@@ -132,32 +132,6 @@
   font-weight: 800;
 }
 
-.questionShare {
-  position: absolute;
-  top: var(--space-1);
-  right: var(--space-1);
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  gap: 4px;
-  padding: 0 var(--space-2);
-  border: 0;
-  border-radius: var(--radius-tile);
-  background: none;
-  color: var(--color-pink-strong);
-  font: inherit;
-  font-size: 0.8125rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-.questionShare:hover {
-  background: var(--color-pink-soft);
-}
-.questionShare:focus-visible {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
 /* 문제 카드: 방해꾼이 이 카드를 가린다. 좌우 여백은 북마크 버튼(44px)과 겹치지 않게. */
 .question {
   composes: card from '../styles/ui.module.css';
@@ -302,11 +276,6 @@
 .completeActions > button {
   min-width: 0;
   flex: 1 1 0;
-}
-
-/* 공유 버튼(오른쪽 위)과 긴 문제 글이 겹치지 않게 양쪽을 같이 비운다(가운데 정렬 유지). */
-.questionBox:has(.questionShare) .question {
-  padding-inline: 56px;
 }
 
 /* 첫 화면 "이어서 풀기": 화면의 주 행동 하나. */

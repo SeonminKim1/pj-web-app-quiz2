@@ -10,7 +10,7 @@ import { DataErrorView } from '../components/DataErrorView.tsx';
 import { HintPanel } from '../components/HintPanel.tsx';
 import { PestLayer } from '../components/PestLayer.tsx';
 import { PetPortrait } from '../components/PetPortrait.tsx';
-import { ShareIcon } from '../components/ShareIcon.tsx';
+import { ShareButton } from '../components/ShareButton.tsx';
 import { ManualCopy, ShareToast } from '../components/ShareFeedback.tsx';
 import { Playground } from '../components/Playground.tsx';
 import { GoldBadge, LoadingView } from '../components/StatusViews.tsx';
@@ -291,6 +291,7 @@ function Session({
             canOpen={hints.canOpen}
             goldShort={hints.goldShort}
             onOpen={play.openNextHint}
+            leading={<ShareButton onClick={sharePre} />}
           />
           <AnswerInput
             questionKey={item.id}
@@ -314,16 +315,8 @@ function Session({
             }}
             onAdvance={() => {}}
           />
-          {/* 막혔을 때 할 수 있는 일: 친구한테 넘기기(늘), 정답 보기(한 번 틀린 뒤). */}
+          {/* 정답 보기(한 번 틀렸거나 힌트를 다 쓴 뒤). */}
           <div className={styles.helpRow}>
-            <button
-              type="button"
-              className={styles.shareButton}
-              onClick={sharePre}
-            >
-              <ShareIcon />
-              친구한테 이 문제 내기
-            </button>
             {canGiveUp &&
               (confirmGiveUp ? (
                 <div

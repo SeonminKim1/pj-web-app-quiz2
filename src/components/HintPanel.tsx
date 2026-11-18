@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { HINT_PRICE } from '../lib/progress.ts';
 import styles from './HintPanel.module.css';
 
@@ -11,6 +11,8 @@ type HintPanelProps = {
   /** 유료 힌트인데 골드가 모자람("골드 부족"). */
   goldShort: boolean;
   onOpen: () => void;
+  /** 힌트 버튼과 같은 줄 왼쪽에 둘 것(친구한테 내기 버튼). */
+  leading?: ReactNode;
 };
 
 /**
@@ -23,38 +25,42 @@ export function HintPanel({
   canOpen,
   goldShort,
   onOpen,
+  leading,
 }: HintPanelProps): ReactElement {
   return (
     <section aria-label="힌트" className={styles.panel}>
-      {next && (
-        <button
-          type="button"
-          className={styles.button}
-          disabled={!canOpen}
-          onClick={onOpen}
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-            focusable="false"
+      <div className={styles.row}>
+        {leading}
+        {next && (
+          <button
+            type="button"
+            className={styles.button}
+            disabled={!canOpen}
+            onClick={onOpen}
           >
-            <path d="M9 18h6M10 21h4" />
-            <path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" />
-          </svg>
-          {!next.paid
-            ? '힌트 무료'
-            : goldShort
-              ? '골드 부족'
-              : `힌트 ${HINT_PRICE}골드`}
-        </button>
-      )}
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="M9 18h6M10 21h4" />
+              <path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" />
+            </svg>
+            {!next.paid
+              ? '힌트 무료'
+              : goldShort
+                ? '골드 부족'
+                : `힌트 ${HINT_PRICE}골드`}
+          </button>
+        )}
+      </div>
       {opened.length > 0 && (
         <ol className={styles.list}>
           {opened.map((text, index) => (

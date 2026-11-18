@@ -42,56 +42,94 @@
   white-space: nowrap;
 }
 
-/* 입력창 + 확인 버튼 한 줄(360px에서도). */
+/* 입력 바: 입력창과 확인 버튼을 한 덩어리로(360px에서도 한 줄). 포커스·오답·정답은 바 전체가 바뀐다. */
 .row {
   display: flex;
-  gap: var(--space-2);
+  align-items: center;
+  gap: var(--space-1);
+  padding: 5px;
+  border: var(--border);
+  border-radius: var(--radius-button);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-pop);
+  transition:
+    background-color 150ms ease-out,
+    border-color 150ms ease-out;
+}
+
+.row:focus-within {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 .input {
   min-width: 0;
-  height: 52px;
+  height: 46px;
   flex: 1 1 auto;
   padding: 0 var(--space-3);
-  border: var(--border);
-  border-radius: var(--radius-button);
-  background: var(--color-surface);
+  border: 0;
+  border-radius: calc(var(--radius-button) - 5px);
+  background: transparent;
   color: var(--color-ink);
   font: inherit;
   /* 16px 이상이어야 iOS가 화면을 확대하지 않는다. */
   font-size: 1.25rem;
   font-weight: 700;
-  text-align: center;
+  caret-color: var(--color-pink-strong);
+}
+
+/* 포커스 표시는 바 전체(.row:focus-within)가 맡는다. */
+.input:focus,
+.input:focus-visible {
+  outline: none;
 }
 
 .input::placeholder {
   color: var(--color-ink-soft);
 }
 
-/* 포커스 테두리가 옆 "확인" 버튼에 겹치지 않게 바짝 붙인다. */
-.input:focus-visible {
-  outline-offset: 0;
-}
-
 .submit {
-  composes: primary from '../styles/ui.module.css';
-  min-width: 88px;
-  min-height: 52px;
+  composes: pressable from '../styles/ui.module.css';
+  display: inline-flex;
+  min-width: 84px;
+  height: 46px;
   flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-4);
+  border-radius: calc(var(--radius-button) - 5px);
+  background: var(--color-pink);
+  /* 바 안쪽이라 그림자를 얕게. */
+  box-shadow: 0 2px 0 var(--color-ink);
+  font-weight: 800;
 }
 
-/* 오답: 흔들기 + 빨간 테두리·바탕. 정답: 민트 바탕. */
+.submit:active:not(:disabled) {
+  box-shadow: none;
+  transform: translateY(2px);
+}
+
+/* 아직 쓸 게 없을 때: 회색 대신 연분홍(꺼진 게 아니라 "기다리는 중"). */
+.submit:disabled {
+  background: var(--color-pink-soft);
+  color: var(--color-ink-soft);
+  box-shadow: none;
+  opacity: 1;
+  transform: none;
+}
+
+/* 오답: 흔들기 + 빨간 바. 정답: 민트 바, 버튼은 "다음 ›". */
 .row[data-phase='wrong'] {
   animation: shake 0.5s;
+  border-color: var(--color-danger);
+  background: var(--color-danger-soft);
 }
 
 .row[data-phase='wrong'] .input {
-  border-color: var(--color-danger);
-  background: var(--color-danger-soft);
   color: var(--color-danger);
 }
 
-.row[data-phase='correct'] .input {
+.row[data-phase='correct'] {
   background: var(--color-mint-soft);
 }
 

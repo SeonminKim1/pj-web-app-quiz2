@@ -1,9 +1,20 @@
 .panel {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
   gap: var(--space-2);
   margin: var(--space-3) 0 0;
+}
+
+/* 한 줄: 왼쪽 친구한테 내기, 오른쪽 힌트. */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.row .button {
+  margin-left: auto;
 }
 
 /* 연 힌트: 민트 말풍선 목록(번호 붙임). */

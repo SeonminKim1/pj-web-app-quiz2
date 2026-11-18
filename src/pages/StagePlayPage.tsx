@@ -14,7 +14,7 @@ import {
 import { useStageSession } from '../hooks/useStageSession.ts';
 import { loadNickname, useShare } from '../hooks/useShare.ts';
 import { ManualCopy, ShareToast } from '../components/ShareFeedback.tsx';
-import { ShareIcon } from '../components/ShareIcon.tsx';
+import { ShareButton } from '../components/ShareButton.tsx';
 import styles from './Page.module.css';
 
 /** 풀이 화면: 주소의 주제·스테이지를 확인하고 풀이 세션을 띄운다. */
@@ -157,15 +157,6 @@ function StageSession({
           <p ref={questionRef} className={styles.question}>
             {item?.question}
           </p>
-          <button
-            type="button"
-            className={styles.questionShare}
-            aria-label="친구한테 이 문제 내기"
-            onClick={shareCurrent}
-          >
-            <ShareIcon size={16} />
-            내기
-          </button>
         </div>
         {shareView.manualText && (
           <ManualCopy
@@ -179,6 +170,7 @@ function StageSession({
           canOpen={hints.canOpen}
           goldShort={hints.goldShort}
           onOpen={play.openNextHint}
+          leading={<ShareButton onClick={shareCurrent} />}
         />
         <AnswerInput
           questionKey={item?.id ?? ''}
