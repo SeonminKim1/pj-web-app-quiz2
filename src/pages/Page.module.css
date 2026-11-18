@@ -333,6 +333,27 @@
 .parade svg {
   display: block;
 }
+/* 칭호: 금색 띠 + 다음 칭호까지. */
+.title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  margin: 0;
+}
+.titleName {
+  padding: 1px 10px;
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--color-gold);
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+.titleNext {
+  color: var(--color-ink-soft);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
 .continueStatus {
   margin: 0;
   font-size: 1.25rem;

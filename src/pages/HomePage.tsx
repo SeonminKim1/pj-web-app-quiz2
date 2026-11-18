@@ -9,6 +9,7 @@ import { DataErrorView } from '../components/DataErrorView.tsx';
 import { GoldBadge, LoadingView } from '../components/StatusViews.tsx';
 import { TopicCard } from '../components/TopicCard.tsx';
 import { useHomePage } from '../hooks/useHomePage.ts';
+import { titleFor } from '../lib/titles.ts';
 import styles from './Page.module.css';
 
 /** 첫 화면: 앱 아이콘·로고, 보유 골드, 주제 카드(들어갈 수 없는 주제는 "준비 중"). */
@@ -17,6 +18,7 @@ export function HomePage(): ReactElement {
     useHomePage();
   const { settings, choosePet } = useSettings();
   const [picking, setPicking] = useState(false);
+  const title = next ? titleFor(next) : undefined;
   return (
     <main className={styles.page}>
       <header className={styles.hero}>
@@ -56,6 +58,16 @@ export function HomePage(): ReactElement {
                 </span>
               ))}
           </div>
+          {title && (
+            <p className={styles.title}>
+              <span className={styles.titleName}>{title.name}</span>
+              {title.next && (
+                <span className={styles.titleNext}>
+                  {title.next.name}까지 {title.next.remaining}문제
+                </span>
+              )}
+            </p>
+          )}
           <p className={styles.continueStatus}>
             {next.stageNo
               ? next.solved === 0

@@ -12,6 +12,8 @@ export type StagePlayTarget = {
   topic: StageTopic;
   stage: Stage;
   stageCount: number;
+  /** 주제 전체 문제 수(칭호). */
+  itemCount: number;
 };
 
 /** 풀이 화면 상태와 화면 이동. */
@@ -47,6 +49,7 @@ export function useStagePlayPage(): StagePlayPageView {
         topic: loaded.data.topic,
         stage,
         stageCount: stages.length,
+        itemCount: loaded.data.items.length,
       },
     };
   }, [loaded, stageNo]);

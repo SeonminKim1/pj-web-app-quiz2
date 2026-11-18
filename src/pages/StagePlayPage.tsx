@@ -1,3 +1,5 @@
+import { TitleToast } from '../components/TitleToast.tsx';
+import { useTitleUp } from '../hooks/useTitleUp.ts';
 import { usePhaseSound } from '../hooks/usePhaseSound.ts';
 import type { ReactElement } from 'react';
 import { AnswerInput } from '../components/AnswerInput.tsx';
@@ -82,6 +84,10 @@ function StageSession({
   } = useStageSession(target);
   const { state, item, hints } = play;
   usePhaseSound({ phase: state.phase, fresh: state.fresh });
+  const newTitle = useTitleUp({
+    topicId: target.topic.id,
+    total: target.itemCount,
+  });
   const { stage } = target;
   // 지금 문제를 친구한테 내기. 방금 맞힌 문제면 결과(힌트 수)도 함께 보낸다.
   const shareView = useShare({
@@ -195,6 +201,7 @@ function StageSession({
         />
       </PestLayer>
       <ShareToast text={shareView.toast} />
+      <TitleToast name={newTitle} />
     </main>
   );
 }
