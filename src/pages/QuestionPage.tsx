@@ -15,6 +15,7 @@ import { ManualCopy, ShareToast } from '../components/ShareFeedback.tsx';
 import { Playground } from '../components/Playground.tsx';
 import { GoldBadge, LoadingView } from '../components/StatusViews.tsx';
 import { usePestSession } from '../hooks/usePestSession.ts';
+import { useSettings } from '../hooks/useSettings.ts';
 import { useProgress } from '../hooks/useProgress.ts';
 import {
   useQuestionPage,
@@ -88,12 +89,13 @@ function RestingView({
   info: ShareInfo;
   onStage: () => void;
 }): ReactElement {
+  const { settings } = useSettings();
   return (
     <main className={pageStyles.page}>
       <div className={styles.resting}>
         {info.from && <Banner info={{ from: info.from }} />}
         <div className={styles.restingPest} aria-hidden="true">
-          <PetPortrait animal="rabbit" mood="sulky" />
+          <PetPortrait animal={settings.pet} mood="sulky" />
           <span className={styles.restingZ}>z z</span>
         </div>
         <h1 className={styles.title}>이 문제는 쉬는 중이에요</h1>

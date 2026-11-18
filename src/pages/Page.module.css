@@ -27,6 +27,15 @@
 }
 
 /* 첫 화면 왼쪽 위 설정 버튼. */
+.heroPet {
+  composes: small from '../styles/ui.module.css';
+  position: absolute;
+  top: 0;
+  left: 0;
+  gap: 4px;
+  padding: 0 var(--space-3) 0 var(--space-1);
+}
+
 .heroSettings {
   composes: small from '../styles/ui.module.css';
   position: absolute;

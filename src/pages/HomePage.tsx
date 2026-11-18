@@ -1,5 +1,9 @@
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { AppIcon } from '../components/AppIcon.tsx';
+import { PetPicker } from '../components/PetPicker.tsx';
+import { PetPortrait } from '../components/PetPortrait.tsx';
+import { useSettings } from '../hooks/useSettings.ts';
+import { getPestAnimal } from '../lib/pestAnimals.ts';
 import { DataErrorView } from '../components/DataErrorView.tsx';
 import { GoldBadge, LoadingView } from '../components/StatusViews.tsx';
 import { TopicCard } from '../components/TopicCard.tsx';
@@ -10,9 +14,20 @@ import styles from './Page.module.css';
 export function HomePage(): ReactElement {
   const { gold, state, retry, openTopic, goHome, next, openNext } =
     useHomePage();
+  const { settings, choosePet } = useSettings();
+  const [picking, setPicking] = useState(false);
   return (
     <main className={styles.page}>
       <header className={styles.hero}>
+        <button
+          type="button"
+          className={styles.heroPet}
+          aria-label={`방해꾼 바꾸기, 지금 ${getPestAnimal(settings.pet).label}`}
+          onClick={() => setPicking(true)}
+        >
+          <PetPortrait animal={settings.pet} headOnly size={28} />
+          방해꾼
+        </button>
         <span className={styles.heroGold}>
           <GoldBadge gold={gold} />
         </span>
@@ -84,6 +99,13 @@ export function HomePage(): ReactElement {
             ))}
           </ul>
         </>
+      )}
+      {picking && (
+        <PetPicker
+          current={settings.pet}
+          onChoose={choosePet}
+          onClose={() => setPicking(false)}
+        />
       )}
     </main>
   );
