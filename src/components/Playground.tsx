@@ -4,12 +4,20 @@ import styles from './Playground.module.css';
 type PlaygroundProps = {
   /** 움직임 계산이 놀이터 위치를 잰다(평소 다니는 곳). */
   playgroundRef: RefObject<HTMLDivElement | null>;
+  /** 남은 간식 문제 수(있으면 "냠냠" 표시). */
+  treats?: number;
 };
 
 /** 풀이 화면 위쪽(머리 줄 아래) 놀이터 띠(docs/ui-play-layout/spec.md "놀이터"). 장식이라 보조 기술에는 숨긴다. */
-export function Playground({ playgroundRef }: PlaygroundProps): ReactElement {
+export function Playground({
+  playgroundRef,
+  treats = 0,
+}: PlaygroundProps): ReactElement {
   return (
     <div ref={playgroundRef} className={styles.playground} aria-hidden="true">
+      {treats > 0 && (
+        <span className={styles.treat}>냠냠 간식 중 · {treats}문제</span>
+      )}
       <svg
         className={styles.decor}
         viewBox="0 0 360 40"

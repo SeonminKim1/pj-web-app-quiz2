@@ -76,6 +76,7 @@ function StageSession({
     pestAreaRef,
     playgroundRef,
     animal,
+    treats,
     questionRef,
     gold,
     replay,
@@ -159,7 +160,7 @@ function StageSession({
         animal={animal.id}
       >
         {/* 방해꾼이 평소 노는 곳: 머리 줄 바로 아래(ui-play-layout spec "놀이터"). */}
-        <Playground playgroundRef={playgroundRef} />
+        <Playground playgroundRef={playgroundRef} treats={treats} />
         <div className={styles.questionBox}>
           <span className={styles.qTag} aria-hidden="true">
             Q{state.index + 1}

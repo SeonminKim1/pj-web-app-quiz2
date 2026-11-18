@@ -38,6 +38,12 @@ export function isProgress(value: unknown): value is Progress {
   if (!isRecord(value) || value.version !== PROGRESS_VERSION) return false;
   if (!Number.isInteger(value.gold) || (value.gold as number) < 0) return false;
   if (
+    value.treats !== undefined &&
+    !(Number.isInteger(value.treats) && (value.treats as number) >= 0)
+  ) {
+    return false;
+  }
+  if (
     value.bookmarks !== undefined &&
     !(Array.isArray(value.bookmarks) && value.bookmarks.every(isBookmark))
   ) {

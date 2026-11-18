@@ -204,8 +204,11 @@ export function usePest({
   phase,
   animal = getPestAnimal('rabbit'),
   random = Math.random,
+  calm = false,
 }: {
   phase: PlayPhase;
+  /** 간식을 먹는 중이면 문제를 가리러 가지 않는다(돌아다니기·반응은 그대로). */
+  calm?: boolean;
   /** 고른 방해꾼 동물(가리기 간격). 기본 토끼. */
   animal?: PestAnimal;
   random?: RandomFn;
@@ -221,20 +224,26 @@ export function usePest({
   // 가리기 예약: 예약 번호가 바뀔 때마다 그 동물의 가리기 간격(토끼 15~30초 등) 타이머. 숨겨진 동안은 걸지 않는다.
   useEffect(() => {
     // 스테이지 결과 화면에서는 가리기를 예약하지 않는다(방해꾼이 없음).
-    if (paused || finished) return;
+    if (paused || finished || calm) return;
     const timer = setTimeout(
       () => dispatch({ type: 'coverDue' }),
       nextCoverDelayFor({ animal, random }),
     );
     return () => clearTimeout(timer);
-  }, [scheduleId, paused, finished, random, animal]);
+  }, [scheduleId, paused, finished, random, animal, calm]);
 
   // 가리기 시각이 지났고, 돌아다니는 중(어지럽지 않음)이고, 답을 고르는 중이면 가리러 간다.
   useEffect(() => {
-    if (coverDue && behavior === 'roaming' && !dizzy && phase === 'answering') {
+    if (
+      coverDue &&
+      !calm &&
+      behavior === 'roaming' &&
+      !dizzy &&
+      phase === 'answering'
+    ) {
       dispatch({ type: 'coverStart' });
     }
-  }, [coverDue, behavior, dizzy, phase]);
+  }, [coverDue, behavior, dizzy, phase, calm]);
 
   // 상태별 시간: 가리러 가기 최대 1.5초 → 앉음, 앉은 지 5초 → 떠남,
   // 도망 0.8초 → 도착, 어지러움 1초 → 끝. 움직임이 먼저 알리면 그때 바뀐다.

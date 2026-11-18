@@ -56,3 +56,24 @@ it('첫 화면에서 방해꾼을 고르면 저장되고 버튼에 바로 보인
     screen.getByRole('button', { name: '방해꾼 바꾸기, 지금 고양이' }),
   ).toBeInTheDocument();
 });
+
+it('간식을 사면 골드 20이 빠지고 남은 간식이 보인다', async () => {
+  const user = userEvent.setup();
+  render(
+    <ProgressProvider store={createProgressStore({ storage: null })}>
+      <SettingsProvider store={createSettingsStore({ storage: null })}>
+        <MemoryRouter initialEntries={['/']}>
+          <AppRoutes />
+        </MemoryRouter>
+      </SettingsProvider>
+    </ProgressProvider>,
+  );
+  await user.click(screen.getByRole('button', { name: /방해꾼 바꾸기/ }));
+  expect(screen.getByText('5문제 동안 문제를 안 가려요')).toBeInTheDocument();
+  await user.click(screen.getByRole('button', { name: '20골드' }));
+  expect(screen.getByText('얌전히 먹는 중 · 5문제 남음')).toBeInTheDocument();
+  expect(screen.getByRole('status')).toHaveTextContent('토끼가 냠냠 먹었어요');
+  expect(screen.getByLabelText('보유 골드 10')).toBeInTheDocument();
+  // 골드 10으로는 더 못 산다.
+  expect(screen.getByRole('button', { name: '20골드' })).toBeDisabled();
+});

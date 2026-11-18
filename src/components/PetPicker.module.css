@@ -12,6 +12,8 @@
   display: grid;
   width: 100%;
   max-width: 480px;
+  max-height: 92dvh;
+  overflow-y: auto;
   gap: var(--space-4);
   padding: var(--space-5) var(--space-4)
     calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
@@ -71,6 +73,64 @@
   word-break: keep-all;
 }
 
+/* 간식: 그림 · 설명 · 사기 버튼 한 줄. */
+.treat {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-mint-soft);
+}
+
+.treatPet {
+  animation: munch 420ms ease-in-out 2;
+}
+
+.treatPet svg {
+  display: block;
+}
+
+.treatText {
+  min-width: 0;
+}
+
+.treatTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.treat .desc {
+  margin: 0;
+}
+
+.treatButton {
+  composes: primary from '../styles/ui.module.css';
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.treatNote {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.treatNote:empty {
+  display: none;
+}
+
+@keyframes munch {
+  50% {
+    transform: scale(1.08, 0.92);
+  }
+}
+
 .done {
   composes: primary from '../styles/ui.module.css';
 }
@@ -83,7 +143,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sheet {
+  .sheet,
+  .treatPet {
     animation: none;
   }
 }

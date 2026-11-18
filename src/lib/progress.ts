@@ -8,6 +8,10 @@ export const START_GOLD = 30;
 export const CORRECT_GOLD = 10;
 export const CORRECT_WITH_HINT_GOLD = 5;
 export const HINT_PRICE = 5;
+/** 방해꾼 간식 하나: 골드 20으로 5문제 동안 얌전. 15문제까지 쌓을 수 있다. */
+export const TREAT_PRICE = 20;
+export const TREAT_QUESTIONS = 5;
+export const TREAT_MAX = 15;
 
 /** 열 수 있는 힌트 한 단계: 보여 줄 문장과 무료 여부. */
 export type OpenableHint = {
@@ -171,4 +175,32 @@ export function openHint({
       },
     },
   };
+}
+
+/** 간식 사기: 골드 20을 빼고 남은 간식 문제 수 +5(최대 15). */
+export function buyTreat(
+  progress: Progress,
+):
+  | { ok: true; progress: Progress }
+  | { ok: false; reason: 'insufficientGold' | 'full' } {
+  const treats = progress.treats ?? 0;
+  if (treats + TREAT_QUESTIONS > TREAT_MAX)
+    return { ok: false, reason: 'full' };
+  if (progress.gold < TREAT_PRICE) {
+    return { ok: false, reason: 'insufficientGold' };
+  }
+  return {
+    ok: true,
+    progress: {
+      ...progress,
+      gold: progress.gold - TREAT_PRICE,
+      treats: treats + TREAT_QUESTIONS,
+    },
+  };
+}
+
+/** 문제를 하나 맞힐 때마다 간식 하나를 먹는다(남은 게 있으면). */
+export function eatTreat(progress: Progress): Progress {
+  const treats = progress.treats ?? 0;
+  return treats > 0 ? { ...progress, treats: treats - 1 } : progress;
 }

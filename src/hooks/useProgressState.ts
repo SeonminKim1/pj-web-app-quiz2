@@ -5,6 +5,8 @@ import {
   type ProgressStore,
 } from '../data/progressRepository.ts';
 import {
+  buyTreat as applyBuyTreat,
+  eatTreat,
   openHint as applyOpenHint,
   openedHintCount,
   recordCorrect as applyRecordCorrect,
@@ -40,7 +42,9 @@ export function useProgressState(
         topicId,
         itemId,
       });
-      if (result.progress !== latest.current) commit(result.progress);
+      // 맞힐 때마다(다시 풀기 포함) 간식 하나를 먹는다.
+      const next = eatTreat(result.progress);
+      if (next !== latest.current) commit(next);
       return result.goldEarned;
     },
     [commit],
@@ -67,8 +71,15 @@ export function useProgressState(
     [commit],
   );
 
+  const buyTreat = useCallback<ProgressContextValue['buyTreat']>(() => {
+    const result = applyBuyTreat(latest.current);
+    if (!result.ok) return result.reason;
+    commit(result.progress);
+    return 'ok';
+  }, [commit]);
+
   return useMemo(
-    () => ({ progress, recordCorrect, openHint }),
-    [progress, recordCorrect, openHint],
+    () => ({ progress, recordCorrect, openHint, buyTreat }),
+    [progress, recordCorrect, openHint, buyTreat],
   );
 }

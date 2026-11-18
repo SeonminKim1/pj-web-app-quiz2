@@ -143,10 +143,11 @@ function Session({
   usePhaseSound({ phase: state.phase, fresh: state.fresh });
   const solved = state.phase === 'correct';
   const finished = solved || gaveUp;
-  const { pest, areaRef, playgroundRef, questionRef, animal } = usePestSession({
-    phase: play.pestPhase,
-    active: !finished,
-  });
+  const { pest, areaRef, playgroundRef, questionRef, animal, treats } =
+    usePestSession({
+      phase: play.pestPhase,
+      active: !finished,
+    });
   const shareView = useShare({ id: item.id, question: item.question });
   const [nickname, setNickname] = useState(loadNickname);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -287,7 +288,7 @@ function Session({
           motion={pest.motion}
           animal={animal.id}
         >
-          <Playground playgroundRef={playgroundRef} />
+          <Playground playgroundRef={playgroundRef} treats={treats} />
           {/* 공유 링크(s=1)로 들어왔을 때만. 주소로 바로 오면 친구가 낸 문제가 아니다. */}
           {fromShare && <Banner info={info} />}
           <div className={pageStyles.questionBox}>

@@ -4,6 +4,7 @@ import { useRef, useState, type RefObject } from 'react';
 import { getPestAnimal, type PestAnimal } from '../lib/pestAnimals.ts';
 import { usePest, type PestView } from './usePest.ts';
 import { usePestMotion, type PestMotion } from './usePestMotion.ts';
+import { useProgress } from './useProgress.ts';
 import { useSettings } from './useSettings.ts';
 import type { PlayPhase } from './useStagePlay.ts';
 
@@ -18,6 +19,8 @@ export type PestSessionView = {
   questionRef: RefObject<HTMLParagraphElement | null>;
   /** 이번 화면의 방해꾼 동물. */
   animal: PestAnimal;
+  /** 남은 간식 문제 수(0이면 평소처럼 가린다). */
+  treats: number;
 };
 
 /**
@@ -34,7 +37,9 @@ export function usePestSession({
   const { settings } = useSettings();
   // 화면에 있는 동안에는 동물이 바뀌지 않게 들어올 때 한 번 정한다.
   const [animal] = useState(() => getPestAnimal(settings.pet));
-  const pest = usePest({ phase, animal });
+  const { progress } = useProgress();
+  const treats = progress.treats ?? 0;
+  const pest = usePest({ phase, animal, calm: treats > 0 });
   const areaRef = useRef<HTMLDivElement>(null);
   const playgroundRef = useRef<HTMLDivElement>(null);
   const questionRef = useRef<HTMLParagraphElement>(null);
@@ -52,5 +57,6 @@ export function usePestSession({
     playgroundRef,
     questionRef,
     animal,
+    treats,
   };
 }

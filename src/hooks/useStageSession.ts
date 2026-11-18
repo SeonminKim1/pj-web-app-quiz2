@@ -21,6 +21,8 @@ export type StageSessionView = {
   playgroundRef: RefObject<HTMLDivElement | null>;
   /** 이번 세션의 방해꾼 동물(들어올 때 정함). */
   animal: PestAnimal;
+  /** 남은 간식 문제 수. */
+  treats: number;
   questionRef: RefObject<HTMLParagraphElement | null>;
   gold: number;
   /** 모두 푼 스테이지를 다시 푸는 중(골드 없음). */
@@ -42,14 +44,16 @@ export function useStageSession({
   const [plan] = useState(() => stagePlayPlan({ stage, solved }));
   const play = useStagePlay({ topic, plan });
   // 방해꾼은 방금 채점한 결과에만 반응하고, 결과 화면에서는 움직임 계산을 멈춘다.
-  const { pest, areaRef, playgroundRef, questionRef, animal } = usePestSession({
-    phase: play.pestPhase,
-    active: play.state.phase !== 'result',
-  });
+  const { pest, areaRef, playgroundRef, questionRef, animal, treats } =
+    usePestSession({
+      phase: play.pestPhase,
+      active: play.state.phase !== 'result',
+    });
   return {
     play,
     pest,
     pestAreaRef: areaRef,
+    treats,
     playgroundRef,
     animal,
     questionRef,
