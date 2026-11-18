@@ -28,10 +28,6 @@
 .title:focus {
   outline: none;
 }
-.gold {
-  margin: 0;
-  font-weight: 800;
-}
 .compare {
   margin: 0;
   text-wrap: balance;
@@ -121,4 +117,66 @@
   composes: secondary from '../styles/ui.module.css';
   gap: var(--space-2);
   font-size: 0.9375rem;
+}
+
+/* 결과 화면: 방해꾼 → 정답 카드 → 나 vs 친구 → 내기. */
+.resultPet {
+  display: flex;
+  justify-content: center;
+}
+.resultPet svg {
+  width: 104px;
+  height: 104px;
+}
+.answerCard {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-4);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-pop);
+}
+.answerCard:focus {
+  outline: none;
+}
+.answerLabel {
+  color: var(--color-pink-strong);
+  font-size: 1rem;
+  font-weight: 800;
+}
+.answerText {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  word-break: keep-all;
+}
+.versus {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin: 0;
+}
+.versus > div {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-tile);
+  background: var(--color-surface);
+}
+.versus .versusMine {
+  background: var(--color-mint-soft);
+}
+.versus dt {
+  overflow: hidden;
+  color: var(--color-ink-soft);
+  font-size: 0.875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.versus dd {
+  margin: 0;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
 }

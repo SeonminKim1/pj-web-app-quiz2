@@ -9,6 +9,7 @@ import { AnswerInput } from '../components/AnswerInput.tsx';
 import { DataErrorView } from '../components/DataErrorView.tsx';
 import { HintPanel } from '../components/HintPanel.tsx';
 import { PestLayer } from '../components/PestLayer.tsx';
+import { PetPortrait } from '../components/PetPortrait.tsx';
 import { ShareIcon } from '../components/ShareIcon.tsx';
 import { ManualCopy, ShareToast } from '../components/ShareFeedback.tsx';
 import { Playground } from '../components/Playground.tsx';
@@ -207,14 +208,36 @@ function Session({
       </header>
       {finished ? (
         <section className={styles.result} aria-live="polite">
-          <h1 ref={resultHeading} tabIndex={-1} className={styles.title}>
-            {solved ? `정답! ${item.answer}` : `정답은 "${item.answer}"`}
+          <div className={styles.resultPet} aria-hidden="true">
+            {/* 방해꾼은 내가 맞히면 삐지고, 포기하면 으쓱한다. */}
+            <PetPortrait animal={animal.id} mood={solved ? 'sulky' : 'smug'} />
+          </div>
+          <h1 ref={resultHeading} tabIndex={-1} className={styles.answerCard}>
+            <span className={styles.answerLabel}>
+              {solved ? '정답!' : '정답은'}
+            </span>{' '}
+            <span className={styles.answerText}>
+              {solved ? item.answer : `"${item.answer}"`}
+            </span>
           </h1>
-          {solved && play.lastGold > 0 && (
-            <p className={styles.gold}>+{play.lastGold}💰</p>
+          {(play.lastGold > 0 || solvedBefore) && solved && (
+            <p className={styles.note}>
+              {play.lastGold > 0 ? `골드 +${play.lastGold}` : '전에 맞힌 문제'}
+            </p>
           )}
-          {solved && solvedBefore && (
-            <p className={styles.note}>전에 맞힌 문제</p>
+          {info.from && info.result && (
+            <dl className={styles.versus}>
+              <div className={styles.versusMine}>
+                <dt>나</dt>
+                <dd>{solved ? `힌트 ${mine.hints}개` : '포기'}</dd>
+              </div>
+              <div>
+                <dt>{info.from}</dt>
+                <dd>
+                  {info.result === 's' ? `힌트 ${info.hints ?? 0}개` : '포기'}
+                </dd>
+              </div>
+            </dl>
           )}
           <p className={styles.compare}>{compareLine({ info, mine })}</p>
           <button type="button" className={styles.primary} onClick={sharePost}>
