@@ -279,6 +279,41 @@ describe('스테이지 목록 → 풀이 → 결과', () => {
   });
 });
 
+describe('스테이지 풀이에서 친구한테 내기', () => {
+  afterEach(() => localStorage.removeItem('qp_nickname'));
+
+  it('지금 문제를 /q/<id>/ 링크로 보내고, 맞힌 직후면 결과를 붙인다', async () => {
+    // 결과(h, r)는 보낸 사람 이름이 있을 때만 붙는다(shareLink 규칙).
+    localStorage.setItem('qp_nickname', '준혁');
+    const share = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'share', {
+      value: share,
+      configurable: true,
+    });
+    const user = renderAt('/topics/nonsense/stages/2');
+    expect(
+      await screen.findByText('지구가 제일 힘들었던 시기는?'),
+    ).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole('button', { name: '친구한테 이 문제 내기' }),
+    );
+    await waitFor(() => expect(share).toHaveBeenCalledTimes(1));
+    const before = share.mock.calls[0]![0] as { text: string; url: string };
+    expect(before.url).toMatch(/\/q\/11\/\?s=1&from=[^&]+$/);
+    expect(before.text).not.toContain('고생대');
+
+    await typeAnswer(user, '고생대');
+    await user.click(
+      screen.getByRole('button', { name: '친구한테 이 문제 내기' }),
+    );
+    await waitFor(() => expect(share).toHaveBeenCalledTimes(2));
+    const after = share.mock.calls[1]![0] as { url: string };
+    expect(after.url).toMatch(/\/q\/11\/\?s=1/);
+    expect(after.url).toContain('r=s');
+  });
+});
+
 describe('이전·다음 이동', () => {
   it('4문제 푼 스테이지는 5 / 10부터, 이전으로 맞힌 문제의 정답을 보고, 쓰던 답은 남는다', async () => {
     store.save({

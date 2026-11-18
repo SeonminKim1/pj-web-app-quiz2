@@ -9,6 +9,7 @@ import { AnswerInput } from '../components/AnswerInput.tsx';
 import { DataErrorView } from '../components/DataErrorView.tsx';
 import { HintPanel } from '../components/HintPanel.tsx';
 import { PestLayer } from '../components/PestLayer.tsx';
+import { ManualCopy, ShareToast } from '../components/ShareFeedback.tsx';
 import { Playground } from '../components/Playground.tsx';
 import { GoldBadge, LoadingView } from '../components/StatusViews.tsx';
 import { usePestSession } from '../hooks/usePestSession.ts';
@@ -339,9 +340,7 @@ function Session({
           onClose={() => setSheetOpen(false)}
         />
       )}
-      <p className={styles.toast} aria-live="polite">
-        {shareView.toast}
-      </p>
+      <ShareToast text={shareView.toast} />
     </main>
   );
 }
@@ -417,36 +416,6 @@ function NicknameSheet({
           이름 없이 보내기
         </button>
       </form>
-    </div>
-  );
-}
-
-function ManualCopy({
-  text,
-  onClose,
-}: {
-  text: string;
-  onClose: () => void;
-}): ReactElement {
-  return (
-    <div className={styles.manual}>
-      <p>길게 눌러 복사하세요</p>
-      <textarea
-        id="manual-copy"
-        readOnly
-        value={text}
-        rows={3}
-        onFocus={(event) => event.currentTarget.select()}
-        autoFocus
-      />
-      <button
-        type="button"
-        className={styles.link}
-        aria-label="닫기"
-        onClick={onClose}
-      >
-        ✕
-      </button>
     </div>
   );
 }

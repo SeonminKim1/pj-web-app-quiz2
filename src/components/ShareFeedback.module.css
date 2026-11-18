@@ -1,0 +1,38 @@
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  z-index: 10;
+  transform: translateX(-50%);
+  margin: 0;
+  max-width: calc(100% - 32px);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-button);
+  background: var(--color-ink);
+  color: var(--color-surface);
+}
+.toast:empty {
+  display: none;
+}
+.manual {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-tile);
+  background: var(--color-surface);
+}
+.manual p {
+  margin: 0;
+}
+.manual textarea {
+  width: 100%;
+  font: inherit;
+}
+.close {
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: var(--color-ink-soft);
+  font: inherit;
+  cursor: pointer;
+}

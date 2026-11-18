@@ -12,6 +12,8 @@ import {
   type StagePlayTarget,
 } from '../hooks/useStagePlayPage.ts';
 import { useStageSession } from '../hooks/useStageSession.ts';
+import { loadNickname, useShare } from '../hooks/useShare.ts';
+import { ManualCopy, ShareToast } from '../components/ShareFeedback.tsx';
 import styles from './Page.module.css';
 
 /** 풀이 화면: 주소의 주제·스테이지를 확인하고 풀이 세션을 띄운다. */
@@ -78,6 +80,21 @@ function StageSession({
   } = useStageSession(target);
   const { state, item, hints } = play;
   const { stage } = target;
+  // 지금 문제를 친구한테 내기. 방금 맞힌 문제면 결과(힌트 수)도 함께 보낸다.
+  const shareView = useShare({
+    id: item?.id ?? '',
+    question: item?.question ?? '',
+  });
+  const shareCurrent = () => {
+    if (!item) return;
+    const justSolved = state.phase === 'correct' && state.fresh;
+    void shareView.share({
+      info: justSolved
+        ? { from: loadNickname(), hints: hints.opened.length, result: 's' }
+        : { from: loadNickname() },
+      timing: justSolved ? 'post' : 'pre',
+    });
+  };
 
   if (state.phase === 'result') {
     return (
@@ -139,7 +156,21 @@ function StageSession({
           <p ref={questionRef} className={styles.question}>
             {item?.question}
           </p>
+          <button
+            type="button"
+            className={styles.questionShare}
+            aria-label="친구한테 이 문제 내기"
+            onClick={shareCurrent}
+          >
+            📤
+          </button>
         </div>
+        {shareView.manualText && (
+          <ManualCopy
+            text={shareView.manualText}
+            onClose={shareView.closeManual}
+          />
+        )}
         <HintPanel
           opened={hints.opened.map((hint) => hint.text)}
           next={hints.next}
@@ -163,6 +194,7 @@ function StageSession({
           onAdvance={play.advance}
         />
       </PestLayer>
+      <ShareToast text={shareView.toast} />
     </main>
   );
 }

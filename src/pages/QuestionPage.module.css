@@ -74,21 +74,6 @@
   align-items: center;
   justify-content: center;
 }
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
-  transform: translateX(-50%);
-  margin: 0;
-  max-width: calc(100% - 32px);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-button);
-  background: var(--color-ink);
-  color: var(--color-surface);
-}
-.toast:empty {
-  display: none;
-}
 .sheetBackdrop {
   position: fixed;
   inset: 0;
@@ -126,17 +111,4 @@
 .counter {
   color: var(--color-ink-soft);
   font-variant-numeric: tabular-nums;
-}
-.manual {
-  display: grid;
-  gap: var(--space-2);
-}
-.manual textarea {
-  width: 100%;
-  font: inherit;
-}
-@media (prefers-reduced-motion: reduce) {
-  .toast {
-    transition: none;
-  }
 }
