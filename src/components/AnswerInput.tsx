@@ -9,6 +9,7 @@ import {
 import type { PlayPhase } from '../hooks/useStagePlay.ts';
 import type { AnswerSlots as AnswerSlotsModel } from '../lib/answer.ts';
 import { AnswerSlots } from './AnswerSlots.tsx';
+import { CoinBurst } from './CoinBurst.tsx';
 import styles from './AnswerInput.module.css';
 
 type AnswerInputProps = {
@@ -28,6 +29,8 @@ type AnswerInputProps = {
   canAdvance: boolean;
   /** 맞힌 뒤 버튼 글자("다음 ›", "결과 보기 ›"). */
   advanceLabel: string;
+  /** 방금 맞혀 얻은 골드(있으면 동전이 골드 배지로 날아간다). */
+  reward?: number;
   onChange: (value: string) => void;
   onSubmit: () => void;
   onAdvance: () => void;
@@ -48,6 +51,7 @@ export function AnswerInput({
   canSubmit,
   canAdvance,
   advanceLabel,
+  reward = 0,
   onChange,
   onSubmit,
   onAdvance,
@@ -103,6 +107,7 @@ export function AnswerInput({
         )}
       </p>
       <AnswerSlots slots={slots} phase={phase} />
+      {phase === 'correct' && reward > 0 && <CoinBurst key={questionKey} />}
       <div className={styles.row} data-phase={phase}>
         <input
           ref={inputRef}

@@ -71,6 +71,24 @@
 .gold {
   composes: pill from '../styles/ui.module.css';
   background: var(--color-gold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 골드가 오르는 동안 통통. */
+.gold[data-rising] {
+  animation: bump 260ms ease-out infinite alternate;
+}
+
+@keyframes bump {
+  to {
+    transform: scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gold[data-rising] {
+    animation: none;
+  }
 }
 
 /* 동전: 노란 동그라미에 안쪽 테두리. */

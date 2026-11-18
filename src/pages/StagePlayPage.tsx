@@ -179,6 +179,7 @@ function StageSession({
         />
         <AnswerInput
           questionKey={item?.id ?? ''}
+          reward={state.fresh ? play.lastGold : 0}
           charCount={play.charCount}
           wordLengths={play.wordLengths}
           slots={play.slots}

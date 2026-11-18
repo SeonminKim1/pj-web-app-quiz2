@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 import type { PlayPhase } from '../hooks/useStagePlay.ts';
 import type { AnswerSlots as AnswerSlotsModel } from '../lib/answer.ts';
 import styles from './AnswerSlots.module.css';
@@ -13,6 +13,8 @@ type AnswerSlotsProps = {
  * 같은 정보(글자 수)는 입력창 설명 문구가 읽어 주므로 보조 기술에는 숨긴다.
  */
 export function AnswerSlots({ slots, phase }: AnswerSlotsProps): ReactElement {
+  // 정답 연출에서 칸이 왼쪽부터 차례로 뒤집히도록 어절을 넘어 이어지는 번호.
+  let order = 0;
   return (
     <div className={styles.slots} data-phase={phase} aria-hidden="true">
       {slots.groups.map((group, groupIndex) => (
@@ -22,6 +24,7 @@ export function AnswerSlots({ slots, phase }: AnswerSlotsProps): ReactElement {
               key={index}
               className={styles.slot}
               data-filled={char !== undefined}
+              style={{ '--i': order++ } as CSSProperties}
             >
               {char}
             </span>
