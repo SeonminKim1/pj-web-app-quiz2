@@ -1,0 +1,44 @@
+# Netlify 설정. 배포는 git push → Netlify CI(npm run build)만. 끌어다 놓기·CLI 배포는 정식 사이트에 쓰지 않는다.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# HTML은 늘 새로 확인(배포 뒤 옛 청크를 부르지 않게). 해시가 붙은 파일은 오래 캐시.
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/q/*"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/og/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/count.js"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# SPA: 파일이 없는 주소는 앱으로(있는 파일 /q/<id>/index.html이 먼저).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

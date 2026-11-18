@@ -94,6 +94,10 @@ describe('pageHtml', () => {
     expect(match).not.toBeNull();
     expect(JSON.parse(match![1]!)).toEqual(item);
     expect(html.indexOf('id="q-data"')).toBeLessThan(html.indexOf('</head>'));
+    // noscript에는 문제만(이스케이프), 정답은 없다.
+    const noscript = html.match(/<noscript>([\s\S]*?)<\/noscript>/)![1]!;
+    expect(noscript).toContain('&lt;/script&gt;');
+    expect(noscript).not.toContain('답');
   });
 
   it('틀에 <title>이 없으면 실패', () => {

@@ -119,6 +119,12 @@ export function pageHtml({
   if (qdata) {
     const script = `<script type="application/json" id="q-data">${jsonForScript(qdata)}</script>\n  `;
     html = html.replace('</head>', () => `${script}</head>`);
+    // 스크립트가 꺼진 브라우저·미리보기 봇에도 문제는 보이게(정답은 넣지 않음).
+    const noscript = `<noscript><p>${escapeHtml(qdata.question)}</p><p>JavaScript를 켜면 바로 풀 수 있어요.</p></noscript>`;
+    html = html.replace(
+      '<div id="root"></div>',
+      () => `<div id="root"></div>\n    ${noscript}`,
+    );
   }
   return html;
 }

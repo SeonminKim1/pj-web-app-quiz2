@@ -8,7 +8,8 @@
       {
         "allowConstantExport": true
       }
-    ]
+    ],
+    "react/no-danger": "error"
   },
-  "ignorePatterns": [".claude", "dist"]
+  "ignorePatterns": [".claude", "dist", "public/count.js"]
 }
