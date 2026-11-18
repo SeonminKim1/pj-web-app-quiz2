@@ -1,0 +1,285 @@
+/* 페이지 공통 레이아웃(모바일 우선: 360px 기준, 넓은 화면에서는 가운데 480px). */
+.page {
+  max-width: 480px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+/* 풀이 화면: 세로로 쌓는다. 놀이 영역(3D 캔버스)은 남는 높이를 채우고, 동물은 평소 위쪽 놀이터 띠 안에서만
+   다니다가 가리기·끌기 때만 그 아래로 나온다. */
+.playPage {
+  composes: page;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 설정 화면의 한 묶음(제목·안내·내용). */
+.settingsSection h2 {
+  margin: var(--space-2) 0 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.settingsSection > p {
+  margin: var(--space-1) 0 var(--space-4);
+  color: var(--color-ink-soft);
+}
+
+/* 첫 화면 왼쪽 위 설정 버튼. */
+.heroSettings {
+  composes: small from '../styles/ui.module.css';
+  position: absolute;
+  top: 0;
+  left: 0;
+  gap: var(--space-1);
+}
+
+/* 머리: 왼쪽 버튼·가운데 제목(또는 진행)·오른쪽 골드. */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.back {
+  composes: small from '../styles/ui.module.css';
+  flex-shrink: 0;
+}
+
+/* 아이콘만 있는 뒤로 버튼(풀이 화면 머리 줄: 화살표 두 개가 들어갈 자리를 남긴다). */
+.backIcon {
+  composes: small from '../styles/ui.module.css';
+  width: 44px;
+  flex-shrink: 0;
+  padding: 0;
+  font-size: 1.25rem;
+}
+
+/* 첫 화면 머리: 아이콘 + 로고, 골드는 오른쪽 위. */
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 var(--space-5);
+  padding-top: var(--space-5);
+  text-align: center;
+}
+
+.heroGold {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.logo {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.25;
+  word-break: keep-all;
+}
+
+.logoAccent {
+  color: var(--color-pink-strong);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 풀이 화면 머리 가운데 진행 표시. */
+.progress {
+  composes: pill from '../styles/ui.module.css';
+  overflow: hidden;
+  min-width: 0;
+  font-size: 0.875rem;
+  text-overflow: ellipsis;
+}
+
+/* 문제 카드를 감싸는 상자: 오른쪽 위에 북마크 버튼을 얹는다. */
+.questionBox {
+  position: relative;
+}
+
+/* 다시 풀기 태그: 문제 카드 왼쪽 위 테두리에 걸친 배지(문장과 겹치지 않게). */
+.replayTag {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: var(--space-4);
+  transform: translateY(-50%);
+  padding: 0 var(--space-2);
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--color-gold);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.questionBookmark {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+}
+
+/* 문제 카드: 방해꾼이 이 카드를 가린다. 좌우 여백은 북마크 버튼(44px)과 겹치지 않게. */
+.question {
+  composes: card from '../styles/ui.module.css';
+  margin: 0;
+  padding: var(--space-5) 48px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: center;
+  word-break: keep-all;
+}
+
+/* MBTI 시트 상태 줄(피드백): 비어 있어도 높이를 유지해 아래 칸이 흔들리지 않게. */
+.feedback {
+  display: flex;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  margin: var(--space-3) 0 0;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* 정답: 민트 알약(ui.module.css pill과 같은 모양). */
+.feedback[data-tone='correct'] span {
+  padding: 2px var(--space-3);
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--color-mint);
+}
+
+.feedback[data-tone='wrong'] {
+  color: var(--color-danger);
+}
+
+/* 카테고리 완료 묶음의 보조("목록으로")·주("다음 카테고리 ›") 버튼. */
+.prev {
+  composes: secondary from '../styles/ui.module.css';
+}
+
+.next {
+  composes: primary from '../styles/ui.module.css';
+}
+
+/* 북마크 목록이 비었을 때. */
+.empty {
+  margin: var(--space-5) 0;
+  color: var(--color-ink-soft);
+  font-weight: 700;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* 북마크 정답 화면. */
+.answerView {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.answerView .questionBox {
+  width: 100%;
+}
+
+.topicTag {
+  composes: pill from '../styles/ui.module.css';
+  font-size: 0.875rem;
+}
+
+.answer {
+  composes: pill from '../styles/ui.module.css';
+  margin: var(--space-2) 0 0;
+  padding: var(--space-2) var(--space-4);
+  font-size: 1.25rem;
+  white-space: normal;
+  text-align: center;
+}
+
+/* 공통 pill의 흰 바탕보다 앞서도록 선택자를 한 단계 구체적으로(CSS 불러오는 순서와 무관하게). */
+.answerView .topicTag {
+  background: var(--color-mint-soft);
+}
+
+.answerView .answer {
+  background: var(--color-mint);
+}
+
+/* 북마크 목록: 일부 주제를 읽지 못했을 때 안내(나머지 목록은 그대로 보인다). */
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius-tile);
+  background: var(--color-danger-soft);
+  font-weight: 700;
+}
+
+.notice p {
+  margin: 0;
+  word-break: keep-all;
+}
+
+.noticeAction {
+  composes: small from '../styles/ui.module.css';
+  flex-shrink: 0;
+}
+
+/* MBTI 시트 안 문제 카드(문장이 길어 글자를 조금 작게). */
+.sheetQuestion {
+  composes: question;
+  padding: var(--space-4) 48px var(--space-4) var(--space-4);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+/* MBTI 보드 완료 띠. */
+.complete {
+  composes: card from '../styles/ui.module.css';
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  background: var(--color-mint);
+  text-align: center;
+}
+
+.complete h2 {
+  margin: 0 0 var(--space-3);
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.completeActions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.completeActions > button {
+  min-width: 0;
+  flex: 1 1 0;
+}

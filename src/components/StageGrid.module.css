@@ -1,0 +1,55 @@
+.grid {
+  display: grid;
+  gap: var(--space-3) var(--space-2);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  padding: 0 0 var(--space-2);
+  list-style: none;
+}
+
+.cell {
+  composes: pressable from '../styles/ui.module.css';
+  display: flex;
+  width: 100%;
+  min-height: 72px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: var(--space-2) var(--space-1);
+  border-radius: var(--radius-tile);
+  background: var(--color-surface);
+}
+
+.cell[data-completed='true'] {
+  background: var(--color-mint);
+}
+
+.no {
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.count {
+  color: var(--color-ink-soft);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.done {
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+/* 진행 막대: 분홍으로 채운 만큼. */
+.bar {
+  width: 70%;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--color-pink) var(--progress),
+    var(--color-pink-soft) var(--progress)
+  );
+}

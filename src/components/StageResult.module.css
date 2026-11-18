@@ -1,0 +1,62 @@
+.result {
+  composes: card from '../styles/ui.module.css';
+  overflow: hidden;
+  margin: var(--space-5) 0;
+  text-align: center;
+}
+
+.result h2 {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border);
+  font-size: 1.375rem;
+  font-weight: 800;
+}
+
+/* 완료면 제목을 민트 띠로. */
+.result[data-completed='true'] h2 {
+  background: var(--color-mint);
+}
+
+.body {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+
+.body p {
+  margin: 0;
+}
+
+.body strong {
+  font-weight: 700;
+}
+
+.note {
+  display: block;
+  color: var(--color-ink-soft);
+  font-size: 0.875rem;
+}
+
+/* 버튼 두 개를 360px에서도 한 줄에. */
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-5);
+}
+
+.actions button {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 200px;
+}
+
+.list {
+  composes: secondary from '../styles/ui.module.css';
+  min-height: 48px;
+}
+
+.next {
+  composes: primary from '../styles/ui.module.css';
+}

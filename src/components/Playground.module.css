@@ -1,0 +1,34 @@
+/* 놀이터 띠: 머리 줄 아래 둥근 민트 풀밭, 높이 88px(동물 몸이 띠 안에 들어오는 높이). */
+.playground {
+  position: relative;
+  height: 88px;
+  flex-shrink: 0;
+  margin-bottom: var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-mint-soft);
+  pointer-events: none;
+}
+
+.decor {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  width: 100%;
+  height: 40px;
+}
+
+.grass {
+  fill: none;
+  stroke: var(--color-mint);
+  stroke-linecap: round;
+  stroke-width: 3;
+}
+
+.flower {
+  fill: var(--color-pink);
+}
+
+.flowerCenter {
+  fill: var(--color-gold);
+}

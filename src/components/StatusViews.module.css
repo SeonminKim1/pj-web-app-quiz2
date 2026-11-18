@@ -1,0 +1,84 @@
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) 0;
+  color: var(--color-ink-soft);
+  font-weight: 700;
+}
+
+/* 분홍 점 세 개가 차례로 통통. */
+.dots {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.dots span {
+  width: 12px;
+  height: 12px;
+  border: var(--border);
+  border-radius: 50%;
+  background: var(--color-pink);
+  animation: bounce 0.9s ease-in-out infinite;
+}
+
+.dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dots span {
+    animation: none;
+  }
+}
+
+.error {
+  composes: card from '../styles/ui.module.css';
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-5) 0;
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
+}
+
+.message {
+  margin: 0;
+  font-weight: 700;
+}
+
+.action {
+  composes: primary from '../styles/ui.module.css';
+}
+
+.gold {
+  composes: pill from '../styles/ui.module.css';
+  background: var(--color-gold);
+}
+
+/* 동전: 노란 동그라미에 안쪽 테두리. */
+.coin {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-gold);
+  box-shadow: inset 0 0 0 2px #fff3c4;
+}

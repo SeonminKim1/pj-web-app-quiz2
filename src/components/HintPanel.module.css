@@ -1,0 +1,42 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+}
+
+/* 연 힌트: 민트 말풍선 목록(번호 붙임). */
+.list {
+  display: grid;
+  width: 100%;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  counter-reset: hint;
+  list-style: none;
+}
+
+.list li {
+  position: relative;
+  padding: var(--space-2) var(--space-3) var(--space-2) 40px;
+  border: var(--border);
+  border-radius: var(--radius-tile) var(--radius-tile) var(--radius-tile) 4px;
+  background: var(--color-mint-soft);
+  counter-increment: hint;
+}
+
+.list li::before {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-3);
+  content: counter(hint) '.';
+  font-weight: 700;
+}
+
+.button {
+  composes: mint from '../styles/ui.module.css';
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  font-size: 0.9375rem;
+}
