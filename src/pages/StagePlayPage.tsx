@@ -1,3 +1,4 @@
+import { playCue } from '../lib/sound.ts';
 import { TitleToast } from '../components/TitleToast.tsx';
 import { useTitleUp } from '../hooks/useTitleUp.ts';
 import { usePhaseSound } from '../hooks/usePhaseSound.ts';
@@ -76,7 +77,6 @@ function StageSession({
     pestAreaRef,
     playgroundRef,
     animal,
-    treats,
     questionRef,
     gold,
     replay,
@@ -158,9 +158,17 @@ function StageSession({
         line={pest.line}
         motion={pest.motion}
         animal={animal.id}
+        fedId={pest.fedId}
       >
         {/* 방해꾼이 평소 노는 곳: 머리 줄 바로 아래(ui-play-layout spec "놀이터"). */}
-        <Playground playgroundRef={playgroundRef} treats={treats} />
+        <Playground
+          playgroundRef={playgroundRef}
+          animal={animal.id}
+          onFeed={() => {
+            playCue('treat');
+            pest.feed();
+          }}
+        />
         <div className={styles.questionBox}>
           <span className={styles.qTag} aria-hidden="true">
             Q{state.index + 1}

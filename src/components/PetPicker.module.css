@@ -90,7 +90,13 @@
 }
 
 .treatPet {
-  animation: munch 420ms ease-in-out 2;
+  position: relative;
+}
+
+.munch {
+  display: block;
+  transform-origin: 50% 95%;
+  animation: munch 260ms ease-in-out 200ms 3;
 }
 
 .treatPet svg {
@@ -113,25 +119,14 @@
 
 .treatButton {
   composes: primary from '../styles/ui.module.css';
+  gap: 4px;
   min-height: 44px;
   padding: 0 var(--space-3);
-  font-variant-numeric: tabular-nums;
-}
-
-.treatNote {
-  grid-column: 1 / -1;
-  margin: 0;
-  font-size: 0.8125rem;
-  font-weight: 700;
-}
-
-.treatNote:empty {
-  display: none;
 }
 
 @keyframes munch {
   50% {
-    transform: scale(1.08, 0.92);
+    transform: scale(1.08, 0.9);
   }
 }
 
@@ -148,7 +143,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sheet,
-  .treatPet {
+  .munch {
     animation: none;
   }
 }

@@ -19,6 +19,8 @@ import type { PlayPhase } from './useStagePlay.ts';
 
 export type PestState = {
   behavior: PestBehavior;
+  /** 간식을 먹을 때마다 1씩 는다(먹는 연출을 다시 시작). */
+  fedId: number;
   /** covering에서 문제 위에 도착해 앉았는지(5초는 앉은 때부터). */
   seated: boolean;
   /** 끌기에서 놓인 뒤 어지러워하는 중(이동·가리기 안 함). */
@@ -40,6 +42,7 @@ export type PestAction =
   | { type: 'seat'; line: string }
   | { type: 'leave' }
   | { type: 'tap'; line: string }
+  | { type: 'feed'; line: string }
   | { type: 'grab'; line: string }
   | { type: 'drop' }
   | { type: 'dizzyEnd' }
@@ -54,6 +57,7 @@ export function initialPestState(hidden = false): PestState {
   return {
     behavior: hidden ? 'paused' : 'roaming',
     seated: false,
+    fedId: 0,
     dizzy: false,
     mood: 'idle',
     line: undefined,
@@ -127,6 +131,18 @@ export function pestReducer(state: PestState, action: PestAction): PestState {
         behavior: 'fleeing',
         dizzy: false,
       };
+    case 'feed':
+      // 간식: 가리던 중이면 내려와서 먹는다. 끌리는 중·숨김 중이면 무시.
+      if (state.behavior !== 'roaming' && state.behavior !== 'covering') {
+        return state;
+      }
+      return {
+        ...say({ state, kind: 'treat', line: action.line }),
+        ...endCover(state),
+        behavior: 'roaming',
+        dizzy: false,
+        fedId: state.fedId + 1,
+      };
     case 'grab':
       if (
         state.behavior !== 'roaming' &&
@@ -189,6 +205,10 @@ export type PestView = {
   line: string | undefined;
   /** 탭(키보드 Enter/Space): 도망. */
   tap: () => void;
+  /** 간식 주기(무료, 아무 때나): 기뻐하며 먹는다. */
+  feed: () => void;
+  /** 먹은 횟수(먹는 연출 키). */
+  fedId: number;
   /** 끌기 시작. */
   grab: () => void;
   /** 끌기를 놓음. */
@@ -204,11 +224,8 @@ export function usePest({
   phase,
   animal = getPestAnimal('rabbit'),
   random = Math.random,
-  calm = false,
 }: {
   phase: PlayPhase;
-  /** 간식을 먹는 중이면 문제를 가리러 가지 않는다(돌아다니기·반응은 그대로). */
-  calm?: boolean;
   /** 고른 방해꾼 동물(가리기 간격). 기본 토끼. */
   animal?: PestAnimal;
   random?: RandomFn;
@@ -224,26 +241,20 @@ export function usePest({
   // 가리기 예약: 예약 번호가 바뀔 때마다 그 동물의 가리기 간격(토끼 15~30초 등) 타이머. 숨겨진 동안은 걸지 않는다.
   useEffect(() => {
     // 스테이지 결과 화면에서는 가리기를 예약하지 않는다(방해꾼이 없음).
-    if (paused || finished || calm) return;
+    if (paused || finished) return;
     const timer = setTimeout(
       () => dispatch({ type: 'coverDue' }),
       nextCoverDelayFor({ animal, random }),
     );
     return () => clearTimeout(timer);
-  }, [scheduleId, paused, finished, random, animal, calm]);
+  }, [scheduleId, paused, finished, random, animal]);
 
   // 가리기 시각이 지났고, 돌아다니는 중(어지럽지 않음)이고, 답을 고르는 중이면 가리러 간다.
   useEffect(() => {
-    if (
-      coverDue &&
-      !calm &&
-      behavior === 'roaming' &&
-      !dizzy &&
-      phase === 'answering'
-    ) {
+    if (coverDue && behavior === 'roaming' && !dizzy && phase === 'answering') {
       dispatch({ type: 'coverStart' });
     }
-  }, [coverDue, behavior, dizzy, phase, calm]);
+  }, [coverDue, behavior, dizzy, phase]);
 
   // 상태별 시간: 가리러 가기 최대 1.5초 → 앉음, 앉은 지 5초 → 떠남,
   // 도망 0.8초 → 도착, 어지러움 1초 → 끝. 움직임이 먼저 알리면 그때 바뀐다.
@@ -305,6 +316,10 @@ export function usePest({
     () => dispatch({ type: 'tap', line: pickLine({ kind: 'caught', random }) }),
     [random],
   );
+  const feed = useCallback(
+    () => dispatch({ type: 'feed', line: pickLine({ kind: 'treat', random }) }),
+    [random],
+  );
   const grab = useCallback(
     () =>
       dispatch({ type: 'grab', line: pickLine({ kind: 'caught', random }) }),
@@ -324,6 +339,8 @@ export function usePest({
     mood: state.mood,
     line,
     tap,
+    feed,
+    fedId: state.fedId,
     grab,
     drop,
     seat,

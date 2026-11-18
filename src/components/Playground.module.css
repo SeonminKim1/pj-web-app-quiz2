@@ -33,16 +33,16 @@
   fill: var(--color-gold);
 }
 
-/* 간식 먹는 중(문제를 안 가린다). */
-.treat {
+/* 간식 버튼: 놀이터 오른쪽 아래(방해꾼보다 위). */
+.feed {
+  composes: small from '../styles/ui.module.css';
   position: absolute;
-  z-index: 1;
-  top: var(--space-2);
+  /* 말풍선(4)보다 위: 언제든 누를 수 있게. */
+  z-index: 5;
   right: var(--space-2);
-  padding: 1px 8px;
-  border: 2px solid var(--color-ink);
-  border-radius: 999px;
-  background: var(--color-surface);
-  font-size: 0.75rem;
-  font-weight: 800;
+  bottom: var(--space-2);
+  gap: 2px;
+  min-height: 40px;
+  padding: 0 var(--space-2) 0 6px;
+  font-size: 0.8125rem;
 }

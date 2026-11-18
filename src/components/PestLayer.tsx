@@ -9,6 +9,7 @@ import {
 import type { PestMotion } from '../hooks/usePestMotion.ts';
 import type { PestBehavior, PestMood } from '../lib/pest.ts';
 import styles from './PestLayer.module.css';
+import { FeedEffect } from './FeedEffect.tsx';
 import { PetPortrait } from './PetPortrait.tsx';
 import type { PetId } from '../types/settings.ts';
 
@@ -24,6 +25,8 @@ type PestLayerProps = {
   children: ReactNode;
   /** 고른 방해꾼 동물. 기본 토끼. */
   animal?: PetId;
+  /** 간식을 먹은 횟수(바뀔 때마다 먹는 연출). */
+  fedId?: number;
 };
 
 /**
@@ -41,6 +44,7 @@ export function PestLayer({
   motion,
   children,
   animal = 'rabbit',
+  fedId = 0,
 }: PestLayerProps): ReactElement {
   const hitRef = useRef<HTMLButtonElement>(null);
   const jellyRef = useRef<HTMLDivElement>(null);
@@ -118,10 +122,14 @@ export function PestLayer({
       >
         <div ref={figureRef} className={styles.figure}>
           {/* 표정이 바뀌면 새로 그려서 "통" 튀는 애니메이션을 다시 시작한다. */}
-          <div key={mood} className={styles.pop}>
+          <div
+            key={`${mood}-${fedId}`}
+            className={mood === 'happy' ? styles.munch : styles.pop}
+          >
             <PetPortrait animal={animal} mood={mood} />
           </div>
         </div>
+        {fedId > 0 && <FeedEffect key={fedId} animal={animal} />}
       </div>
       <button
         ref={hitRef}

@@ -3,7 +3,6 @@ import { AppIcon } from '../components/AppIcon.tsx';
 import { PetPicker } from '../components/PetPicker.tsx';
 import { PetPortrait } from '../components/PetPortrait.tsx';
 import { SoundToggle } from '../components/SoundToggle.tsx';
-import { useProgress } from '../hooks/useProgress.ts';
 import { useSettings } from '../hooks/useSettings.ts';
 import { PEST_ANIMALS, getPestAnimal } from '../lib/pestAnimals.ts';
 import { DataErrorView } from '../components/DataErrorView.tsx';
@@ -18,7 +17,6 @@ export function HomePage(): ReactElement {
   const { gold, state, retry, openTopic, goHome, next, openNext } =
     useHomePage();
   const { settings, choosePet } = useSettings();
-  const { progress, buyTreat } = useProgress();
   const [picking, setPicking] = useState(false);
   const title = next ? titleFor(next) : undefined;
   return (
@@ -137,9 +135,6 @@ export function HomePage(): ReactElement {
           current={settings.pet}
           onChoose={choosePet}
           onClose={() => setPicking(false)}
-          gold={gold}
-          treats={progress.treats ?? 0}
-          onBuyTreat={buyTreat}
         />
       )}
     </main>

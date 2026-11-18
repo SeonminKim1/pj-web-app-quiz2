@@ -17,8 +17,6 @@ export type ProgressContextValue = {
     step: number;
     paid: boolean;
   }) => boolean;
-  /** 방해꾼 간식 사기. */
-  buyTreat: () => 'ok' | 'insufficientGold' | 'full';
 };
 
 export const ProgressContext = createContext<ProgressContextValue | undefined>(

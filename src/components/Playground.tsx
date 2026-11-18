@@ -1,24 +1,38 @@
 import type { ReactElement, RefObject } from 'react';
+import { TREAT_NAME } from '../lib/pestAnimals.ts';
+import type { PetId } from '../types/settings.ts';
 import styles from './Playground.module.css';
+import { TreatIcon } from './TreatIcon.tsx';
 
 type PlaygroundProps = {
   /** 움직임 계산이 놀이터 위치를 잰다(평소 다니는 곳). */
   playgroundRef: RefObject<HTMLDivElement | null>;
-  /** 남은 간식 문제 수(있으면 "냠냠" 표시). */
-  treats?: number;
+  /** 간식 주기(무료, 아무 때나). 없으면 버튼을 그리지 않는다. */
+  onFeed?: () => void;
+  animal?: PetId;
 };
 
-/** 풀이 화면 위쪽(머리 줄 아래) 놀이터 띠(docs/ui-play-layout/spec.md "놀이터"). 장식이라 보조 기술에는 숨긴다. */
+/** 풀이 화면 위쪽(머리 줄 아래) 놀이터 띠(docs/ui-play-layout/spec.md "놀이터"). 풀잎·꽃은 장식이라 보조 기술에 숨기고, 간식 버튼만 읽힌다. */
 export function Playground({
   playgroundRef,
-  treats = 0,
+  onFeed,
+  animal = 'rabbit',
 }: PlaygroundProps): ReactElement {
   return (
-    <div ref={playgroundRef} className={styles.playground} aria-hidden="true">
-      {treats > 0 && (
-        <span className={styles.treat}>냠냠 간식 중 · {treats}문제</span>
+    <div ref={playgroundRef} className={styles.playground}>
+      {onFeed && (
+        <button
+          type="button"
+          className={styles.feed}
+          aria-label={`간식 주기(${TREAT_NAME[animal]})`}
+          onClick={onFeed}
+        >
+          <TreatIcon animal={animal} size={22} />
+          간식
+        </button>
       )}
       <svg
+        aria-hidden="true"
         className={styles.decor}
         viewBox="0 0 360 40"
         preserveAspectRatio="none"

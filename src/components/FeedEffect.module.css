@@ -1,0 +1,83 @@
+.effect {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* 간식: 머리 위에서 입(아래 60%)으로 떨어져 사라진다. */
+.treat {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  animation: drop 520ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+.treat svg {
+  display: block;
+}
+
+@keyframes drop {
+  0% {
+    transform: translate(-50%, -4px) rotate(-20deg) scale(1);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  80% {
+    transform: translate(-50%, 30px) rotate(10deg) scale(0.9);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, 36px) scale(0.85);
+    opacity: 0;
+  }
+}
+
+/* 하트: 먹은 뒤 위로 둥실. */
+.heart {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  opacity: 0;
+  animation: float 1100ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.heart[data-i='0'] {
+  --x: -26px;
+  animation-delay: 450ms;
+}
+
+.heart[data-i='1'] {
+  --x: 4px;
+  animation-delay: 560ms;
+  width: 20px;
+  height: 20px;
+}
+
+.heart[data-i='2'] {
+  --x: 28px;
+  animation-delay: 670ms;
+}
+
+@keyframes float {
+  0% {
+    transform: translate(-50%, 0) scale(0.85);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--x)), -30px) scale(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 움직임 없이: 말풍선·표정만으로 알린다. */
+  .treat,
+  .heart {
+    display: none;
+  }
+}

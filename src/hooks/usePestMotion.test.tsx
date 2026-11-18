@@ -41,6 +41,8 @@ function fakePest(overrides: Partial<PestView> = {}): PestView {
     mood: 'idle',
     line: undefined,
     tap: vi.fn(),
+    feed: vi.fn(),
+    fedId: 0,
     grab: vi.fn(),
     drop: vi.fn(),
     seat: vi.fn(),

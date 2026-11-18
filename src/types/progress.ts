@@ -22,6 +22,4 @@ export type Progress = {
   topics: Record<string, TopicProgress>;
   /** 북마크(선택 필드). 주제를 섞은 하나의 목록, 북마크한 순서(뒤가 최근). 없으면 빈 목록. */
   bookmarks?: Bookmark[];
-  /** 방해꾼 간식: 남은 문제 수(선택 필드). 0보다 크면 방해꾼이 문제를 가리지 않는다. 맞힐 때마다 1 준다. */
-  treats?: number;
 };

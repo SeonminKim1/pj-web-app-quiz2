@@ -4,6 +4,7 @@
 //   [loading] → playable ─ answering/wrong/correct ─(맞힘)→ result(s) ─ share / continue
 //                   │                └─(포기 확인)→ result(g)
 //                   └ resting(공유 대상 아님·없는 id) → 다른 문제 풀기
+import { playCue } from '../lib/sound.ts';
 import { usePhaseSound } from '../hooks/usePhaseSound.ts';
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { AnswerInput } from '../components/AnswerInput.tsx';
@@ -143,11 +144,10 @@ function Session({
   usePhaseSound({ phase: state.phase, fresh: state.fresh });
   const solved = state.phase === 'correct';
   const finished = solved || gaveUp;
-  const { pest, areaRef, playgroundRef, questionRef, animal, treats } =
-    usePestSession({
-      phase: play.pestPhase,
-      active: !finished,
-    });
+  const { pest, areaRef, playgroundRef, questionRef, animal } = usePestSession({
+    phase: play.pestPhase,
+    active: !finished,
+  });
   const shareView = useShare({ id: item.id, question: item.question });
   const [nickname, setNickname] = useState(loadNickname);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -287,8 +287,16 @@ function Session({
           line={pest.line}
           motion={pest.motion}
           animal={animal.id}
+          fedId={pest.fedId}
         >
-          <Playground playgroundRef={playgroundRef} treats={treats} />
+          <Playground
+            playgroundRef={playgroundRef}
+            animal={animal.id}
+            onFeed={() => {
+              playCue('treat');
+              pest.feed();
+            }}
+          />
           {/* 공유 링크(s=1)로 들어왔을 때만. 주소로 바로 오면 친구가 낸 문제가 아니다. */}
           {fromShare && <Banner info={info} />}
           <div className={pageStyles.questionBox}>

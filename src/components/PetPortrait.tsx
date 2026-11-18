@@ -61,6 +61,7 @@ function Eyes({ mood }: { mood: PestMood }): ReactElement {
     </g>
   );
   switch (mood) {
+    case 'happy':
     case 'smug':
       return (
         <g>
@@ -178,6 +179,17 @@ function Mouth({ mood }: { mood: PestMood }): ReactElement {
       );
     case 'surprised':
       return <ellipse cx="64" cy="88" rx="3.5" ry="4.5" fill={LINE} />;
+    case 'happy':
+      // 활짝 웃는 입(오물오물).
+      return (
+        <path
+          d="M56 84 q8 11 16 0 z"
+          fill="#c2456a"
+          stroke={LINE}
+          strokeWidth="2.2"
+          strokeLinejoin="round"
+        />
+      );
     case 'idle':
       return omega;
   }
@@ -370,10 +382,15 @@ export function PetPortrait({
         <circle
           cx="43"
           cy="83"
-          r={mood === 'sulky' ? 11 : 9}
+          r={mood === 'sulky' || mood === 'happy' ? 11 : 9}
           fill={`url(#${id}c)`}
         />
-        <circle cx="85" cy="83" r="9" fill={`url(#${id}c)`} />
+        <circle
+          cx="85"
+          cy="83"
+          r={mood === 'happy' ? 11 : 9}
+          fill={`url(#${id}c)`}
+        />
         <Eyes mood={mood} />
         <Nose animal={animal} />
         <Mouth mood={mood} />

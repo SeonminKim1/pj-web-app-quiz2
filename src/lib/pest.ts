@@ -7,10 +7,11 @@ export type PestBehavior =
   'roaming' | 'covering' | 'fleeing' | 'dragged' | 'paused';
 
 /** 표정. */
-export type PestMood = 'idle' | 'smug' | 'taunt' | 'sulky' | 'surprised';
+export type PestMood =
+  'idle' | 'smug' | 'taunt' | 'sulky' | 'surprised' | 'happy';
 
 /** 말풍선 종류(언제 띄우는지). */
-export type PestLineKind = 'cover' | 'wrong' | 'correct' | 'caught';
+export type PestLineKind = 'cover' | 'wrong' | 'correct' | 'caught' | 'treat';
 
 /** 시간 값(ms). 실제로 해 보고 조정하기 쉽게 한곳에 둔다. */
 export const PEST_TIMING = {
@@ -34,6 +35,7 @@ export const PEST_LINE_MOOD: Record<PestLineKind, PestMood> = {
   wrong: 'taunt',
   correct: 'sulky',
   caught: 'surprised',
+  treat: 'happy',
 };
 
 /** 말풍선 문구(직접 씀, 특정 집단·모욕 표현 없음). */
@@ -53,6 +55,14 @@ export const PEST_LINES: Record<PestLineKind, readonly string[]> = {
     '이건 너무 쉬웠어…',
   ],
   caught: ['으악! 들켰다', '놔줘~!', '치사하게 누르기냐', '알았어 비켜 줄게…'],
+  treat: [
+    '냠냠! 고마워',
+    '이거 내 최애야!',
+    '헤헤 기분 좋다',
+    '한 개만 더…?',
+    '맛있다~',
+    '오늘은 봐줄게!',
+  ],
 };
 
 /** 종류에 맞는 말풍선 문구를 하나 고른다. */

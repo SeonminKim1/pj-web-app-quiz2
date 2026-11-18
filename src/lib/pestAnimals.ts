@@ -107,3 +107,11 @@ export function nextCoverDelayFor({
   const { min, max } = animal.coverDelay;
   return randomIntBetween({ min, max, random });
 }
+
+/** 동물별 간식 이름(간식 주기 버튼·문구). */
+export const TREAT_NAME: Record<PetId, string> = {
+  rabbit: '당근',
+  dog: '뼈다귀',
+  cat: '생선',
+  squirrel: '도토리',
+};
