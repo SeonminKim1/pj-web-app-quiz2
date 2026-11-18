@@ -13,10 +13,6 @@
   font-weight: 400;
   color: var(--color-ink-soft);
 }
-.shareIcon {
-  composes: small from '../styles/ui.module.css';
-  min-width: 44px;
-}
 .result,
 .resting {
   display: grid;
@@ -111,4 +107,18 @@
 .counter {
   color: var(--color-ink-soft);
   font-variant-numeric: tabular-nums;
+}
+
+/* 풀이 아래 도움 줄: 친구한테 넘기기 + 포기. */
+.helpRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  justify-content: space-between;
+}
+.shareButton {
+  composes: secondary from '../styles/ui.module.css';
+  gap: var(--space-2);
+  font-size: 0.9375rem;
 }

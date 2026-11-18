@@ -9,6 +9,7 @@ import { AnswerInput } from '../components/AnswerInput.tsx';
 import { DataErrorView } from '../components/DataErrorView.tsx';
 import { HintPanel } from '../components/HintPanel.tsx';
 import { PestLayer } from '../components/PestLayer.tsx';
+import { ShareIcon } from '../components/ShareIcon.tsx';
 import { ManualCopy, ShareToast } from '../components/ShareFeedback.tsx';
 import { Playground } from '../components/Playground.tsx';
 import { GoldBadge, LoadingView } from '../components/StatusViews.tsx';
@@ -203,16 +204,6 @@ function Session({
           ←
         </button>
         <GoldBadge gold={progress.gold} compact />
-        {!finished && (
-          <button
-            type="button"
-            className={styles.shareIcon}
-            aria-label="친구한테 이 문제 내기"
-            onClick={sharePre}
-          >
-            📤
-          </button>
-        )}
       </header>
       {finished ? (
         <section className={styles.result} aria-live="polite">
@@ -277,7 +268,6 @@ function Session({
             goldShort={hints.goldShort}
             onOpen={play.openNextHint}
           />
-          <p className={styles.note}>모르겠으면 친구한테 넘기기 ↗</p>
           <AnswerInput
             questionKey={item.id}
             charCount={play.charCount}
@@ -300,38 +290,49 @@ function Session({
             }}
             onAdvance={() => {}}
           />
-          {canGiveUp &&
-            (confirmGiveUp ? (
-              <div
-                className={styles.confirm}
-                role="group"
-                aria-label="정답을 볼까요?"
-              >
-                <span>정답을 볼까요?</span>
+          {/* 막혔을 때 할 수 있는 일: 친구한테 넘기기(늘), 정답 보기(한 번 틀린 뒤). */}
+          <div className={styles.helpRow}>
+            <button
+              type="button"
+              className={styles.shareButton}
+              onClick={sharePre}
+            >
+              <ShareIcon />
+              친구한테 이 문제 내기
+            </button>
+            {canGiveUp &&
+              (confirmGiveUp ? (
+                <div
+                  className={styles.confirm}
+                  role="group"
+                  aria-label="정답을 볼까요?"
+                >
+                  <span>정답을 볼까요?</span>
+                  <button
+                    type="button"
+                    className={styles.link}
+                    onClick={() => setGaveUp(true)}
+                  >
+                    볼래요
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.link}
+                    onClick={() => setConfirmGiveUp(false)}
+                  >
+                    더 풀래요
+                  </button>
+                </div>
+              ) : (
                 <button
                   type="button"
                   className={styles.link}
-                  onClick={() => setGaveUp(true)}
+                  onClick={() => setConfirmGiveUp(true)}
                 >
-                  볼래요
+                  포기하고 정답 보기
                 </button>
-                <button
-                  type="button"
-                  className={styles.link}
-                  onClick={() => setConfirmGiveUp(false)}
-                >
-                  더 풀래요
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                className={styles.link}
-                onClick={() => setConfirmGiveUp(true)}
-              >
-                포기하고 정답 보기
-              </button>
-            ))}
+              ))}
+          </div>
         </PestLayer>
       )}
       {sheetOpen && (

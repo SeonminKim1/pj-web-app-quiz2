@@ -14,6 +14,7 @@ import {
 import { useStageSession } from '../hooks/useStageSession.ts';
 import { loadNickname, useShare } from '../hooks/useShare.ts';
 import { ManualCopy, ShareToast } from '../components/ShareFeedback.tsx';
+import { ShareIcon } from '../components/ShareIcon.tsx';
 import styles from './Page.module.css';
 
 /** 풀이 화면: 주소의 주제·스테이지를 확인하고 풀이 세션을 띄운다. */
@@ -162,7 +163,8 @@ function StageSession({
             aria-label="친구한테 이 문제 내기"
             onClick={shareCurrent}
           >
-            📤
+            <ShareIcon size={16} />
+            내기
           </button>
         </div>
         {shareView.manualText && (
