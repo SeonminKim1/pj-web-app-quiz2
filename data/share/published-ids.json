@@ -1,1 +1,2732 @@
-[]
+[
+  {
+    "id": "1",
+    "answerKey": "eac3bc7856c85b5e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "2",
+    "answerKey": "3ce2c1bd5da3afb9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "3",
+    "answerKey": "71f0971209304e3e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "4",
+    "answerKey": "e11b42e5e9002f34",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "5",
+    "answerKey": "70d7dc68a944cb51",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "6",
+    "answerKey": "1a284c015e1085aa",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "7",
+    "answerKey": "46e81502345cbdf5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "8",
+    "answerKey": "6c2eaaf5b51328ce",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "9",
+    "answerKey": "36f447e7f6effc2d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "10",
+    "answerKey": "6a9e3d510b0da66b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "11",
+    "answerKey": "a7f6e1f35bbe20bf",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "12",
+    "answerKey": "e023c27cde974c2f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "13",
+    "answerKey": "47395dc6dc5d3345",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "14",
+    "answerKey": "5c14d2c2b269c2ea",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "15",
+    "answerKey": "1f20290ec54e634d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "16",
+    "answerKey": "7df86e7ffeaf48a6",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "17",
+    "answerKey": "883cfc9764fe6ddb",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "18",
+    "answerKey": "d3ed327c2704e07d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "19",
+    "answerKey": "0ad686f7b48730d5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "20",
+    "answerKey": "217a14948d39e735",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "21",
+    "answerKey": "d4c97a3f17364a57",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "22",
+    "answerKey": "edd9736c8e4f6447",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "23",
+    "answerKey": "ae192cce97d5b6b5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "24",
+    "answerKey": "5b327576fae8b359",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "25",
+    "answerKey": "c6519e11cc0d1232",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "26",
+    "answerKey": "bfeadb648c6fe683",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "27",
+    "answerKey": "ae0d8878a1203828",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "28",
+    "answerKey": "df410774e3dd128a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "29",
+    "answerKey": "b2a29f4283b0e2f9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "30",
+    "answerKey": "019f085377ad53a6",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "31",
+    "answerKey": "425c77dfa9261c85",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "32",
+    "answerKey": "691bd0521714dd68",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "33",
+    "answerKey": "d9e0b2c036309a97",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "34",
+    "answerKey": "d50f595c7782e694",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "35",
+    "answerKey": "85cbbf2ead4a9010",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "36",
+    "answerKey": "3655e17d0bc2de1e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "37",
+    "answerKey": "8157114ade9214ff",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "38",
+    "answerKey": "5267a5434d54069d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "39",
+    "answerKey": "f11a62c1b30d565c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "40",
+    "answerKey": "7d19d8b9e7f20af4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "41",
+    "answerKey": "4b3fc8781d0985f2",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "42",
+    "answerKey": "c1f8dfa8b4d5ac67",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "43",
+    "answerKey": "2c2b312b41a0978f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "44",
+    "answerKey": "5a80468b4e5386da",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "45",
+    "answerKey": "1e821ffcefd0cae0",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "46",
+    "answerKey": "88638f7afe7e8f13",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "47",
+    "answerKey": "a10196a4977e0a2d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "48",
+    "answerKey": "bf48090799bb2297",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "49",
+    "answerKey": "56f2a16263b76a11",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "50",
+    "answerKey": "1e821ffcefd0cae0",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "51",
+    "answerKey": "f91bd4f31a935ac3",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "52",
+    "answerKey": "ec09d2bb52d97c47",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "53",
+    "answerKey": "cbce680ce25413d4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "54",
+    "answerKey": "54d29166f9ff80b6",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "55",
+    "answerKey": "5c57da9a7b2eabb5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "56",
+    "answerKey": "c43346e9cce0c1e1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "57",
+    "answerKey": "8fa1f45c3109bff1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "58",
+    "answerKey": "aa3c3be361f3c684",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "59",
+    "answerKey": "114967a5a956f5fb",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "60",
+    "answerKey": "6a8df66370e6c9f7",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "61",
+    "answerKey": "6b6fad5e05ee5eca",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "62",
+    "answerKey": "34e9c0cb74964499",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "63",
+    "answerKey": "aeccd0c72c130080",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "64",
+    "answerKey": "65d20229b15fa9bf",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "65",
+    "answerKey": "4bd070ffd115326b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "66",
+    "answerKey": "383a267d08e55bc1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "67",
+    "answerKey": "6f80c60267f6bc73",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "68",
+    "answerKey": "45af133b5025dc7b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "69",
+    "answerKey": "689b86274f229e30",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "70",
+    "answerKey": "86a2ff8d438c9c6b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "71",
+    "answerKey": "4e424f5c29b78717",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "72",
+    "answerKey": "d1a27c1f9b6a44da",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "73",
+    "answerKey": "cc0125a115f7a7a9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "74",
+    "answerKey": "0ae55adeed4eafa4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "75",
+    "answerKey": "2f1c22ad55f9ad04",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "76",
+    "answerKey": "489da487bf7b3289",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "77",
+    "answerKey": "26fe8cf1e04907a9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "78",
+    "answerKey": "13e7ac62f574a294",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "79",
+    "answerKey": "c11d85fa40899281",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "80",
+    "answerKey": "1092f705331f5d88",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "81",
+    "answerKey": "6df2d0201325ea22",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "82",
+    "answerKey": "27f4a90a9e75ac52",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "83",
+    "answerKey": "3ebc13d877b39bff",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "84",
+    "answerKey": "0b532e563bab8765",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "85",
+    "answerKey": "6f98d1d1d1d1a4b2",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "86",
+    "answerKey": "8f621bd29a1937e2",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "87",
+    "answerKey": "3e7ac64c5cf1d943",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "88",
+    "answerKey": "f5df3b4c29e6151a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "89",
+    "answerKey": "055ecb25fdfc2623",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "90",
+    "answerKey": "6afc2a24e4cdd21e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "91",
+    "answerKey": "82bd0106f54c0716",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "92",
+    "answerKey": "c1059c30e2fa5a35",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "93",
+    "answerKey": "c17fbf2e2dbf3954",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "94",
+    "answerKey": "9b20e4f1b1fa4d9d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "95",
+    "answerKey": "0d6bf29cf517ac79",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "96",
+    "answerKey": "7caa736e2041eb55",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "97",
+    "answerKey": "7b95f5712b45b7ec",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "98",
+    "answerKey": "1663b824fa3477db",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "99",
+    "answerKey": "1e05c424129b064d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "100",
+    "answerKey": "9d9072d23070636e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "101",
+    "answerKey": "a21d4cfc792c5068",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "102",
+    "answerKey": "5753f5d579dbc9f2",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "103",
+    "answerKey": "21bbe806829a7ba4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "104",
+    "answerKey": "4c391048d251fb39",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "105",
+    "answerKey": "8a84c76631c7402a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "106",
+    "answerKey": "dadd328c197022b7",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "107",
+    "answerKey": "7776aafc99ee5ce7",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "108",
+    "answerKey": "2f7a81bbceeb651a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "109",
+    "answerKey": "44120ff5101c2f82",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "110",
+    "answerKey": "0983c29a1c37eb59",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "111",
+    "answerKey": "a50c656bbff24451",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "112",
+    "answerKey": "7fb69a11bf349a86",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "113",
+    "answerKey": "5afbb05a4ee92ee5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "114",
+    "answerKey": "cb427961331d503d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "115",
+    "answerKey": "f55c2828d8ac508d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "116",
+    "answerKey": "fc9328a0db3a24a7",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "117",
+    "answerKey": "938bcf342efaaab2",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "118",
+    "answerKey": "6c16465cbd24617d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "119",
+    "answerKey": "6a6c665d4dca6523",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "120",
+    "answerKey": "f757c8bb78f8b739",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "121",
+    "answerKey": "d7c8417ee3db697d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "122",
+    "answerKey": "c32bec45be8c1707",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "123",
+    "answerKey": "e97bc66e6e5a5d4b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "124",
+    "answerKey": "b9d6be784782b41c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "125",
+    "answerKey": "b7e7ccc68fd4b3a5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "126",
+    "answerKey": "c893b8d3522e64f6",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "127",
+    "answerKey": "ec8bd2be99aa0070",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "128",
+    "answerKey": "411ac58af3d51629",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "129",
+    "answerKey": "5dc9340cf4657d5a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "130",
+    "answerKey": "c7c95b3981e278d1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "131",
+    "answerKey": "787ef60b09f6b354",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "132",
+    "answerKey": "969667ff2723a394",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "133",
+    "answerKey": "017f9740033ceef1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "134",
+    "answerKey": "ee4562e6d8ae0117",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "135",
+    "answerKey": "ab21bb4d39d5d556",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "136",
+    "answerKey": "d536e6255a4151ea",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "137",
+    "answerKey": "d0188432be439714",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "138",
+    "answerKey": "a826e49064f08391",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "139",
+    "answerKey": "f5d00f1dac712a64",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "140",
+    "answerKey": "e0dabbab412a287a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "141",
+    "answerKey": "1c43cb84ddfe9bd6",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "142",
+    "answerKey": "75a6afad0bc7c231",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "143",
+    "answerKey": "6094ff5073a59248",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "144",
+    "answerKey": "f7c9620e91051c20",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "145",
+    "answerKey": "816951c7d3030883",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "146",
+    "answerKey": "090d7bac55970196",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "147",
+    "answerKey": "50089f8d41e726ba",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "148",
+    "answerKey": "d41ba754fd87264b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "149",
+    "answerKey": "55f4066820e06019",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "150",
+    "answerKey": "c1d7c38629018da9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "151",
+    "answerKey": "ce595383b1a7692c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "152",
+    "answerKey": "86814f80ffe40201",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "153",
+    "answerKey": "1a856432c747e222",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "154",
+    "answerKey": "a8603bf3453332f0",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "155",
+    "answerKey": "6aa54f33bcab8811",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "156",
+    "answerKey": "ca1791228a9821c2",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "157",
+    "answerKey": "6c782f8e14d8d097",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "158",
+    "answerKey": "78496a61deb74f2d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "159",
+    "answerKey": "ea17d312012403f7",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "160",
+    "answerKey": "d7c3c9ffc8872c1f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "161",
+    "answerKey": "8be68521de7efd5a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "162",
+    "answerKey": "8f62b0a3458d8c5d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "163",
+    "answerKey": "821a77cc00ed3cf8",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "164",
+    "answerKey": "0ff833451b455d91",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "165",
+    "answerKey": "72b3c71e0c7335fa",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "166",
+    "answerKey": "b5895ce809377c63",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "167",
+    "answerKey": "02f51afd85f01ff4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "168",
+    "answerKey": "8810c77e35ca817f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "169",
+    "answerKey": "6a4d2c747f7370a8",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "170",
+    "answerKey": "b7b52588ab79d32a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "171",
+    "answerKey": "11feb1c23a1891f8",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "172",
+    "answerKey": "82a2218a0f6320f1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "173",
+    "answerKey": "89058d16546c1107",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "174",
+    "answerKey": "70129359d515b770",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "175",
+    "answerKey": "5911582b07eb8cc4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "176",
+    "answerKey": "e376df6dcfb32508",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "177",
+    "answerKey": "87518c7adca1c730",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "178",
+    "answerKey": "6d1de5f5a1fca63d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "179",
+    "answerKey": "76283eb084e6bdf2",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "180",
+    "answerKey": "86d8c516941dd0bf",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "181",
+    "answerKey": "e160ba8314a4f2e5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "182",
+    "answerKey": "e1682c453b20f197",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "183",
+    "answerKey": "56ee41643819376a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "184",
+    "answerKey": "8c954cd9b6c8f818",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "185",
+    "answerKey": "401ad11112703ca4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "186",
+    "answerKey": "fd2ba70df4775709",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "187",
+    "answerKey": "219bfa2b8e59dd91",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "188",
+    "answerKey": "7d0716d5cfa4021b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "189",
+    "answerKey": "7e3004b5d001a95b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "190",
+    "answerKey": "9889fbd398857472",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "191",
+    "answerKey": "3bbad0751803e762",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "192",
+    "answerKey": "f5c8e7b37c9a0c3a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "193",
+    "answerKey": "6442b8ba46405faf",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "194",
+    "answerKey": "33b09ab86a2d7a5e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "195",
+    "answerKey": "0299c61355383bdc",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "196",
+    "answerKey": "b29ce30ffa4bddbd",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "197",
+    "answerKey": "3582139c82f5adcd",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "198",
+    "answerKey": "e69e4cfe8ad6807a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "199",
+    "answerKey": "3192925e7602df9f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "200",
+    "answerKey": "f9477504dc181ac4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "201",
+    "answerKey": "30e2c0de1e27e6c1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "202",
+    "answerKey": "df6b85a57f65968c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "203",
+    "answerKey": "cbedc4e2baa8340d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "204",
+    "answerKey": "8dd5783c7cd6b0b4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "205",
+    "answerKey": "5282475271558573",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "206",
+    "answerKey": "6def27cf76c41c44",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "207",
+    "answerKey": "177178727ffbd993",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "208",
+    "answerKey": "d07a4f501f19859b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "209",
+    "answerKey": "37290d74ac4d186e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "210",
+    "answerKey": "32ec51a99965bfaa",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "211",
+    "answerKey": "57a2b4d06e83e473",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "212",
+    "answerKey": "4513cc6a31b3bd7c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "213",
+    "answerKey": "b6ecea5f6d1c3994",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "214",
+    "answerKey": "348ea3bd14db7abf",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "215",
+    "answerKey": "a67dcab1895547e1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "216",
+    "answerKey": "455209437ed958e9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "217",
+    "answerKey": "6d80a75c22026c82",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "218",
+    "answerKey": "4a7849864c3b8d40",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "219",
+    "answerKey": "eefa3980fdf345e9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "220",
+    "answerKey": "3d255f0c83ad8fdb",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "221",
+    "answerKey": "b6036f634bebefe0",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "222",
+    "answerKey": "0f6b7d2dbef4c3cd",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "223",
+    "answerKey": "ca4a22321636bb97",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "224",
+    "answerKey": "446a8d1df967deb6",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "225",
+    "answerKey": "179063c739cd1944",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "226",
+    "answerKey": "9c1b36f2a1afaab8",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "227",
+    "answerKey": "587ae8621cc948ec",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "228",
+    "answerKey": "892634b6a0edabc3",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "229",
+    "answerKey": "9467bd8aafe82764",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "230",
+    "answerKey": "5ecab3cb61506d91",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "231",
+    "answerKey": "3b0507a8cc9e435d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "232",
+    "answerKey": "e46b320165eec91e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "233",
+    "answerKey": "53b4a9b4f1530ae0",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "234",
+    "answerKey": "eec341d46dc80b7c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "235",
+    "answerKey": "57f51bb530bb7a12",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "236",
+    "answerKey": "b987de8017111cb8",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "237",
+    "answerKey": "68e8f90e6925a048",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "238",
+    "answerKey": "6cfda02ff345a443",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "239",
+    "answerKey": "94e946db837bfac4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "240",
+    "answerKey": "e0ee4e4fbfb32299",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "241",
+    "answerKey": "d029fa3a95e174a1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "242",
+    "answerKey": "da17573e9e376061",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "243",
+    "answerKey": "4ce47cf650b96257",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "244",
+    "answerKey": "9ea16561cdf06b4c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "245",
+    "answerKey": "c23cce86d86485e9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "246",
+    "answerKey": "e3c63ab38abdeb69",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "247",
+    "answerKey": "e762aae1c502eca7",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "248",
+    "answerKey": "7684ba175355f8fb",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "249",
+    "answerKey": "29cd132d2b858c0f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "250",
+    "answerKey": "7125e0a9236fe844",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "251",
+    "answerKey": "39285db28e162266",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "252",
+    "answerKey": "a061856c5bc64ac9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "253",
+    "answerKey": "479a1eaf86a3c776",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "254",
+    "answerKey": "b2e527989d680258",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "255",
+    "answerKey": "ca924d61fea5d291",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "256",
+    "answerKey": "6d233c2c67335069",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "257",
+    "answerKey": "9ed1ffc89cb9396f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "258",
+    "answerKey": "c4fdfa0450624633",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "259",
+    "answerKey": "10dc0485ef2b1299",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "260",
+    "answerKey": "de050c69c7aa1964",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "261",
+    "answerKey": "614bdb9f46c8e6fa",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "262",
+    "answerKey": "e8352303d276edd5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "263",
+    "answerKey": "05890fddcad5dee8",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "264",
+    "answerKey": "6a058a16270cb236",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "265",
+    "answerKey": "ed395205345bd476",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "266",
+    "answerKey": "b33b78133f7c3326",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "267",
+    "answerKey": "c5b1d2bed6837784",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "268",
+    "answerKey": "14ff397db53c4589",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "269",
+    "answerKey": "be6e4d122acf701a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "270",
+    "answerKey": "769cbcc2daaa886f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "271",
+    "answerKey": "e4df0b2b35078f5c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "272",
+    "answerKey": "1f7dfb101fbf1b34",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "273",
+    "answerKey": "7a564cbf7cddc651",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "274",
+    "answerKey": "ac8c6f4c4c0d3ff0",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "275",
+    "answerKey": "cc8a26781ea2664e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "276",
+    "answerKey": "e7d0db0e4a847232",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "277",
+    "answerKey": "0a887f4f37e3be9c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "278",
+    "answerKey": "2f02a4f7da5ad4d6",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "279",
+    "answerKey": "32fbd887d05a3ada",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "280",
+    "answerKey": "f467fbaeb30d5667",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "281",
+    "answerKey": "64e80acbf86053fc",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "282",
+    "answerKey": "da7c6fd749c093ed",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "283",
+    "answerKey": "28f9a58011e3880a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "284",
+    "answerKey": "ff857ea9556d89c7",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "285",
+    "answerKey": "45159c7f755bf4b5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "286",
+    "answerKey": "953495d29c205d11",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "287",
+    "answerKey": "9375345ff7c5aedd",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "288",
+    "answerKey": "36151d10f137b820",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "289",
+    "answerKey": "23c18fb5897ec1e4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "290",
+    "answerKey": "e3a6f127319d5e00",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "291",
+    "answerKey": "05f036878c22785f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "292",
+    "answerKey": "2539c022a3a8b233",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "293",
+    "answerKey": "dfd7712a868b7cd2",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "294",
+    "answerKey": "0fb101c039bc7fc0",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "295",
+    "answerKey": "9db00c5b9caad487",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "296",
+    "answerKey": "1ef18b6ac1b2f39f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "297",
+    "answerKey": "6d5f18cfdffd1624",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "298",
+    "answerKey": "de361ba315195dd0",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "299",
+    "answerKey": "5f3c766cd7fe615d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "300",
+    "answerKey": "ab586241d1056d49",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "301",
+    "answerKey": "e78fd63fb26b57ea",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "302",
+    "answerKey": "15cd08ca831fbbbf",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "303",
+    "answerKey": "2de7bd1bea5aca5d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "304",
+    "answerKey": "39584f4df0c46328",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "305",
+    "answerKey": "d14240ec0ef997c2",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "306",
+    "answerKey": "591f11d8b2394fcf",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "307",
+    "answerKey": "107fa8e241d5fec9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "308",
+    "answerKey": "b5c90e50c8e36799",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "309",
+    "answerKey": "afaf28c22670171a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "310",
+    "answerKey": "932c4e3f42ff867c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "311",
+    "answerKey": "99d05f462bdcbcc0",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "312",
+    "answerKey": "b89dc7b8d5d70a66",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "313",
+    "answerKey": "4f78ae44b10bdd8b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "314",
+    "answerKey": "00323014ffffcfc8",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "315",
+    "answerKey": "a77b021b06354bb2",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "316",
+    "answerKey": "cb7511fed5c3926c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "317",
+    "answerKey": "0f1e11d946f6362d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "318",
+    "answerKey": "1bfd50952cf3fe24",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "319",
+    "answerKey": "45d7a06a69c17090",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "320",
+    "answerKey": "e3280a9e8259830e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "321",
+    "answerKey": "6629b4cf44246350",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "322",
+    "answerKey": "c03f7e871a4127c4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "323",
+    "answerKey": "4cb22594d13591e9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "324",
+    "answerKey": "90d8e349cff15fc6",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "325",
+    "answerKey": "ba3b7d3398291b57",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "326",
+    "answerKey": "668c8587dc940c9d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "327",
+    "answerKey": "68c49c7be6d4568d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "328",
+    "answerKey": "014e68fddc24fad9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "329",
+    "answerKey": "06c8aaa93d80a768",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "330",
+    "answerKey": "eecc54326d45bffc",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "331",
+    "answerKey": "c64e270d08683f26",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "332",
+    "answerKey": "4d8f6322bfd323f5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "333",
+    "answerKey": "e6029089681eeac9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "334",
+    "answerKey": "2d4715eb9be0f74a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "335",
+    "answerKey": "fa0095540addd63b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "336",
+    "answerKey": "b13df4fe132c8430",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "337",
+    "answerKey": "2e5d8a5fff99479e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "338",
+    "answerKey": "c11bb49f583423c1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "339",
+    "answerKey": "6c837d3b79989ffe",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "340",
+    "answerKey": "7985863beb69d4e1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "341",
+    "answerKey": "5c6764bb28b3e264",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "342",
+    "answerKey": "1bcc8141b32cb561",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "343",
+    "answerKey": "98a1e7667e88e25c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "344",
+    "answerKey": "e6029d8f78a26919",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "345",
+    "answerKey": "5d7d4540b21bc35b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "346",
+    "answerKey": "a5fa78b6c550c4c8",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "347",
+    "answerKey": "1cfee01296c412a1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "348",
+    "answerKey": "2e6b28471f6ac83c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "349",
+    "answerKey": "596fa0691be281c1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "350",
+    "answerKey": "2fb9212ea895f6e8",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "351",
+    "answerKey": "0a4ca9bc91ee23b2",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "352",
+    "answerKey": "de7a46f4c53e1fbf",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "353",
+    "answerKey": "45a4bd47fdb2ffcd",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "354",
+    "answerKey": "31e52393f3eb0c17",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "355",
+    "answerKey": "cae4afa2116e2571",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "356",
+    "answerKey": "bdab8f2615db90d4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "357",
+    "answerKey": "563a6c094f0eed18",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "358",
+    "answerKey": "107dd01c3d38a368",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "359",
+    "answerKey": "a2d97418c1405ffa",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "360",
+    "answerKey": "635c8d3d54e592b5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "361",
+    "answerKey": "a7265fac89d7d463",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "362",
+    "answerKey": "13c40a798b27c889",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "363",
+    "answerKey": "6c8d745f86e0967e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "364",
+    "answerKey": "f43145d43679abb1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "365",
+    "answerKey": "f6c9e5ddd49989a0",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "366",
+    "answerKey": "935f68319d4f227e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "367",
+    "answerKey": "9e76558f2d5f26f1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "368",
+    "answerKey": "d9d8b3f39a0ebaec",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "369",
+    "answerKey": "658042f9fa9d6789",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "370",
+    "answerKey": "596ef7c524e4d828",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "371",
+    "answerKey": "b2fcd2f8bef3b0aa",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "372",
+    "answerKey": "f37482bbfd1a085d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "373",
+    "answerKey": "8dffed65de2856a4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "374",
+    "answerKey": "1661584d52fe1963",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "375",
+    "answerKey": "1e6c6086110c5703",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "376",
+    "answerKey": "177b7cb0686749af",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "377",
+    "answerKey": "c7c1d966a81b5cf9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "378",
+    "answerKey": "8d2ccfaaed9070e1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "379",
+    "answerKey": "1bceae8ab5a69b20",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "380",
+    "answerKey": "5f12fb4ee5f3b7ed",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "381",
+    "answerKey": "be5a3870add5b161",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "382",
+    "answerKey": "46064b6572e89f1d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "383",
+    "answerKey": "3f3e35b28ddbac61",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "384",
+    "answerKey": "24e26de58fde9382",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "385",
+    "answerKey": "a414273724f69cd8",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "386",
+    "answerKey": "c194cedce15033c2",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "387",
+    "answerKey": "3475124ea44fa6fe",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "388",
+    "answerKey": "1d080437d8462ce9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "389",
+    "answerKey": "02835e9df3dc7ea6",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "390",
+    "answerKey": "dad1200c5a2d9efd",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "391",
+    "answerKey": "d0da9740a11cb24f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "392",
+    "answerKey": "5a43f0ce96ef6f14",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "393",
+    "answerKey": "e67fdacf992b765d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "394",
+    "answerKey": "b769992c5aae7aee",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "395",
+    "answerKey": "f37482bbfd1a085d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "396",
+    "answerKey": "a2ba7fb0da889fe3",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "397",
+    "answerKey": "c075c01f4eac8701",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "398",
+    "answerKey": "2706917070b608a9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "399",
+    "answerKey": "19de45d344998c6f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "400",
+    "answerKey": "e83d08d866491dff",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "401",
+    "answerKey": "19ca87140c1b1c7a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "402",
+    "answerKey": "6d253673db906e71",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "403",
+    "answerKey": "38dcc312f0b3bda5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "404",
+    "answerKey": "5f9e67950fee067e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "405",
+    "answerKey": "48ec877c105d4173",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "406",
+    "answerKey": "b202f355fb019aab",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "407",
+    "answerKey": "fecc942a8b19c2d4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "408",
+    "answerKey": "fb09d4629b9dbeae",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "409",
+    "answerKey": "cbfba8bc68ebdc4a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "410",
+    "answerKey": "794f077822f742fe",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "411",
+    "answerKey": "877feda2bdab1ecf",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "412",
+    "answerKey": "7bc65e7c7ceb634c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "413",
+    "answerKey": "750b2b5a944ddc24",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "414",
+    "answerKey": "be0790e452b3f740",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "415",
+    "answerKey": "fd13d72fa1a185c9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "416",
+    "answerKey": "b6ecea5f6d1c3994",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "417",
+    "answerKey": "fdb988c34a9b13f5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "418",
+    "answerKey": "39a0579cceacc130",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "419",
+    "answerKey": "d28d3c7b8b8b10d4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "420",
+    "answerKey": "d8ce7221b93e9fea",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "421",
+    "answerKey": "6e66e735441c1765",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "422",
+    "answerKey": "25b40a415fc2d33c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "423",
+    "answerKey": "3e7ac64c5cf1d943",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "424",
+    "answerKey": "b11f203e8e6ce90d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "425",
+    "answerKey": "989b919e53302294",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "426",
+    "answerKey": "c60f635172beb588",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "427",
+    "answerKey": "d41c38f51711d433",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "428",
+    "answerKey": "d6dab8e7a021c768",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "429",
+    "answerKey": "328263b28ff57998",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "430",
+    "answerKey": "13ad400cd316d884",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "431",
+    "answerKey": "31165e91a54ea120",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "432",
+    "answerKey": "4c5d0e9e2bfc32d4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "433",
+    "answerKey": "6f5e74e44ac93731",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "434",
+    "answerKey": "885ae7da1bc9832f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "435",
+    "answerKey": "23838b9767ca1d80",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "436",
+    "answerKey": "b2bbaafa22850faa",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "437",
+    "answerKey": "ec50f1992318788b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "438",
+    "answerKey": "5feceb66ffc86f38",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "439",
+    "answerKey": "f0eff3686b47f4c7",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "440",
+    "answerKey": "b0b277dee5ab5519",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "441",
+    "answerKey": "c8514c73f6868d60",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "442",
+    "answerKey": "0ac627c8cdeac727",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "443",
+    "answerKey": "63f596b2a2ef8741",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "444",
+    "answerKey": "9514a73da7e5768e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "445",
+    "answerKey": "37d72d6931ff90b1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "446",
+    "answerKey": "3dd25d9a095358d6",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "447",
+    "answerKey": "f2e4a659848e4bee",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "448",
+    "answerKey": "a4efd43c32e87e47",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "449",
+    "answerKey": "76ba738c25c954af",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "450",
+    "answerKey": "63daf7accb4f9c4f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "451",
+    "answerKey": "b9f92f92fe9ffa56",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "452",
+    "answerKey": "46ace9b8dfc3c8d7",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "453",
+    "answerKey": "1ac0e32688b2ac11",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "454",
+    "answerKey": "0c483296f85a71db",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "455",
+    "answerKey": "5a02ef00b4ef9b91",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "456",
+    "answerKey": "32e608b594bece7a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "457",
+    "answerKey": "73ee3cfff9dbc19f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "458",
+    "answerKey": "8dc4d6918deb0b6e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "459",
+    "answerKey": "c9a870ea7d535011",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "460",
+    "answerKey": "ff5a9af2f91a4a39",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "461",
+    "answerKey": "e0587f75ed317902",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "462",
+    "answerKey": "a40c4de81603e47a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "463",
+    "answerKey": "1240a4423f2ca086",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "464",
+    "answerKey": "39645d286a025ef4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "465",
+    "answerKey": "692580ad7382a627",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "466",
+    "answerKey": "0898095e22abff0a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "467",
+    "answerKey": "f783c2267f74ee9a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "468",
+    "answerKey": "7af100aa4d74e13c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "469",
+    "answerKey": "16ddc6bf00a10403",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "470",
+    "answerKey": "32b782cb0a530dae",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "471",
+    "answerKey": "0d0befb12726b305",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "472",
+    "answerKey": "a241640c436d992b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "473",
+    "answerKey": "4ca8453f5b02ba23",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "474",
+    "answerKey": "43d989c7651204d3",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "475",
+    "answerKey": "129e68de625effbe",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "476",
+    "answerKey": "858896f7139a2980",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "477",
+    "answerKey": "daa874d49e2df0ad",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "478",
+    "answerKey": "e315c93fadfe5160",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "479",
+    "answerKey": "9b3291b0361af904",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "480",
+    "answerKey": "2ae0a585df43df27",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "481",
+    "answerKey": "ce9d3c54f1a69b9a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "482",
+    "answerKey": "bbb6ffefda74cc24",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "483",
+    "answerKey": "7c3525ea6c6101d0",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "484",
+    "answerKey": "1c90aeff2ad68611",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "485",
+    "answerKey": "aa3c74d3444712d5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "486",
+    "answerKey": "ed9a564e47aaafbd",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "487",
+    "answerKey": "a9e973ff709d931a",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "488",
+    "answerKey": "cac6137eba01c326",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "489",
+    "answerKey": "3ec1392fe8ae609d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "490",
+    "answerKey": "10a223314dc73639",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "491",
+    "answerKey": "3f86917c2f765ce7",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "492",
+    "answerKey": "c1db58a836255c29",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "493",
+    "answerKey": "2b368e72c269191b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "494",
+    "answerKey": "b554bc51527226e3",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "495",
+    "answerKey": "b8ba08b069b54fb2",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "496",
+    "answerKey": "cd377b0d2d962c53",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "497",
+    "answerKey": "b3bf31f65841d3e1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "498",
+    "answerKey": "d722246f153dc68f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "499",
+    "answerKey": "b594cfd6a9e72bf9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "500",
+    "answerKey": "98d90f18e72fc8ec",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "501",
+    "answerKey": "fe8e6368f8fd67d9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "502",
+    "answerKey": "50484cc4758009c4",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "503",
+    "answerKey": "1e2cb79b6970d021",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "504",
+    "answerKey": "758e55c0654fc7ce",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "505",
+    "answerKey": "79b568c9316a0e26",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "506",
+    "answerKey": "4e0665502d55cc0f",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "507",
+    "answerKey": "e4075d998cf8a7fa",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "508",
+    "answerKey": "cd101186949c2899",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "509",
+    "answerKey": "13b506be06b689a2",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "510",
+    "answerKey": "b294b251f77dfbc5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "511",
+    "answerKey": "04b961957b4302de",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "512",
+    "answerKey": "5e12e956c42b0eb6",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "513",
+    "answerKey": "bf3ec764fafcb6fb",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "514",
+    "answerKey": "a64d092851b2ef4e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "515",
+    "answerKey": "acc1dacd89753cb9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "516",
+    "answerKey": "ef4cd335f35c3df3",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "517",
+    "answerKey": "41cfc0d1f2d127b0",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "518",
+    "answerKey": "0b1bcd1145592923",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "519",
+    "answerKey": "15206139962efc4b",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "520",
+    "answerKey": "24542dccd4d94174",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "521",
+    "answerKey": "5f9bbbae4e8125a6",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "522",
+    "answerKey": "3efb2068d186fa23",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "523",
+    "answerKey": "5422821cc72d57bc",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "524",
+    "answerKey": "90736d518436d08e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "525",
+    "answerKey": "6b543db1a9c05846",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "526",
+    "answerKey": "15a5fbf3a651c593",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "527",
+    "answerKey": "412ca58099a101f5",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "528",
+    "answerKey": "200957bb3949bdf9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "529",
+    "answerKey": "de9025ac060faf49",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "530",
+    "answerKey": "45bdc8b88d3921ff",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "531",
+    "answerKey": "20a193c0c575efb9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "532",
+    "answerKey": "59476bcbabcbfb1e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "533",
+    "answerKey": "7673cf90b1f2257e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "534",
+    "answerKey": "1e1fb6e61a1b17b1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "535",
+    "answerKey": "669a6050e2fb9b72",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "536",
+    "answerKey": "29205b39ec5e5116",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "537",
+    "answerKey": "d88aaa5803f77c0c",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "538",
+    "answerKey": "4e1f5dc041804bf0",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "539",
+    "answerKey": "0304631267d2f0e1",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "540",
+    "answerKey": "f434523ee62dd517",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "541",
+    "answerKey": "16700afccdeba8a9",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "542",
+    "answerKey": "e67446b02e87b10e",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "543",
+    "answerKey": "579138380e4e7d5d",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "544",
+    "answerKey": "a71b09c66b9c7f71",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "545",
+    "answerKey": "6f0afda9a3ea3302",
+    "firstPublished": "2026-11-18"
+  },
+  {
+    "id": "546",
+    "answerKey": "16c919684aa52487",
+    "firstPublished": "2026-11-18"
+  }
+]
