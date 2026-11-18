@@ -288,6 +288,7 @@ function Session({
           motion={pest.motion}
           animal={animal.id}
           fedId={pest.fedId}
+          inviting={pest.inviting}
         >
           <Playground
             playgroundRef={playgroundRef}

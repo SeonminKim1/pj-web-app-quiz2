@@ -1,0 +1,71 @@
+.cue {
+  position: absolute;
+  z-index: 6;
+  top: 50%;
+  left: 52%;
+  pointer-events: none;
+}
+
+/* 끄는 길: 점선이 오른쪽으로 늘어난다. */
+.trail {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 0;
+  height: 30px;
+  border-left: 3px dashed var(--color-pink-strong);
+  transform-origin: center top;
+  animation: trail 1.6s ease-in-out infinite;
+}
+
+.hand {
+  position: absolute;
+  top: -4px;
+  left: -6px;
+  display: block;
+  animation: drag 1.6s ease-in-out infinite;
+}
+
+@keyframes drag {
+  0%,
+  15% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(0, 3px) scale(0.88);
+  }
+  70% {
+    transform: translate(0, 30px) scale(0.88);
+  }
+  85%,
+  100% {
+    transform: translate(0, 30px) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes trail {
+  0%,
+  25% {
+    transform: scaleY(0);
+    opacity: 1;
+  }
+  70% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hand,
+  .trail {
+    animation: none;
+  }
+  .trail {
+    transform: scaleY(1);
+  }
+}

@@ -11,7 +11,15 @@ export type PestMood =
   'idle' | 'smug' | 'taunt' | 'sulky' | 'surprised' | 'happy';
 
 /** 말풍선 종류(언제 띄우는지). */
-export type PestLineKind = 'cover' | 'wrong' | 'correct' | 'caught' | 'treat';
+export type PestLineKind =
+  | 'cover'
+  | 'wrong'
+  | 'correct'
+  | 'caught'
+  | 'treat'
+  | 'invite'
+  | 'dragged'
+  | 'dropped';
 
 /** 시간 값(ms). 실제로 해 보고 조정하기 쉽게 한곳에 둔다. */
 export const PEST_TIMING = {
@@ -36,7 +44,13 @@ export const PEST_LINE_MOOD: Record<PestLineKind, PestMood> = {
   correct: 'sulky',
   caught: 'surprised',
   treat: 'happy',
+  invite: 'taunt',
+  dragged: 'surprised',
+  dropped: 'sulky',
 };
+
+/** 이 시간(ms) 동안 아무 일이 없으면 아직 끌어 보지 않은 사람에게 "끌어 봐"라고 말을 건다. */
+export const INVITE_DELAY = 3_000;
 
 /** 말풍선 문구(직접 씀, 특정 집단·모욕 표현 없음). */
 export const PEST_LINES: Record<PestLineKind, readonly string[]> = {
@@ -55,6 +69,14 @@ export const PEST_LINES: Record<PestLineKind, readonly string[]> = {
     '이건 너무 쉬웠어…',
   ],
   caught: ['으악! 들켰다', '놔줘~!', '치사하게 누르기냐', '알았어 비켜 줄게…'],
+  invite: [
+    '날 잡아서 끌어 봐~',
+    '꾹 잡고 옮겨 볼래?',
+    '잡을 수 있으면 잡아 봐!',
+    '치우고 싶으면 끌어 보시지~',
+  ],
+  dragged: ['으아 어디 가!', '내려 줘~', '우와 하늘을 난다!', '살살 좀 다뤄~'],
+  dropped: ['어지러워…', '빙글빙글~', '다시는 안 그럴게…'],
   treat: [
     '냠냠! 고마워',
     '이거 내 최애야!',

@@ -160,7 +160,8 @@
   font-family: var(--font-display);
   font-synthesis: none;
   position: absolute;
-  z-index: 4;
+  /* 간식 버튼(5) 위. 터치는 통과하므로 버튼은 그대로 눌린다. */
+  z-index: 6;
   top: 0;
   left: 0;
   max-width: 70%;

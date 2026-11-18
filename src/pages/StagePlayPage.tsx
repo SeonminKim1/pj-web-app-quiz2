@@ -159,6 +159,7 @@ function StageSession({
         motion={pest.motion}
         animal={animal.id}
         fedId={pest.fedId}
+        inviting={pest.inviting}
       >
         {/* 방해꾼이 평소 노는 곳: 머리 줄 바로 아래(ui-play-layout spec "놀이터"). */}
         <Playground

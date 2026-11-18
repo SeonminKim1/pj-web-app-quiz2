@@ -1,8 +1,10 @@
 // 방해꾼 행동(spec "행동 상태"). 상태 전이는 pestReducer 한 곳에서만 하고,
 // 타이머·화면 숨김 감지·풀이 반응 같은 부수 효과는 hook이 맡는다. 위치 계산은 usePestMotion.
 import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { browserDragHint, type DragHint } from '../lib/dragHint.ts';
 import type { RandomFn } from '../lib/random.ts';
 import {
+  INVITE_DELAY,
   PEST_LINE_MOOD,
   PEST_TIMING,
   pickLine,
@@ -19,6 +21,8 @@ import type { PlayPhase } from './useStagePlay.ts';
 
 export type PestState = {
   behavior: PestBehavior;
+  /** "날 잡아서 끌어 봐" 말을 거는 중(끄는 손 모양을 같이 보여 준다). */
+  inviting: boolean;
   /** 간식을 먹을 때마다 1씩 는다(먹는 연출을 다시 시작). */
   fedId: number;
   /** covering에서 문제 위에 도착해 앉았는지(5초는 앉은 때부터). */
@@ -39,12 +43,13 @@ export type PestState = {
 export type PestAction =
   | { type: 'coverDue' }
   | { type: 'coverStart' }
-  | { type: 'seat'; line: string }
+  | { type: 'seat'; line: string; invite?: boolean }
   | { type: 'leave' }
   | { type: 'tap'; line: string }
   | { type: 'feed'; line: string }
   | { type: 'grab'; line: string }
-  | { type: 'drop' }
+  | { type: 'drop'; line: string }
+  | { type: 'invite'; line: string }
   | { type: 'dizzyEnd' }
   | { type: 'arrive' }
   | { type: 'react'; kind: PestLineKind; line: string }
@@ -58,6 +63,7 @@ export function initialPestState(hidden = false): PestState {
     behavior: hidden ? 'paused' : 'roaming',
     seated: false,
     fedId: 0,
+    inviting: false,
     dizzy: false,
     mood: 'idle',
     line: undefined,
@@ -82,6 +88,7 @@ function say({
     mood: PEST_LINE_MOOD[kind],
     line,
     bubbleId: state.bubbleId + 1,
+    inviting: kind === 'invite',
   };
 }
 
@@ -108,9 +115,19 @@ export function pestReducer(state: PestState, action: PestAction): PestState {
     case 'seat':
       if (state.behavior !== 'covering' || state.seated) return state;
       return {
-        ...say({ state, kind: 'cover', line: action.line }),
+        ...say({
+          state,
+          kind: action.invite ? 'invite' : 'cover',
+          line: action.line,
+        }),
         seated: true,
       };
+    case 'invite':
+      // 돌아다니며 아무 말도 안 하고 있을 때만.
+      if (state.behavior !== 'roaming' || state.dizzy || state.line) {
+        return state;
+      }
+      return say({ state, kind: 'invite', line: action.line });
     case 'leave':
       if (state.behavior !== 'covering' || !state.seated) return state;
       return {
@@ -152,14 +169,18 @@ export function pestReducer(state: PestState, action: PestAction): PestState {
         return state;
       }
       return {
-        ...say({ state, kind: 'caught', line: action.line }),
+        ...say({ state, kind: 'dragged', line: action.line }),
         ...endCover(state),
         behavior: 'dragged',
         dizzy: false,
       };
     case 'drop':
       if (state.behavior !== 'dragged') return state;
-      return { ...state, behavior: 'roaming', dizzy: true };
+      return {
+        ...say({ state, kind: 'dropped', line: action.line }),
+        behavior: 'roaming',
+        dizzy: true,
+      };
     case 'dizzyEnd':
       if (!state.dizzy) return state;
       return { ...state, dizzy: false };
@@ -175,6 +196,7 @@ export function pestReducer(state: PestState, action: PestAction): PestState {
         ...state,
         mood: state.behavior === 'covering' && state.seated ? 'smug' : 'idle',
         line: undefined,
+        inviting: false,
       };
     case 'hide':
       return {
@@ -209,6 +231,8 @@ export type PestView = {
   feed: () => void;
   /** 먹은 횟수(먹는 연출 키). */
   fedId: number;
+  /** "끌어 봐"라고 말을 거는 중. */
+  inviting: boolean;
   /** 끌기 시작. */
   grab: () => void;
   /** 끌기를 놓음. */
@@ -224,8 +248,11 @@ export function usePest({
   phase,
   animal = getPestAnimal('rabbit'),
   random = Math.random,
+  dragHint = browserDragHint,
 }: {
   phase: PlayPhase;
+  /** 끌어 본 적이 있는지(없으면 "끌어 봐"라고 알려 준다). 테스트에서 바꿔 넣는다. */
+  dragHint?: DragHint;
   /** 고른 방해꾼 동물(가리기 간격). 기본 토끼. */
   animal?: PestAnimal;
   random?: RandomFn;
@@ -280,6 +307,20 @@ export function usePest({
     }
   }, [behavior, seated, dizzy, random]);
 
+  // 아직 끌어 본 적 없으면, 들어와서 잠시 뒤 한 번 "날 잡아서 끌어 봐~".
+  useEffect(() => {
+    if (dragHint.known()) return;
+    const timer = setTimeout(
+      () =>
+        dispatch({
+          type: 'invite',
+          line: pickLine({ kind: 'invite', random }),
+        }),
+      INVITE_DELAY,
+    );
+    return () => clearTimeout(timer);
+  }, [dragHint, random]);
+
   // 말풍선 2초 뒤 내림. 새 말풍선이 뜨면 이전 타이머는 정리된다.
   useEffect(() => {
     if (line === undefined) return;
@@ -320,16 +361,24 @@ export function usePest({
     () => dispatch({ type: 'feed', line: pickLine({ kind: 'treat', random }) }),
     [random],
   );
-  const grab = useCallback(
+  const grab = useCallback(() => {
+    dragHint.learned();
+    dispatch({ type: 'grab', line: pickLine({ kind: 'dragged', random }) });
+  }, [random, dragHint]);
+  const drop = useCallback(
     () =>
-      dispatch({ type: 'grab', line: pickLine({ kind: 'caught', random }) }),
+      dispatch({ type: 'drop', line: pickLine({ kind: 'dropped', random }) }),
     [random],
   );
-  const drop = useCallback(() => dispatch({ type: 'drop' }), []);
-  const seat = useCallback(
-    () => dispatch({ type: 'seat', line: pickLine({ kind: 'cover', random }) }),
-    [random],
-  );
+  const seat = useCallback(() => {
+    // 아직 끌어 본 적 없으면, 문제를 가릴 때 "치우고 싶으면 끌어 봐"라고 알려 준다.
+    const invite = !dragHint.known();
+    dispatch({
+      type: 'seat',
+      invite,
+      line: pickLine({ kind: invite ? 'invite' : 'cover', random }),
+    });
+  }, [random, dragHint]);
   const arrive = useCallback(() => dispatch({ type: 'arrive' }), []);
 
   return {
@@ -341,6 +390,7 @@ export function usePest({
     tap,
     feed,
     fedId: state.fedId,
+    inviting: state.inviting,
     grab,
     drop,
     seat,

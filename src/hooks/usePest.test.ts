@@ -3,17 +3,23 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PEST_LINES, PEST_TIMING } from '../lib/pest.ts';
 import { getPestAnimal } from '../lib/pestAnimals.ts';
 import { initialPestState, pestReducer, usePest } from './usePest.ts';
+import { INVITE_DELAY } from '../lib/pest.ts';
 import type { PlayPhase } from './useStagePlay.ts';
 
 // 난수 0: 가리기 간격 15초, 문구는 목록의 첫 번째.
 const random = () => 0;
 // 난수 0이면 그 동물(기본 토끼)의 가장 짧은 가리기 간격.
 const COVER_AT = getPestAnimal('rabbit').coverDelay.min;
+const KNOWN = { known: () => true, learned: () => {} };
 
 function setup(initialPhase: PlayPhase = 'answering') {
-  return renderHook(({ phase }) => usePest({ phase, random }), {
-    initialProps: { phase: initialPhase },
-  });
+  // 이 테스트들은 끌기를 이미 아는 사람 기준("끌어 봐" 안내 없음). 안내는 아래 따로.
+  return renderHook(
+    ({ phase }) => usePest({ phase, random, dragHint: KNOWN }),
+    {
+      initialProps: { phase: initialPhase },
+    },
+  );
 }
 
 type Result = ReturnType<typeof setup>['result'];
@@ -52,7 +58,7 @@ describe('pestReducer', () => {
     expect(pestReducer(roaming, { type: 'seat', line: 'x' })).toBe(roaming);
     expect(pestReducer(roaming, { type: 'leave' })).toBe(roaming);
     expect(pestReducer(roaming, { type: 'arrive' })).toBe(roaming);
-    expect(pestReducer(roaming, { type: 'drop' })).toBe(roaming);
+    expect(pestReducer(roaming, { type: 'drop', line: 'x' })).toBe(roaming);
     expect(pestReducer(roaming, { type: 'dizzyEnd' })).toBe(roaming);
 
     const fleeing = pestReducer(roaming, { type: 'tap', line: 'x' });
@@ -247,5 +253,36 @@ describe('usePest', () => {
     expect(result.current.behavior).toBe('roaming');
     act(() => vi.advanceTimersByTime(dog.coverDelay.min - COVER_AT));
     expect(result.current.behavior).toBe('covering');
+  });
+});
+
+describe('끌기 안내', () => {
+  function fresh() {
+    let known = false;
+    const hint = { known: () => known, learned: () => void (known = true) };
+    const view = renderHook(() =>
+      usePest({ phase: 'answering', random, dragHint: hint }),
+    );
+    return { ...view, hint };
+  }
+
+  it('끌어 본 적 없으면 잠시 뒤 "날 잡아서 끌어 봐~"라고 말을 건다', () => {
+    const { result } = fresh();
+    act(() => vi.advanceTimersByTime(INVITE_DELAY));
+    expect(result.current.line).toBe(PEST_LINES.invite[0]);
+    expect(result.current.inviting).toBe(true);
+  });
+
+  it('문제를 가릴 때도 끌어서 치우라고 알려 주고, 한 번 끌면 그만한다', () => {
+    const { result, hint } = fresh();
+    act(() => vi.advanceTimersByTime(COVER_AT));
+    act(() => result.current.seat());
+    expect(result.current.line).toBe(PEST_LINES.invite[0]);
+    act(() => result.current.grab());
+    expect(hint.known()).toBe(true);
+    expect(result.current.line).toBe(PEST_LINES.dragged[0]);
+    expect(result.current.inviting).toBe(false);
+    act(() => result.current.drop());
+    expect(result.current.line).toBe(PEST_LINES.dropped[0]);
   });
 });

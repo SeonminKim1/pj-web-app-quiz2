@@ -9,6 +9,7 @@ import {
 import type { PestMotion } from '../hooks/usePestMotion.ts';
 import type { PestBehavior, PestMood } from '../lib/pest.ts';
 import styles from './PestLayer.module.css';
+import { DragCue } from './DragCue.tsx';
 import { FeedEffect } from './FeedEffect.tsx';
 import { PetPortrait } from './PetPortrait.tsx';
 import type { PetId } from '../types/settings.ts';
@@ -27,6 +28,8 @@ type PestLayerProps = {
   animal?: PetId;
   /** 간식을 먹은 횟수(바뀔 때마다 먹는 연출). */
   fedId?: number;
+  /** "날 잡아서 끌어 봐" 중이면 끄는 손 모양을 보여 준다. */
+  inviting?: boolean;
 };
 
 /**
@@ -45,6 +48,7 @@ export function PestLayer({
   children,
   animal = 'rabbit',
   fedId = 0,
+  inviting = false,
 }: PestLayerProps): ReactElement {
   const hitRef = useRef<HTMLButtonElement>(null);
   const jellyRef = useRef<HTMLDivElement>(null);
@@ -130,6 +134,7 @@ export function PestLayer({
           </div>
         </div>
         {fedId > 0 && <FeedEffect key={fedId} animal={animal} />}
+        {inviting && <DragCue />}
       </div>
       <button
         ref={hitRef}
