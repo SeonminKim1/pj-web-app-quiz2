@@ -7,6 +7,8 @@ export type SettingsContextValue = {
   settings: Settings;
   /** 방해꾼 동물 고르기. */
   choosePet: (pet: PetId) => void;
+  /** 효과음·진동 켜고 끄기. */
+  setSound: (on: boolean) => void;
 };
 
 export const SettingsContext = createContext<SettingsContextValue | undefined>(

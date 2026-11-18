@@ -4,6 +4,7 @@
 //   [loading] → playable ─ answering/wrong/correct ─(맞힘)→ result(s) ─ share / continue
 //                   │                └─(포기 확인)→ result(g)
 //                   └ resting(공유 대상 아님·없는 id) → 다른 문제 풀기
+import { usePhaseSound } from '../hooks/usePhaseSound.ts';
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { AnswerInput } from '../components/AnswerInput.tsx';
 import { DataErrorView } from '../components/DataErrorView.tsx';
@@ -139,6 +140,7 @@ function Session({
   const [confirmGiveUp, setConfirmGiveUp] = useState(false);
   const [missedOnce, setMissedOnce] = useState(false);
   const { state, hints } = play;
+  usePhaseSound({ phase: state.phase, fresh: state.fresh });
   const solved = state.phase === 'correct';
   const finished = solved || gaveUp;
   const { pest, areaRef, playgroundRef, questionRef, animal } = usePestSession({

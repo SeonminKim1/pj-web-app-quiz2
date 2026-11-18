@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { loadGoatCounter } from './lib/analytics.ts';
 import { analytics } from './lib/analyticsInstance.ts';
+import { unlockSound } from './lib/sound.ts';
 import siteConfig from '../site.config.json';
 import './index.css';
 
@@ -19,6 +20,11 @@ window.addEventListener('vite:preloadError', (event) => {
   event.preventDefault();
   window.location.reload();
 });
+
+// 효과음: 첫 탭·키에서 소리 장치를 깨운다(설정이 꺼져 있으면 아무것도 안 함).
+for (const type of ['pointerdown', 'keydown'] as const) {
+  window.addEventListener(type, unlockSound, { capture: true, passive: true });
+}
 
 // 통계: 개발자 제외(?dev=1)·디버그 플래그를 먼저 확인한 뒤에만 스크립트를 부른다.
 loadGoatCounter({

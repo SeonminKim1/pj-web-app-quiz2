@@ -8,4 +8,6 @@ export type Settings = {
   version: number;
   /** 풀이 화면에서 뛰어놀 방해꾼 동물. */
   pet: PetId;
+  /** 효과음·진동(선택 필드, 없으면 꺼짐). */
+  sound?: boolean;
 };

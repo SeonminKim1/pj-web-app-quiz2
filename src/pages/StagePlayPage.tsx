@@ -1,3 +1,4 @@
+import { usePhaseSound } from '../hooks/usePhaseSound.ts';
 import type { ReactElement } from 'react';
 import { AnswerInput } from '../components/AnswerInput.tsx';
 import { DataErrorView } from '../components/DataErrorView.tsx';
@@ -80,6 +81,7 @@ function StageSession({
     hasNextStage,
   } = useStageSession(target);
   const { state, item, hints } = play;
+  usePhaseSound({ phase: state.phase, fresh: state.fresh });
   const { stage } = target;
   // 지금 문제를 친구한테 내기. 방금 맞힌 문제면 결과(힌트 수)도 함께 보낸다.
   const shareView = useShare({

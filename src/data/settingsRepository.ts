@@ -32,6 +32,9 @@ export function createSettingsStore({
 /** 저장값이 지금 형식(version 1)의 설정인지 확인한다. */
 export function isSettings(value: unknown): value is Settings {
   return (
-    isRecord(value) && value.version === SETTINGS_VERSION && isPetId(value.pet)
+    isRecord(value) &&
+    value.version === SETTINGS_VERSION &&
+    isPetId(value.pet) &&
+    (value.sound === undefined || typeof value.sound === 'boolean')
   );
 }

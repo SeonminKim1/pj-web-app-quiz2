@@ -1,5 +1,6 @@
 // 앱 전체가 공유하는 설정 상태. App.tsx의 SettingsProvider가 Context로 내려 준다.
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { setSoundEnabled } from '../lib/sound.ts';
 import {
   createSettingsStore,
   type SettingsStore,
@@ -29,5 +30,27 @@ export function useSettingsState(
     [store],
   );
 
-  return useMemo(() => ({ settings, choosePet }), [settings, choosePet]);
+  const setSound = useCallback<SettingsContextValue['setSound']>(
+    (on) => {
+      // 켜는 버튼을 누른 그 순간(사용자 동작 안)에 소리 장치를 깨운다.
+      setSoundEnabled(on);
+      setSettings((current) => {
+        if ((current.sound ?? false) === on) return current;
+        const next = { ...current, sound: on };
+        store.save(next);
+        return next;
+      });
+    },
+    [store],
+  );
+
+  // 저장돼 있던 설정을 효과음 모듈에 알린다(처음 한 번과 바뀔 때).
+  useEffect(() => {
+    setSoundEnabled(settings.sound ?? false);
+  }, [settings.sound]);
+
+  return useMemo(
+    () => ({ settings, choosePet, setSound }),
+    [settings, choosePet, setSound],
+  );
 }
