@@ -41,8 +41,23 @@
   font-size: 0.875rem;
 }
 .restingPest {
+  position: relative;
+  display: flex;
+  justify-content: center;
   margin: 0;
-  font-size: 3rem;
+}
+.restingPest svg {
+  width: 96px;
+  height: 96px;
+}
+.restingZ {
+  position: absolute;
+  top: 0;
+  left: calc(50% + 40px);
+  color: var(--color-ink-soft);
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
 }
 .primary {
   composes: primary from '../styles/ui.module.css';

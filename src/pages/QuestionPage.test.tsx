@@ -91,7 +91,7 @@ describe('/q/:id 문제 하나 모드', () => {
     expect(
       await screen.findByText('지구가 제일 힘들었던 시기는?'),
     ).toBeInTheDocument();
-    expect(screen.getByText('📨 준혁이 낸 문제')).toBeInTheDocument();
+    expect(screen.getByText('준혁이 낸 문제')).toBeInTheDocument();
     expect(screen.getByText('준혁은 힌트 1개로 맞힘')).toBeInTheDocument();
     expect(landed).toHaveBeenCalledWith('11');
     expect(window.location.search).toBe('');
@@ -100,7 +100,7 @@ describe('/q/:id 문제 하나 모드', () => {
   it('문제에서 열 수 없는 h는 결과 줄을 보이지 않는다', async () => {
     // 13번은 문장 힌트가 없어 열 수 있는 단계가 1개뿐이다.
     renderAt('/q/13/?s=1&from=a&h=3&r=s');
-    expect(await screen.findByText('📨 a가 낸 문제')).toBeInTheDocument();
+    expect(await screen.findByText('a가 낸 문제')).toBeInTheDocument();
     expect(screen.queryByText(/힌트 3개로/)).not.toBeInTheDocument();
   });
 
@@ -241,7 +241,9 @@ describe('/q/:id 문제 하나 모드', () => {
 
   it('주소로 바로 열면(s=1 없음) "친구가 낸 문제" 배너가 없다', async () => {
     renderAt('/q/11/');
-    expect(await screen.findByText('지구가 제일 힘들었던 시기는?')).toBeInTheDocument();
+    expect(
+      await screen.findByText('지구가 제일 힘들었던 시기는?'),
+    ).toBeInTheDocument();
     expect(screen.queryByText(/낸 문제/)).not.toBeInTheDocument();
   });
 });

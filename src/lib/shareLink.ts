@@ -144,7 +144,7 @@ function hintPhrase(count: number): string {
 /** 문제 화면 배너(최대 두 줄). */
 export function bannerLines(info: ShareInfo): [string] | [string, string] {
   if (!info.from) return ['친구가 낸 문제'];
-  const first = `📨 ${josa(info.from, '이', '가')} 낸 문제`;
+  const first = `${josa(info.from, '이', '가')} 낸 문제`;
   if (info.result === 's' && info.hints !== undefined)
     return [
       first,

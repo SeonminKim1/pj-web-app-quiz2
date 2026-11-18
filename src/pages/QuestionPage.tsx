@@ -92,9 +92,10 @@ function RestingView({
     <main className={pageStyles.page}>
       <div className={styles.resting}>
         {info.from && <Banner info={{ from: info.from }} />}
-        <p className={styles.restingPest} aria-hidden="true">
-          💤
-        </p>
+        <div className={styles.restingPest} aria-hidden="true">
+          <PetPortrait animal="rabbit" mood="sulky" />
+          <span className={styles.restingZ}>z z</span>
+        </div>
         <h1 className={styles.title}>이 문제는 쉬는 중이에요</h1>
         <button type="button" className={styles.primary} onClick={onStage}>
           다른 문제 풀기

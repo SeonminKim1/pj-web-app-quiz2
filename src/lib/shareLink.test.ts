@@ -104,13 +104,13 @@ describe('문구', () => {
 
   it('배너: from 없음 / from만 / 맞힘(힌트 0은 "힌트 없이") / 포기', () => {
     expect(bannerLines({})).toEqual(['친구가 낸 문제']);
-    expect(bannerLines({ from: '민지' })).toEqual(['📨 민지가 낸 문제']);
+    expect(bannerLines({ from: '민지' })).toEqual(['민지가 낸 문제']);
     expect(bannerLines({ from: '준혁', hints: 0, result: 's' })).toEqual([
-      '📨 준혁이 낸 문제',
+      '준혁이 낸 문제',
       '준혁은 힌트 없이 맞힘',
     ]);
     expect(bannerLines({ from: '민지', result: 'g', hints: 1 })).toEqual([
-      '📨 민지가 낸 문제',
+      '민지가 낸 문제',
       '민지도 못 맞힘',
     ]);
   });
