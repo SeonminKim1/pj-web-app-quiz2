@@ -3,6 +3,7 @@
 // - 이미지 안에는 이모지를 쓰지 않는다(폰트에 없음). 방해꾼 그림은 앱의 PetPortrait SVG를 그대로 쓴다.
 // - 글자 줄은 fitCardText가 정한 대로 한 줄씩 그린다(satori가 다시 줄을 바꾸지 않게 nowrap).
 import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { initWasm, Resvg } from '@resvg/resvg-wasm';
@@ -42,7 +43,7 @@ export class OgError extends Error {
 export type CardFonts = {
   name: string;
   data: Buffer;
-  weight: 700 | 800;
+  weight: 400 | 700 | 800;
   style: 'normal';
 }[];
 
@@ -64,6 +65,7 @@ export async function loadFonts(): Promise<CardFonts> {
       readFile(paths.extraBold),
     ]);
     return [
+      ...(await loadJua()),
       { name: 'Pretendard', data: bold, weight: 700, style: 'normal' },
       { name: 'Pretendard', data: extraBold, weight: 800, style: 'normal' },
     ];
@@ -74,6 +76,16 @@ export async function loadFonts(): Promise<CardFonts> {
       'npm ci로 pretendard 패키지를 다시 설치하세요',
     );
   }
+}
+
+/** 주아체(OFL, scripts/og/fonts/Jua-Regular.ttf). 카드 그리기에만 쓴다(앱은 @fontsource/jua). */
+async function loadJua(): Promise<CardFonts> {
+  const file = fileURLToPath(
+    new URL('./fonts/Jua-Regular.ttf', import.meta.url),
+  );
+  return [
+    { name: 'Jua', data: await readFile(file), weight: 400, style: 'normal' },
+  ];
 }
 
 let wasmReady: Promise<void> | undefined;
@@ -126,7 +138,7 @@ function frame(...content: ReactNode[]): ReactElement {
       height: CARD_HEIGHT,
       background: COLOR.bg,
       justifyContent: 'center',
-      fontFamily: 'Pretendard',
+      fontFamily: 'Jua',
       color: COLOR.ink,
       position: 'relative',
     },
@@ -158,7 +170,7 @@ function brand(): ReactElement {
     createElement('img', { src: petImage(88), width: 88, height: 88 }),
     el(
       'div',
-      { fontSize: 30, fontWeight: 800, color: COLOR.inkSoft },
+      { fontSize: 30, fontWeight: 400, color: COLOR.inkSoft },
       '퀴즈 놀이터',
     ),
   );
@@ -173,7 +185,7 @@ function pill(text: string): ReactElement {
       background: COLOR.pink,
       border: `3px solid ${COLOR.ink}`,
       fontSize: 34,
-      fontWeight: 800,
+      fontWeight: 400,
     },
     text,
   );
@@ -195,7 +207,7 @@ export function challengeCard(layout: CardLayout): ReactElement {
           'div',
           {
             fontSize: layout.size,
-            fontWeight: 800,
+            fontWeight: 400,
             lineHeight: 1.15,
             whiteSpace: 'nowrap',
           },
@@ -211,7 +223,7 @@ export function challengeCard(layout: CardLayout): ReactElement {
 export function defaultCard(): ReactElement {
   return frame(
     brand(),
-    el('div', { fontSize: 56, fontWeight: 800 }, '넌센스 퀴즈'),
+    el('div', { fontSize: 56, fontWeight: 400 }, '넌센스 퀴즈'),
     pill('풀고 친구한테 내기'),
   );
 }
