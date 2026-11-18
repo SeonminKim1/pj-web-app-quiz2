@@ -1,5 +1,5 @@
 // 방해꾼 동물 설정(docs/ui-pest-skin/spec.md "동물 설정"). 화면 코드는 동물 id로 분기하지 않고 이 값을 읽는다.
-// 생김새만 3D(petScene.ts)·2D(PetPortrait.tsx) 만들기 함수가 동물별로 다르다.
+// 생김새는 PetPortrait.tsx(2D SVG)가 동물별로 그린다.
 import type { PetId } from '../types/settings.ts';
 import { randomIntBetween, type RandomFn } from './random.ts';
 

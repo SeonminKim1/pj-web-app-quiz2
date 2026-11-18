@@ -1,247 +1,383 @@
 /** @jsxRuntime automatic */
 // ↑ 빌드 스크립트(tsx, scripts/og/card.ts)도 이 그림을 그린다. tsx가 tsconfig의 jsx 설정을 쓰지 않아 파일에 적어 둔다.
-import type { ReactElement } from 'react';
+//
+// 방해꾼 그림(2D). 모든 동물이 같은 규칙으로 그린다:
+// - 머리가 몸보다 훨씬 크고(아기 비율), 몸은 작고 통통하다.
+// - 머리는 완벽한 원이 아니라 아래가 살짝 넓은 찹쌀떡 모양.
+// - 눈은 얼굴 아래쪽에 크게, 반짝임 두 개. 입은 작게.
+// - 선은 검정 대신 짙은 갈색, 볼은 번지는 볼 터치.
+// - 한쪽을 살짝 다르게(접힌 귀, 기운 꼬리) 해서 손으로 그린 느낌을 낸다.
+// 움직임(깜빡임·숨쉬기·착지)은 PestLayer의 CSS가 data-part를 보고 붙인다.
+import { useId, type ReactElement } from 'react';
 import type { PestMood } from '../lib/pest.ts';
 import type { PetId } from '../types/settings.ts';
 
 type PetPortraitProps = {
   animal: PetId;
   mood?: PestMood;
+  /** 얼굴만(앱 아이콘). 몸 아래쪽을 잘라 머리를 크게 보인다. */
+  headOnly?: boolean;
+  /** 다른 SVG 안에 넣을 때의 자리와 크기(앱 아이콘). */
+  x?: number;
+  y?: number;
+  size?: number;
 };
 
-// 앱 색과 맞춘 선·볼·혀. SVG 속성이라 CSS 변수 대신 값을 둔다.
-const LINE = '#3a2e2e';
-const CHEEK = '#ff9ebb';
-const TONGUE = '#e86a93';
+const LINE = '#6b4f4a';
+const EYE = '#3a2e2e';
+const BLUSH = '#ff8fb1';
+const INNER = '#ffc7d6';
+const W = 2.5;
 
-// 표정별 눈·입(64×64 좌표). 몸통은 모든 표정이 같다.
-function Face({ mood }: { mood: PestMood }): ReactElement {
+type Palette = { top: string; bottom: string; accent: string };
+
+const PALETTE: Record<PetId, Palette> = {
+  rabbit: { top: '#ffffff', bottom: '#f3e9e4', accent: INNER },
+  dog: { top: '#fdebd0', bottom: '#f2d3a9', accent: '#b8794d' },
+  cat: { top: '#ffe3c2', bottom: '#f8c995', accent: '#e9a15f' },
+  squirrel: { top: '#f3c491', bottom: '#e2a56f', accent: '#c97f48' },
+};
+
+// 머리 가운데(64, 70). 눈 높이 75, 입 85.
+const HEAD =
+  'M64 40 C88 40 100 56 98 74 C96 92 82 100 64 100 C46 100 32 92 30 74 C28 56 40 40 64 40 Z';
+const BODY = 'M46 97 C44 112 52 120 64 120 C76 120 84 112 82 97 Z';
+
+function Eyes({ mood }: { mood: PestMood }): ReactElement {
+  const arc = (x: number, up: boolean) => (
+    <path
+      d={up ? `M${x - 6} 76 q6 -7 12 0` : `M${x - 6} 73 q6 7 12 0`}
+      stroke={EYE}
+      strokeWidth="3"
+      fill="none"
+      strokeLinecap="round"
+    />
+  );
+  const open = (x: number, scale = 1) => (
+    <g>
+      <ellipse cx={x} cy="75" rx={6 * scale} ry={7.5 * scale} fill={EYE} />
+      <circle cx={x + 2.5} cy="72" r={2.6 * scale} fill="#fff" />
+      <circle cx={x - 2} cy="79" r={1.2 * scale} fill="#fff" />
+    </g>
+  );
   switch (mood) {
     case 'smug':
       return (
-        <g stroke={LINE} strokeWidth="3" strokeLinecap="round" fill="none">
-          <path d="M19 31 Q24 28 29 31" />
-          <path d="M35 31 Q40 28 45 31" />
-          <path d="M25 43 Q34 48 41 40" />
+        <g>
+          {arc(50, true)}
+          {arc(78, true)}
+        </g>
+      );
+    case 'taunt':
+      // 한쪽 눈 찡긋 + 메롱.
+      return (
+        <g>
+          {open(50)}
+          <path
+            d="M73 70 l9 5 l-9 5"
+            stroke={EYE}
+            strokeWidth="3"
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </g>
+      );
+    case 'sulky':
+      // 반쯤 감은 눈 + 안쪽으로 내려간 눈썹.
+      return (
+        <g>
+          <path d="M44 74 h12 a6 6 0 0 1 -12 0 z" fill={EYE} />
+          <path d="M72 74 h12 a6 6 0 0 1 -12 0 z" fill={EYE} />
+          <path
+            d="M43 66 l12 4 M85 66 l-12 4"
+            stroke={LINE}
+            strokeWidth="2.6"
+            strokeLinecap="round"
+          />
+        </g>
+      );
+    case 'surprised':
+      return (
+        <g data-part="eyes">
+          <circle
+            cx="50"
+            cy="75"
+            r="8"
+            fill="#fff"
+            stroke={EYE}
+            strokeWidth="2.5"
+          />
+          <circle
+            cx="78"
+            cy="75"
+            r="8"
+            fill="#fff"
+            stroke={EYE}
+            strokeWidth="2.5"
+          />
+          <circle cx="50" cy="76" r="3.2" fill={EYE} />
+          <circle cx="78" cy="76" r="3.2" fill={EYE} />
+        </g>
+      );
+    case 'idle':
+      return (
+        <g data-part="eyes">
+          {open(50)}
+          {open(78)}
+        </g>
+      );
+  }
+}
+
+function Mouth({ mood }: { mood: PestMood }): ReactElement {
+  const omega = (
+    <path
+      d="M58 85 q3 3 6 0 q3 3 6 0"
+      stroke={LINE}
+      strokeWidth="2.2"
+      fill="none"
+      strokeLinecap="round"
+    />
+  );
+  switch (mood) {
+    case 'smug':
+      return (
+        <g>
+          {omega}
+          <path
+            d="M65 86.5 q2 6 5 1.5"
+            fill={BLUSH}
+            stroke={LINE}
+            strokeWidth="1.6"
+          />
         </g>
       );
     case 'taunt':
       return (
         <g>
-          <circle cx="24" cy="31" r="3.5" fill={LINE} />
+          {omega}
           <path
-            d="M35 31 L45 31"
+            d="M60.5 87 q3.5 10 7 0"
+            fill={BLUSH}
             stroke={LINE}
-            strokeWidth="3"
-            strokeLinecap="round"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
           />
-          <path d="M24 40 Q32 48 40 40 Z" fill={LINE} />
-          <path d="M30 43 Q32 50 36 44 Z" fill={TONGUE} />
         </g>
       );
     case 'sulky':
       return (
-        <g stroke={LINE} strokeWidth="3" strokeLinecap="round" fill="none">
-          <path d="M18 25 L28 28" />
-          <path d="M46 25 L36 28" />
-          <circle cx="24" cy="33" r="2.5" fill={LINE} stroke="none" />
-          <circle cx="40" cy="33" r="2.5" fill={LINE} stroke="none" />
-          <path d="M26 46 Q32 41 38 46" />
-        </g>
+        <path
+          d="M59 89 q5 -4 10 0"
+          stroke={LINE}
+          strokeWidth="2.4"
+          fill="none"
+          strokeLinecap="round"
+        />
       );
     case 'surprised':
-      return (
-        <g>
-          <circle
-            cx="24"
-            cy="30"
-            r="5.5"
-            fill="#fff"
-            stroke={LINE}
-            strokeWidth="2"
-          />
-          <circle
-            cx="40"
-            cy="30"
-            r="5.5"
-            fill="#fff"
-            stroke={LINE}
-            strokeWidth="2"
-          />
-          <circle cx="24" cy="30" r="2.5" fill={LINE} />
-          <circle cx="40" cy="30" r="2.5" fill={LINE} />
-          <ellipse cx="32" cy="44" rx="4" ry="5" fill={LINE} />
-        </g>
-      );
+      return <ellipse cx="64" cy="88" rx="3.5" ry="4.5" fill={LINE} />;
     case 'idle':
+      return omega;
+  }
+}
+
+function Nose({ animal }: { animal: PetId }): ReactElement {
+  switch (animal) {
+    case 'dog':
+      return <ellipse cx="64" cy="81" rx="4" ry="2.8" fill={EYE} />;
+    case 'cat':
       return (
-        <g>
-          <circle cx="24" cy="32" r="3.5" fill={LINE} />
-          <circle cx="40" cy="32" r="3.5" fill={LINE} />
-          <path
-            d="M26 41 Q32 46 38 41"
-            stroke={LINE}
-            strokeWidth="3"
-            strokeLinecap="round"
-            fill="none"
-          />
-        </g>
+        <path
+          d="M61 80 h6 l-3 3 z"
+          fill={BLUSH}
+          stroke={LINE}
+          strokeWidth="1.2"
+          strokeLinejoin="round"
+        />
+      );
+    case 'squirrel':
+      return <ellipse cx="64" cy="81" rx="3" ry="2.2" fill="#8a5a3c" />;
+    case 'rabbit':
+      return (
+        <path
+          d="M62 81.5 h4"
+          stroke={BLUSH}
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
       );
   }
 }
 
-// 동물별 머리 뒤(귀·꼬리)와 머리 색. 얼굴(눈·입)은 모든 동물이 같은 표정을 쓴다.
-const HEAD_FILL: Record<PetId, string> = {
-  rabbit: '#fff6ec',
-  dog: '#e9c9a1',
-  cat: '#d6d0e2',
-  squirrel: '#d99a62',
-};
-
-function Behind({ animal }: { animal: PetId }): ReactElement {
-  const fill = HEAD_FILL[animal];
+/** 머리 뒤: 귀·꼬리. */
+function Behind({
+  animal,
+  fur,
+}: {
+  animal: PetId;
+  fur: string;
+}): ReactElement | null {
+  const p = PALETTE[animal];
   switch (animal) {
     case 'rabbit':
+      // 왼쪽 귀는 쫑긋, 오른쪽 귀는 접힘.
       return (
-        <g stroke={LINE} strokeWidth="2">
-          <ellipse cx="23" cy="12" rx="5.5" ry="12" fill={fill} />
-          <ellipse cx="41" cy="12" rx="5.5" ry="12" fill={fill} />
-          <ellipse cx="23" cy="13" rx="2.5" ry="8" fill={CHEEK} stroke="none" />
-          <ellipse cx="41" cy="13" rx="2.5" ry="8" fill={CHEEK} stroke="none" />
+        <g stroke={LINE} strokeWidth={W} strokeLinejoin="round">
+          <path d="M44 46 C38 22 42 6 50 8 C58 10 58 30 56 46 Z" fill={fur} />
+          <path
+            d="M47 40 C44 24 46 14 50 14 C54 15 54 28 53 40 Z"
+            fill={INNER}
+            stroke="none"
+          />
+          <path
+            d="M72 44 C74 26 84 16 92 20 C100 24 96 34 84 36 C80 38 78 42 78 46 Z"
+            fill={fur}
+          />
+          <path
+            d="M78 38 C80 30 86 24 91 25 C94 27 90 31 84 32 Z"
+            fill={INNER}
+            stroke="none"
+          />
         </g>
       );
-    case 'dog':
-      return <g />;
     case 'cat':
       return (
-        <g stroke={LINE} strokeWidth="2" strokeLinejoin="round">
-          <path d="M13 26 L16 6 L29 18 Z" fill={fill} />
-          <path d="M51 26 L48 6 L35 18 Z" fill={fill} />
-          <path d="M17 20 L18 11 L24 17 Z" fill={CHEEK} stroke="none" />
-          <path d="M47 20 L46 11 L40 17 Z" fill={CHEEK} stroke="none" />
+        <g stroke={LINE} strokeWidth={W} strokeLinejoin="round">
+          <path d="M36 56 L38 26 C40 22 44 22 46 25 L60 42 Z" fill={fur} />
+          <path d="M92 56 L91 28 C90 24 86 23 83 26 L68 42 Z" fill={fur} />
+          <path d="M41 48 L42 32 L52 42 Z" fill={INNER} stroke="none" />
+          <path d="M87 48 L86 33 L76 42 Z" fill={INNER} stroke="none" />
         </g>
       );
     case 'squirrel':
+      // 몸 뒤로 크게 말린 복슬 꼬리 + 작은 동그란 귀.
       return (
-        <g stroke={LINE} strokeWidth="2">
-          {/* 머리 뒤로 보이는 복슬 꼬리 */}
+        <g stroke={LINE} strokeWidth={W} strokeLinejoin="round">
           <path
-            d="M44 40 C62 40 64 14 50 8 C44 6 40 12 46 16 C54 20 50 32 42 32 Z"
-            fill="#e8b382"
+            d="M80 116 C108 118 122 92 114 66 C108 46 88 44 86 60 C85 70 98 70 100 82 C102 96 90 102 80 104 Z"
+            fill={p.accent}
           />
-          <circle cx="17" cy="17" r="6" fill={fill} />
-          <circle cx="47" cy="17" r="6" fill={fill} />
+          <path
+            d="M98 66 C106 74 108 90 98 100"
+            stroke="#f4cf9f"
+            strokeWidth="5"
+            fill="none"
+            strokeLinecap="round"
+          />
+          <circle cx="42" cy="46" r="9" fill={fur} />
+          <circle cx="86" cy="46" r="9" fill={fur} />
+          <circle cx="42" cy="47" r="4.5" fill={INNER} stroke="none" />
+          <circle cx="86" cy="47" r="4.5" fill={INNER} stroke="none" />
         </g>
       );
+    case 'dog':
+      return null;
   }
 }
 
-// 머리 위(앞)에 붙는 것: 강아지 처진 귀와 주둥이.
+/** 머리 앞: 강아지 처진 귀, 고양이 이마 무늬, 다람쥐 볼 무늬. */
 function Front({ animal }: { animal: PetId }): ReactElement | null {
-  if (animal !== 'dog') return null;
-  return (
-    <g stroke={LINE} strokeWidth="2">
-      <ellipse
-        cx="13"
-        cy="33"
-        rx="6"
-        ry="12"
-        fill="#b98a5e"
-        transform="rotate(18 13 33)"
-      />
-      <ellipse
-        cx="51"
-        cy="33"
-        rx="6"
-        ry="12"
-        fill="#b98a5e"
-        transform="rotate(-18 51 33)"
-      />
-      <ellipse cx="32" cy="45" rx="9" ry="6" fill="#f6e2c8" />
-    </g>
-  );
-}
-
-// 가지고 노는 물건(오른쪽 아래).
-function Toy({ animal }: { animal: PetId }): ReactElement {
+  const p = PALETTE[animal];
   switch (animal) {
-    case 'rabbit':
-      return (
-        <g stroke={LINE} strokeWidth="1.5" strokeLinejoin="round">
-          <path d="M45 61 L58 47 L61 50 Z" fill="#ff9a4d" />
-          <path
-            d="M58 47 L57 41 M59 48 L63 44 M58 47 L62 42"
-            stroke="#5aa858"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </g>
-      );
     case 'dog':
+      // 양쪽이 조금 다르게 처진 귀.
       return (
-        <g stroke={LINE} strokeWidth="1.5" fill="#fffaf0">
-          <rect x="45" y="53" width="12" height="4" rx="2" />
-          <circle cx="45" cy="53" r="2.6" />
-          <circle cx="45" cy="57.5" r="2.6" />
-          <circle cx="57" cy="53" r="2.6" />
-          <circle cx="57" cy="57.5" r="2.6" />
+        <g stroke={LINE} strokeWidth={W} strokeLinejoin="round" fill={p.accent}>
+          <path d="M40 48 C26 48 20 64 24 80 C26 88 34 88 36 80 C38 70 40 60 46 52 Z" />
+          <path d="M88 48 C102 50 108 62 105 76 C103 84 95 85 93 77 C91 68 88 60 82 52 Z" />
         </g>
       );
     case 'cat':
       return (
-        <g stroke={LINE} strokeWidth="1.5">
-          <circle cx="53" cy="54" r="7" fill={CHEEK} />
-          <path
-            d="M47 52 Q53 56 59 51 M48 57 Q54 53 58 58"
-            fill="none"
-            stroke={TONGUE}
-          />
+        <g
+          stroke={p.accent}
+          strokeWidth="3.2"
+          strokeLinecap="round"
+          fill="none"
+        >
+          <path d="M64 44 v8" />
+          <path d="M56 46 l2 6" />
+          <path d="M72 46 l-2 6" />
         </g>
       );
     case 'squirrel':
-      return (
-        <g stroke={LINE} strokeWidth="1.5">
-          <ellipse cx="53" cy="56" rx="5" ry="6" fill="#c9874a" />
-          <path d="M47 52 Q53 46 59 52 Z" fill="#7a5232" />
-          <path d="M53 48 L53 45" strokeWidth="2" strokeLinecap="round" />
-        </g>
-      );
+      return <ellipse cx="64" cy="86" rx="14" ry="10" fill="#fbe3c4" />;
+    case 'rabbit':
+      return null;
   }
 }
 
-/**
- * 방해꾼 동물 2D 그림(직접 그린 인라인 SVG): 머리·귀(동물별), 표정 5개, 가지고 노는 물건.
- * 설정 화면 미리보기와 3D를 못 쓸 때의 대체 그림. 장식이라 보조 기술에는 숨긴다.
- */
 export function PetPortrait({
   animal,
   mood = 'idle',
+  headOnly = false,
+  x,
+  y,
+  size = 56,
 }: PetPortraitProps): ReactElement {
+  // 같은 화면에 여러 장 있어도 그라데이션 id가 겹치지 않게.
+  const id = `pet${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
+  const p = PALETTE[animal];
+  const fur = `url(#${id}f)`;
   return (
     <svg
-      viewBox="0 0 64 64"
-      width="56"
-      height="56"
+      viewBox={headOnly ? '20 2 88 88' : '8 6 116 116'}
+      x={x}
+      y={y}
+      width={size}
+      height={size}
       aria-hidden="true"
       focusable="false"
       data-animal={animal}
+      data-mood={mood}
     >
-      <Behind animal={animal} />
-      <circle
-        cx="32"
-        cy="36"
-        r="21"
-        fill={HEAD_FILL[animal]}
-        stroke={LINE}
-        strokeWidth="2"
-      />
-      <Front animal={animal} />
-      <ellipse cx="17" cy="42" rx="4.5" ry="2.8" fill={CHEEK} opacity="0.8" />
-      <ellipse cx="47" cy="42" rx="4.5" ry="2.8" fill={CHEEK} opacity="0.8" />
-      <g transform="translate(0 2)">
-        <Face mood={mood} />
+      <defs>
+        <linearGradient id={`${id}f`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={p.top} />
+          <stop offset="1" stopColor={p.bottom} />
+        </linearGradient>
+        <radialGradient id={`${id}c`}>
+          <stop offset="0" stopColor={BLUSH} stopOpacity="0.75" />
+          <stop offset="1" stopColor={BLUSH} stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <ellipse cx="64" cy="120" rx="26" ry="3.5" fill={EYE} opacity="0.1" />
+      <g data-part="figure">
+        <Behind animal={animal} fur={fur} />
+        <path d={BODY} fill={fur} stroke={LINE} strokeWidth={W} />
+        <ellipse
+          cx="55"
+          cy="118"
+          rx="6"
+          ry="3.5"
+          fill="#fff"
+          stroke={LINE}
+          strokeWidth="2.2"
+        />
+        <ellipse
+          cx="73"
+          cy="118"
+          rx="6"
+          ry="3.5"
+          fill="#fff"
+          stroke={LINE}
+          strokeWidth="2.2"
+        />
+        <path d={HEAD} fill={fur} stroke={LINE} strokeWidth={W} />
+        <Front animal={animal} />
+        <circle
+          cx="43"
+          cy="83"
+          r={mood === 'sulky' ? 11 : 9}
+          fill={`url(#${id}c)`}
+        />
+        <circle cx="85" cy="83" r="9" fill={`url(#${id}c)`} />
+        <Eyes mood={mood} />
+        <Nose animal={animal} />
+        <Mouth mood={mood} />
       </g>
-      <Toy animal={animal} />
     </svg>
   );
 }

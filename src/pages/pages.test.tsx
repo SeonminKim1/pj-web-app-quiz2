@@ -55,13 +55,6 @@ const NONSENSE: QuizTopicFile = {
   ],
 };
 
-// jsdom에는 WebGL이 없다. 3D 장면은 만들 수 없는 것으로 두고 2D 대체 그림으로 확인한다.
-vi.mock('../components/petScene.ts', () => ({
-  createPetScene: () => {
-    throw new Error('WebGL 없음(테스트)');
-  },
-}));
-
 let store: ProgressStore;
 let settingsStore: SettingsStore;
 

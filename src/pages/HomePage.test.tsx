@@ -7,12 +7,6 @@ import { createProgressStore } from '../data/progressRepository.ts';
 import { createSettingsStore } from '../data/settingsRepository.ts';
 import * as repository from '../data/quizRepository.ts';
 
-vi.mock('../components/petScene.ts', () => ({
-  createPetScene: () => {
-    throw new Error('WebGL 없음(테스트)');
-  },
-}));
-
 beforeEach(() => {
   vi.spyOn(console, 'warn').mockImplementation(() => {});
   vi.spyOn(repository, 'fetchManifest').mockResolvedValue({

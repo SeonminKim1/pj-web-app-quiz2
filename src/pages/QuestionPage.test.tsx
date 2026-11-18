@@ -9,12 +9,6 @@ import * as repository from '../data/quizRepository.ts';
 import { analytics } from '../lib/analyticsInstance.ts';
 import type { QuizTopicFile } from '../types/quiz.ts';
 
-vi.mock('../components/petScene.ts', () => ({
-  createPetScene: () => {
-    throw new Error('WebGL 없음(테스트)');
-  },
-}));
-
 const NONSENSE: QuizTopicFile = {
   version: 1,
   topic: 'nonsense',
