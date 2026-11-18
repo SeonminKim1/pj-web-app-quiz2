@@ -36,7 +36,8 @@
 
 .button {
   composes: mint from '../styles/ui.module.css';
-  min-height: 40px;
+  gap: 6px;
+  min-height: 44px;
   padding: 0 var(--space-3);
   font-size: 0.9375rem;
 }
