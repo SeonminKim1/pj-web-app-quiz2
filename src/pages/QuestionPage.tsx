@@ -218,7 +218,7 @@ function Session({
               {solved ? '정답!' : '정답은'}
             </span>{' '}
             <span className={styles.answerText}>
-              {solved ? item.answer : `"${item.answer}"`}
+              {solved ? item.answer : `“${item.answer}”`}
             </span>
           </h1>
           {(play.lastGold > 0 || solvedBefore) && solved && (

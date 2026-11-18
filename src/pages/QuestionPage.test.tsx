@@ -189,7 +189,7 @@ describe('/q/:id 문제 하나 모드', () => {
     );
     await user.click(screen.getByRole('button', { name: '볼래요' }));
     expect(
-      screen.getByRole('heading', { name: '정답은 "고생대"' }),
+      screen.getByRole('heading', { name: '정답은 “고생대”' }),
     ).toBeInTheDocument();
     expect(
       screen.getByText('이 문제, 다른 친구도 걸릴까?'),
