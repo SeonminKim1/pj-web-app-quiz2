@@ -238,4 +238,10 @@ describe('/q/:id 문제 하나 모드', () => {
     expect(await screen.findByText('뽑으면 우는 식물은?')).toBeInTheDocument();
     expect(screen.queryByText('다른 문제')).not.toBeInTheDocument();
   });
+
+  it('주소로 바로 열면(s=1 없음) "친구가 낸 문제" 배너가 없다', async () => {
+    renderAt('/q/11/');
+    expect(await screen.findByText('지구가 제일 힘들었던 시기는?')).toBeInTheDocument();
+    expect(screen.queryByText(/낸 문제/)).not.toBeInTheDocument();
+  });
 });

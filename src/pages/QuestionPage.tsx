@@ -263,7 +263,8 @@ function Session({
           animal={animal.id}
         >
           <Playground playgroundRef={playgroundRef} />
-          <Banner info={info} />
+          {/* 공유 링크(s=1)로 들어왔을 때만. 주소로 바로 오면 친구가 낸 문제가 아니다. */}
+          {fromShare && <Banner info={info} />}
           <div className={pageStyles.questionBox}>
             <p ref={questionRef} className={pageStyles.question}>
               {item.question}
