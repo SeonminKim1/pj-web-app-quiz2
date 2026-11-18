@@ -3,7 +3,6 @@
 // - 이미지 안에는 이모지를 쓰지 않는다(폰트에 없음). 방해꾼 그림은 앱의 PetPortrait SVG를 그대로 쓴다.
 // - 글자 줄은 fitCardText가 정한 대로 한 줄씩 그린다(satori가 다시 줄을 바꾸지 않게 nowrap).
 import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { initWasm, Resvg } from '@resvg/resvg-wasm';
@@ -72,17 +71,18 @@ export async function loadFonts(): Promise<CardFonts> {
   } catch {
     throw new OgError(
       'OG_FONT_MISSING',
-      `Pretendard OTF를 찾지 못했어요(${paths.bold})`,
-      'npm ci로 pretendard 패키지를 다시 설치하세요',
+      `카드 글꼴을 찾지 못했어요(${JUA_FILE}, ${paths.bold})`,
+      '저장소 루트에서 실행했는지 확인하고, npm ci로 pretendard 패키지를 다시 설치하세요',
     );
   }
 }
 
+export const JUA_FILE = 'scripts/og/fonts/Jua-Regular.ttf';
+
 /** 주아체(OFL, scripts/og/fonts/Jua-Regular.ttf). 카드 그리기에만 쓴다(앱은 @fontsource/jua). */
 async function loadJua(): Promise<CardFonts> {
-  const file = fileURLToPath(
-    new URL('./fonts/Jua-Regular.ttf', import.meta.url),
-  );
+  // npm 스크립트와 테스트는 저장소 루트에서 돈다.
+  const file = JUA_FILE;
   return [
     { name: 'Jua', data: await readFile(file), weight: 400, style: 'normal' },
   ];
