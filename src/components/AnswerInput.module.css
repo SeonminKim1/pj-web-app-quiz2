@@ -54,12 +54,14 @@
   box-shadow: var(--shadow-pop);
   transition:
     background-color 150ms ease-out,
-    border-color 150ms ease-out;
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out;
 }
 
+/* 쓰는 중: 바 테두리와 그림자가 진분홍(파란 링 대신 바 자체가 표시). */
 .row:focus-within {
-  outline: 3px solid var(--color-focus);
-  outline-offset: 2px;
+  border-color: var(--color-pink-strong);
+  box-shadow: 0 4px 0 var(--color-pink-strong);
 }
 
 .input {

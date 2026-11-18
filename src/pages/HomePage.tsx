@@ -3,7 +3,7 @@ import { AppIcon } from '../components/AppIcon.tsx';
 import { PetPicker } from '../components/PetPicker.tsx';
 import { PetPortrait } from '../components/PetPortrait.tsx';
 import { useSettings } from '../hooks/useSettings.ts';
-import { getPestAnimal } from '../lib/pestAnimals.ts';
+import { PEST_ANIMALS, getPestAnimal } from '../lib/pestAnimals.ts';
 import { DataErrorView } from '../components/DataErrorView.tsx';
 import { GoldBadge, LoadingView } from '../components/StatusViews.tsx';
 import { TopicCard } from '../components/TopicCard.tsx';
@@ -38,6 +38,22 @@ export function HomePage(): ReactElement {
       </header>
       {next && (
         <section className={styles.continue} aria-label="이어서 풀기">
+          {/* 카드 위에 올라앉은 방해꾼들(장식). 고른 동물이 맨 앞에서 으쓱. */}
+          <div className={styles.parade} aria-hidden="true">
+            {[...PEST_ANIMALS]
+              .sort((a, b) =>
+                a.id === settings.pet ? -1 : b.id === settings.pet ? 1 : 0,
+              )
+              .map((animal, i) => (
+                <span key={animal.id} style={{ zIndex: 4 - i }}>
+                  <PetPortrait
+                    animal={animal.id}
+                    mood={i === 0 ? 'smug' : 'idle'}
+                    size={i === 0 ? 60 : 46}
+                  />
+                </span>
+              ))}
+          </div>
           <p className={styles.continueStatus}>
             {next.stageNo
               ? next.solved === 0

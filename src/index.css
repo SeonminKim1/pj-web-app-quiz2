@@ -15,6 +15,7 @@
   --color-danger-soft: #fde4e4;
   --color-focus: #3d6bff;
   --color-disabled: #ece5df;
+  --color-dot: rgb(194 58 107 / 9%);
 
   --radius-card: 20px;
   --radius-button: 16px;
@@ -46,7 +47,10 @@
 body {
   margin: 0;
   min-width: 320px;
-  background: var(--color-bg);
+  /* 바탕: 크림색 위에 연한 점무늬(놀이 공책 느낌). */
+  background-color: var(--color-bg);
+  background-image: radial-gradient(var(--color-dot) 1.5px, transparent 1.6px);
+  background-size: 22px 22px;
   color: var(--color-ink);
   font-family: var(--font-body);
   line-height: 1.5;

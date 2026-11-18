@@ -81,7 +81,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-2);
-  margin: var(--space-3) 0 var(--space-5);
+  margin: var(--space-3) 0 56px;
   padding-top: var(--space-5);
   text-align: center;
 }
@@ -127,11 +127,26 @@
 }
 
 /* 다시 풀기 태그: 문제 카드 왼쪽 위 테두리에 걸친 배지(문장과 겹치지 않게). */
+.qTag {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: var(--space-3);
+  transform: translateY(-45%) rotate(-4deg);
+  padding: 1px 10px;
+  border: var(--border);
+  border-radius: 10px;
+  background: var(--color-pink);
+  box-shadow: var(--shadow-pressed);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
 .replayTag {
   position: absolute;
   z-index: 1;
   top: 0;
-  left: var(--space-4);
+  left: 80px;
   transform: translateY(-50%);
   padding: 0 var(--space-2);
   border: var(--border);
@@ -145,8 +160,8 @@
 .question {
   composes: card from '../styles/ui.module.css';
   margin: 0;
-  padding: var(--space-5) 48px;
-  font-size: 1.25rem;
+  padding: 28px var(--space-5) var(--space-5);
+  font-size: 1.375rem;
   font-weight: 800;
   line-height: 1.4;
   text-align: center;
@@ -289,6 +304,7 @@
 
 /* 첫 화면 "이어서 풀기": 화면의 주 행동 하나. */
 .continue {
+  position: relative;
   display: grid;
   gap: var(--space-2);
   margin-bottom: var(--space-5);
@@ -297,6 +313,22 @@
   border-radius: var(--radius-card);
   background: var(--color-surface);
   box-shadow: var(--shadow-pop);
+}
+/* 카드 오른쪽 위 모서리에 걸터앉은 동물들. */
+.parade {
+  position: absolute;
+  top: -50px;
+  right: var(--space-3);
+  display: flex;
+  align-items: flex-end;
+  flex-direction: row-reverse;
+}
+.parade > span {
+  position: relative;
+  margin-left: -12px;
+}
+.parade svg {
+  display: block;
 }
 .continueStatus {
   margin: 0;

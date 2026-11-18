@@ -33,6 +33,7 @@ import {
   cleanNickname,
   compareLine,
   cutGraphemes,
+  displayNumber,
   type ShareInfo,
 } from '../lib/shareLink.ts';
 import styles from './QuestionPage.module.css';
@@ -214,6 +215,11 @@ function Session({
           <div className={styles.resultPet} aria-hidden="true">
             {/* 방해꾼은 내가 맞히면 삐지고, 포기하면 으쓱한다. */}
             <PetPortrait animal={animal.id} mood={solved ? 'sulky' : 'smug'} />
+            {/* 맞혔을 때만 반짝(한 번). */}
+            {solved &&
+              [0, 1, 2, 3].map((i) => (
+                <span key={i} className={styles.spark} data-i={i} />
+              ))}
           </div>
           <h1 ref={resultHeading} tabIndex={-1} className={styles.answerCard}>
             <span className={styles.answerLabel}>
@@ -283,6 +289,9 @@ function Session({
           {/* 공유 링크(s=1)로 들어왔을 때만. 주소로 바로 오면 친구가 낸 문제가 아니다. */}
           {fromShare && <Banner info={info} />}
           <div className={pageStyles.questionBox}>
+            <span className={pageStyles.qTag} aria-hidden="true">
+              {displayNumber(item.id)}
+            </span>
             <p ref={questionRef} className={pageStyles.question}>
               {item.question}
             </p>

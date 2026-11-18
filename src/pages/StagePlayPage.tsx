@@ -153,6 +153,9 @@ function StageSession({
         {/* 방해꾼이 평소 노는 곳: 머리 줄 바로 아래(ui-play-layout spec "놀이터"). */}
         <Playground playgroundRef={playgroundRef} />
         <div className={styles.questionBox}>
+          <span className={styles.qTag} aria-hidden="true">
+            Q{state.index + 1}
+          </span>
           {replay && <span className={styles.replayTag}>다시 풀기</span>}
           <p ref={questionRef} className={styles.question}>
             {item?.question}
