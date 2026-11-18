@@ -1,4 +1,6 @@
 .toast {
+  font-family: var(--font-display);
+  font-synthesis: none;
   position: fixed;
   left: 50%;
   bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));

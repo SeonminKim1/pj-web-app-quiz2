@@ -34,6 +34,8 @@
   --font-body:
     'Pretendard', system-ui, -apple-system, 'Apple SD Gothic Neo',
     'Noto Sans KR', sans-serif;
+  /* 제목·문제·버튼·숫자·말풍선: 둥글고 통통한 주아체(굵기는 하나뿐이라 가짜 굵게를 끈다). */
+  --font-display: 'Jua', var(--font-body);
 
   color-scheme: light;
 }
@@ -61,6 +63,18 @@ body {
 button {
   color: inherit;
   font: inherit;
+}
+
+/* 주아체로 쓰는 곳. 주아체는 굵기가 하나라 font-weight를 무시하게 한다. */
+h1,
+h2,
+h3,
+button,
+input,
+.display {
+  font-family: var(--font-display);
+  font-synthesis: none;
+  letter-spacing: 0.01em;
 }
 
 :focus-visible {

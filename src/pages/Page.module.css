@@ -131,6 +131,8 @@
 
 /* 다시 풀기 태그: 문제 카드 왼쪽 위 테두리에 걸친 배지(문장과 겹치지 않게). */
 .qTag {
+  font-family: var(--font-display);
+  font-synthesis: none;
   position: absolute;
   z-index: 1;
   top: 0;
@@ -146,6 +148,8 @@
   font-variant-numeric: tabular-nums;
 }
 .replayTag {
+  font-family: var(--font-display);
+  font-synthesis: none;
   position: absolute;
   z-index: 1;
   top: 0;
@@ -161,6 +165,8 @@
 
 /* 문제 카드: 방해꾼이 이 카드를 가린다. 좌우 여백은 북마크 버튼(44px)과 겹치지 않게. */
 .question {
+  font-family: var(--font-display);
+  font-synthesis: none;
   composes: card from '../styles/ui.module.css';
   margin: 0;
   padding: 28px var(--space-5) var(--space-5);
@@ -342,6 +348,8 @@
   margin: 0;
 }
 .titleName {
+  font-family: var(--font-display);
+  font-synthesis: none;
   padding: 1px 10px;
   border: var(--border);
   border-radius: 999px;
@@ -355,6 +363,8 @@
   font-weight: 700;
 }
 .continueStatus {
+  font-family: var(--font-display);
+  font-synthesis: none;
   margin: 0;
   font-size: 1.25rem;
   font-weight: 800;
@@ -374,6 +384,8 @@
   background: var(--color-pink);
 }
 .continueCount {
+  font-family: var(--font-display);
+  font-synthesis: none;
   margin: 0 0 var(--space-2);
   color: var(--color-ink-soft);
   font-size: 0.9375rem;

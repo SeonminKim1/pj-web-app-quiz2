@@ -5,6 +5,7 @@ import { loadGoatCounter } from './lib/analytics.ts';
 import { analytics } from './lib/analyticsInstance.ts';
 import { unlockSound } from './lib/sound.ts';
 import siteConfig from '../site.config.json';
+import '@fontsource/jua/400.css';
 import './index.css';
 
 // 배포 뒤 옛 HTML이 사라진 청크를 부르면 한 번만 새로 고친다(10초 안에 또 나면 그대로 둔다).

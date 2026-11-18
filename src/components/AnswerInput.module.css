@@ -5,6 +5,8 @@
 
 /* 상태 줄: 평소 글자 수("정답 3글자 · 1+2"), 채점 뒤 피드백. 높이를 고정해 아래가 흔들리지 않게. */
 .status {
+  font-family: var(--font-display);
+  font-synthesis: none;
   display: flex;
   min-height: 28px;
   align-items: center;

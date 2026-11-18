@@ -69,6 +69,8 @@
 }
 
 .gold {
+  font-family: var(--font-display);
+  font-synthesis: none;
   composes: pill from '../styles/ui.module.css';
   background: var(--color-gold);
   font-variant-numeric: tabular-nums;

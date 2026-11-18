@@ -27,6 +27,8 @@
 }
 
 .label {
+  font-family: var(--font-display);
+  font-synthesis: none;
   font-size: 1.25rem;
   font-weight: 700;
 }

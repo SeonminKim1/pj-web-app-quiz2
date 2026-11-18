@@ -8,6 +8,8 @@
 }
 
 .toast {
+  font-family: var(--font-display);
+  font-synthesis: none;
   display: grid;
   justify-items: center;
   gap: 2px;
