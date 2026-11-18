@@ -84,13 +84,10 @@
 }
 .field {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: var(--space-1) var(--space-2);
-  align-items: center;
+  gap: var(--space-1);
   text-align: left;
 }
 .field > span:first-child {
-  grid-column: 1 / -1;
   font-weight: 700;
 }
 .field input {
@@ -101,7 +98,9 @@
   font: inherit;
 }
 .counter {
+  justify-self: end;
   color: var(--color-ink-soft);
+  font-size: 0.875rem;
   font-variant-numeric: tabular-nums;
 }
 
