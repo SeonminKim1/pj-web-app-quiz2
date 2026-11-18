@@ -308,3 +308,52 @@
 .questionBox:has(.questionShare) .question {
   padding-inline: 56px;
 }
+
+/* 첫 화면 "이어서 풀기": 화면의 주 행동 하나. */
+.continue {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-pop);
+}
+.continueStatus {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-wrap: balance;
+}
+.continueBar {
+  height: 12px;
+  overflow: hidden;
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--color-pink-soft);
+}
+.continueBar > span {
+  display: block;
+  height: 100%;
+  min-width: 0;
+  background: var(--color-pink);
+}
+.continueCount {
+  margin: 0 0 var(--space-2);
+  color: var(--color-ink-soft);
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+.continueButton {
+  composes: primary from '../styles/ui.module.css';
+  min-height: 56px;
+  font-size: 1.125rem;
+}
+
+.sectionLabel {
+  margin: 0 0 var(--space-2);
+  color: var(--color-ink-soft);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
