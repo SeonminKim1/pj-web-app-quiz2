@@ -116,7 +116,7 @@ function Session({
   onHome,
   onStage,
 }: SessionProps): ReactElement {
-  const { item, data, stageNo } = target;
+  const { item, topic, stageNo } = target;
   const { progress } = useProgress();
   // 다시 들어온 문제도 풀 수 있게 한 문제짜리 판으로 연다(골드는 진행 규칙대로 처음만).
   const [plan] = useState(() => ({
@@ -125,9 +125,9 @@ function Session({
     solvedBefore: new Set<string>(),
   }));
   const [solvedBefore] = useState(() =>
-    solvedSet({ progress, topicId: data.topic.id }).has(item.id),
+    solvedSet({ progress, topicId: topic.id }).has(item.id),
   );
-  const play = useStagePlay({ topic: data.topic, plan });
+  const play = useStagePlay({ topic, plan });
   const [gaveUp, setGaveUp] = useState(false);
   const [confirmGiveUp, setConfirmGiveUp] = useState(false);
   const [missedOnce, setMissedOnce] = useState(false);
@@ -178,7 +178,7 @@ function Session({
   };
   const continueStage = () => {
     if (fromShare) analytics.track(EVENTS.continueStageFromShare, item.id);
-    onStage(stageNo || undefined);
+    onStage(stageNo);
   };
 
   const canGiveUp =

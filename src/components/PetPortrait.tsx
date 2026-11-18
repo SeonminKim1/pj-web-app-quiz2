@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+// ↑ 빌드 스크립트(tsx, scripts/og/card.ts)도 이 그림을 그린다. tsx가 tsconfig의 jsx 설정을 쓰지 않아 파일에 적어 둔다.
 import type { ReactElement } from 'react';
 import type { PestMood } from '../lib/pest.ts';
 import type { PetId } from '../types/settings.ts';

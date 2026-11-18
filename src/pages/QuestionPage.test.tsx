@@ -51,7 +51,16 @@ beforeEach(() => {
 afterEach(() => {
   vi.restoreAllMocks();
   window.history.replaceState(null, '', '/');
+  document.getElementById('q-data')?.remove();
 });
+
+function inlineData(item: object) {
+  const script = document.createElement('script');
+  script.type = 'application/json';
+  script.id = 'q-data';
+  script.textContent = JSON.stringify(item);
+  document.head.append(script);
+}
 
 function renderAt(path: string) {
   // 실제 앱(BrowserRouter)처럼 창 주소에도 쿼리를 둔다.
@@ -185,5 +194,48 @@ describe('/q/:id 문제 하나 모드', () => {
     expect(
       screen.getByText('이 문제, 다른 친구도 걸릴까?'),
     ).toBeInTheDocument();
+  });
+
+  it('#q-data가 있으면 전체 파일을 받기 전에 바로 그린다', async () => {
+    vi.spyOn(repository, 'fetchTopicFile').mockReturnValue(
+      new Promise(() => {}),
+    );
+    inlineData({
+      id: '13',
+      question: '뽑으면 우는 식물은?',
+      answer: '우엉',
+      shareable: true,
+    });
+    renderAt('/q/13/');
+    expect(await screen.findByText('뽑으면 우는 식물은?')).toBeInTheDocument();
+  });
+
+  it('전체 파일을 못 받아도 #q-data로 풀 수 있다', async () => {
+    vi.spyOn(repository, 'fetchTopicFile').mockRejectedValue(
+      new Error('offline'),
+    );
+    inlineData({
+      id: '13',
+      question: '뽑으면 우는 식물은?',
+      answer: '우엉',
+      shareable: true,
+    });
+    const user = renderAt('/q/13/');
+    await answer(user, '우엉');
+    expect(
+      await screen.findByRole('heading', { name: '정답! 우엉' }),
+    ).toBeInTheDocument();
+  });
+
+  it('#q-data의 id가 주소와 다르면 쓰지 않는다', async () => {
+    inlineData({
+      id: '11',
+      question: '다른 문제',
+      answer: 'x',
+      shareable: true,
+    });
+    renderAt('/q/13/');
+    expect(await screen.findByText('뽑으면 우는 식물은?')).toBeInTheDocument();
+    expect(screen.queryByText('다른 문제')).not.toBeInTheDocument();
   });
 });

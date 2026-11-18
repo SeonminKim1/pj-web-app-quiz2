@@ -38,6 +38,8 @@
 }
 .compare {
   margin: 0;
+  text-wrap: balance;
+  word-break: keep-all;
   font-size: 1.125rem;
   font-weight: 700;
 }
