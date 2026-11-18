@@ -21,8 +21,44 @@
   background: var(--color-surface);
 }
 
+.cell {
+  position: relative;
+}
+
+/* 다 푼 칸은 한 발 물러서게(민트 연하게), 지금 차례 칸이 가장 먼저 보이게. */
 .cell[data-completed='true'] {
-  background: var(--color-mint);
+  background: var(--color-mint-soft);
+  color: var(--color-ink-soft);
+}
+
+.cell[data-current='true'] {
+  background: var(--color-pink);
+}
+
+.cell[data-current='true'] .count {
+  color: var(--color-ink);
+}
+
+.cell[data-current='true'] .bar {
+  background: linear-gradient(
+    to right,
+    var(--color-ink) var(--progress),
+    var(--color-pink-soft) var(--progress)
+  );
+}
+
+.here {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 8px;
+  border: 2px solid var(--color-ink);
+  border-radius: 999px;
+  background: var(--color-surface);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .no {
@@ -38,6 +74,10 @@
 }
 
 .done {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-ink);
   font-size: 0.8125rem;
   font-weight: 700;
 }
