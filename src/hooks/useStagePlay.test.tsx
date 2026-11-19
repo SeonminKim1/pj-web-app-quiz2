@@ -78,6 +78,21 @@ describe('stagePlayReducer', () => {
     ).toBe('_NFP');
   });
 
+  it('4축 고르기: 맞힌 뒤·결과 화면에서는 축을 바꾸지 않는다(보여 주는 정답이 그대로)', () => {
+    const correct = stagePlayReducer(initialStagePlayState(), {
+      type: 'judged',
+      correct: true,
+      gold: 10,
+    });
+    expect(
+      stagePlayReducer(correct, { type: 'pickAxis', axis: 0, letter: 'E' }),
+    ).toBe(correct);
+    const result = stagePlayReducer(correct, { type: 'finish' });
+    expect(
+      stagePlayReducer(result, { type: 'pickAxis', axis: 0, letter: 'E' }),
+    ).toBe(result);
+  });
+
   it('answering이 아닐 때의 입력·채점은 무시한다', () => {
     const base = initialStagePlayState();
     const typed = stagePlayReducer(base, { type: 'input', value: '고생' });

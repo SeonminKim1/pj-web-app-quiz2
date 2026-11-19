@@ -43,6 +43,37 @@ function MbtiGuideSheet({ onClose }: { onClose: () => void }): ReactElement {
   // 시트 맨 위(제목)부터 읽히게 시트 자체에 포커스를 둔다(닫기 버튼은 맨 아래라 스크롤이 내려간다).
   const sheetRef = useRef<HTMLDivElement>(null);
   useEffect(() => sheetRef.current?.focus(), []);
+  // 열려 있는 동안 Esc는 어디서든 닫고, Tab은 시트 안에서만 돈다(aria-modal).
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent): void => {
+      const sheet = sheetRef.current;
+      if (!sheet) return;
+      if (event.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = [
+        ...sheet.querySelectorAll<HTMLElement>('button, a[href]'),
+      ];
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      const active = document.activeElement;
+      if (event.shiftKey && (active === first || active === sheet)) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        !event.shiftKey &&
+        (active === last || !sheet.contains(active))
+      ) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
   return (
     <div className={styles.backdrop} onClick={onClose}>
       <div
@@ -53,9 +84,6 @@ function MbtiGuideSheet({ onClose }: { onClose: () => void }): ReactElement {
         aria-modal="true"
         aria-labelledby="mbti-guide-title"
         onClick={(event) => event.stopPropagation()}
-        onKeyDown={(event) => {
-          if (event.key === 'Escape') onClose();
-        }}
       >
         <h2 id="mbti-guide-title" className={styles.title}>
           MBTI가 뭐예요?

@@ -46,6 +46,7 @@ afterEach(() => {
   vi.restoreAllMocks();
   window.history.replaceState(null, '', '/');
   document.getElementById('q-data')?.remove();
+  document.head.querySelector('link[rel="canonical"]')?.remove();
 });
 
 function inlineData(item: object) {
@@ -238,6 +239,27 @@ describe('/q/:id 문제 하나 모드', () => {
     renderAt('/q/13/');
     expect(await screen.findByText('뽑으면 우는 식물은?')).toBeInTheDocument();
     expect(screen.queryByText('다른 문제')).not.toBeInTheDocument();
+  });
+
+  // Value: protects=다른 주제의 같은 번호 문제 자료(/m/13/의 #q-data)를 /q/13/에서 쓰지 않는다; fails_when=readInlineItem이 canonical 주소의 주제를 보지 않으면(MBTI 문제를 넌센스로 풂); why_new=기존 테스트는 id만 다른 경우; seam=none; no_claim=실제 빌드 HTML(check-dist가 따로 봄)
+  it('#q-data가 다른 주제 페이지 것이면(canonical /m/) 쓰지 않는다', async () => {
+    // 전체 파일이 오기 전에는 #q-data만 쓰므로, 파일을 붙잡아 두고 본다.
+    vi.spyOn(repository, 'fetchTopicFile').mockReturnValue(
+      new Promise(() => {}),
+    );
+    const link = document.createElement('link');
+    link.rel = 'canonical';
+    link.href = 'https://example.test/m/13/';
+    document.head.append(link);
+    inlineData({
+      id: '13',
+      question: 'MBTI 문제',
+      answer: 'ISTJ',
+      shareable: true,
+    });
+    renderAt('/q/13/');
+    expect(await screen.findByRole('status')).toBeInTheDocument();
+    expect(screen.queryByText('MBTI 문제')).not.toBeInTheDocument();
   });
 
   it('주소로 바로 열면(s=1 없음) "친구가 낸 문제" 배너가 없다', async () => {

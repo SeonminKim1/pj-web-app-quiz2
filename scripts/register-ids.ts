@@ -52,15 +52,28 @@ if (problems.length > 0) {
   console.error('side effects: none');
   process.exitCode = 1;
 } else {
-  for (const { setup, next, added, unchanged } of plans) {
-    const list = added.length > 0 ? `${added.join(', ')} ` : '';
-    console.log(
-      `${setup.topic.label}: added: ${list}(${added.length}) / unchanged: ${unchanged}`,
-    );
-    if (!dryRun && added.length > 0) {
-      await writeRegistry(next, setup.registryFile);
-      console.log(`→ ${setup.registryFile}를 커밋하세요`);
+  // 검사는 모두 통과했다. 쓰다가 실패하면(디스크 등) 이미 쓴 등록부를 알려 주고 실패한다.
+  const written: string[] = [];
+  try {
+    for (const { setup, next, added, unchanged } of plans) {
+      const list = added.length > 0 ? `${added.join(', ')} ` : '';
+      console.log(
+        `${setup.topic.label}: added: ${list}(${added.length}) / unchanged: ${unchanged}`,
+      );
+      if (!dryRun && added.length > 0) {
+        await writeRegistry(next, setup.registryFile);
+        written.push(setup.registryFile);
+        console.log(`→ ${setup.registryFile}를 커밋하세요`);
+      }
     }
+  } catch (error) {
+    console.error(
+      `등록부를 쓰다 실패했어요: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    console.error(
+      `side effects: ${written.length > 0 ? `${written.join(', ')}는 이미 썼어요(다시 돌리면 나머지만 추가돼요)` : 'none'}`,
+    );
+    process.exitCode = 1;
   }
   if (dryRun) console.log('dry run: 파일을 쓰지 않았어요');
 }

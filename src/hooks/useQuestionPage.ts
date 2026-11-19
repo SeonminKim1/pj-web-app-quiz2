@@ -47,11 +47,22 @@ export type QuestionTarget =
  */
 function readInlineItem(
   id: string,
+  prefix: string,
   doc: Document | undefined = globalThis.document,
 ): QuizItem | undefined {
   try {
     const text = doc?.getElementById('q-data')?.textContent;
     if (!text) return undefined;
+    // 주제마다 id를 따로 매기므로(/q/12/와 /m/12/), 페이지의 정식 주소가 이 주제 것인지도 본다.
+    const canonical = doc?.querySelector<HTMLLinkElement>(
+      'link[rel="canonical"]',
+    )?.href;
+    if (
+      canonical &&
+      !new URL(canonical, 'http://x').pathname.startsWith(`/${prefix}/`)
+    ) {
+      return undefined;
+    }
     const item = JSON.parse(text) as Partial<QuizItem>;
     if (
       item.id !== id ||
@@ -154,7 +165,7 @@ export function useQuestionPage(prefix: string): {
     // key·fromShare는 이 화면에서 바뀌지 않는다. 착지는 analytics가 (이벤트, id)당 한 번만 센다.
   }, [key, parsed.fromShare]);
 
-  const [inline] = useState(() => readInlineItem(id));
+  const [inline] = useState(() => readInlineItem(id, prefix));
 
   const state = useMemo<LoadState<QuestionTarget>>(() => {
     if (loaded.status === 'ready') {
