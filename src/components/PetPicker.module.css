@@ -77,59 +77,6 @@
   word-break: keep-all;
 }
 
-/* 간식: 그림 · 설명 · 사기 버튼 한 줄. */
-.treat {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: var(--space-1) var(--space-3);
-  padding: var(--space-3);
-  border: var(--border);
-  border-radius: var(--radius-card);
-  background: var(--color-mint-soft);
-}
-
-.treatPet {
-  position: relative;
-}
-
-.munch {
-  display: block;
-  transform-origin: 50% 95%;
-  animation: munch 260ms ease-in-out 200ms 3;
-}
-
-.treatPet svg {
-  display: block;
-}
-
-.treatText {
-  min-width: 0;
-}
-
-.treatTitle {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 800;
-}
-
-.treat .desc {
-  margin: 0;
-}
-
-.treatButton {
-  composes: primary from '../styles/ui.module.css';
-  gap: 4px;
-  min-height: 44px;
-  padding: 0 var(--space-3);
-}
-
-@keyframes munch {
-  50% {
-    transform: scale(1.08, 0.9);
-  }
-}
-
 .done {
   composes: primary from '../styles/ui.module.css';
 }

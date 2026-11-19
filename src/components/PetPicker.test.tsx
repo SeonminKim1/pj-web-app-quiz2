@@ -56,26 +56,3 @@ it('첫 화면에서 방해꾼을 고르면 저장되고 버튼에 바로 보인
     screen.getByRole('button', { name: '방해꾼 바꾸기, 지금 고양이' }),
   ).toBeInTheDocument();
 });
-
-it('간식은 무료로 아무 때나 줄 수 있고, 줄 때마다 기뻐하며 한마디 한다', async () => {
-  const user = userEvent.setup();
-  render(
-    <ProgressProvider store={createProgressStore({ storage: null })}>
-      <SettingsProvider store={createSettingsStore({ storage: null })}>
-        <MemoryRouter initialEntries={['/']}>
-          <AppRoutes />
-        </MemoryRouter>
-      </SettingsProvider>
-    </ProgressProvider>,
-  );
-  await user.click(screen.getByRole('button', { name: /방해꾼 바꾸기/ }));
-  expect(screen.getByText('토끼가 좋아하는 당근')).toBeInTheDocument();
-  const give = screen.getByRole('button', { name: '주기' });
-  await user.click(give);
-  await user.click(give);
-  expect(give).toBeEnabled();
-  expect(screen.getByRole('status')).not.toHaveTextContent('좋아하는 당근');
-  expect(document.querySelector('svg[data-mood="happy"]')).not.toBeNull();
-  // 골드는 그대로.
-  expect(screen.getByLabelText('보유 골드 30')).toBeInTheDocument();
-});
