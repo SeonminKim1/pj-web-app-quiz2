@@ -57,4 +57,13 @@ describe('isSettings', () => {
     expect(isSettings({ version: 1 })).toBe(false);
     expect(isSettings(null)).toBe(false);
   });
+
+  // Value: protects=마지막 주제(lastTopic)가 문자열이면 받고, 문자열이 아니면 깨진 설정으로 본다; fails_when=lastTopic 검사가 빠지거나 뒤집혀 저장한 동물·소리 설정이 통째로 토끼로 돌아가면; why_new=lastTopic 필드는 새로 생김; seam=none; no_claim=모르는 주제 id 걸러내기(첫 화면이 함)
+  it('lastTopic은 없거나 문자열일 때만 true', () => {
+    expect(isSettings({ version: 1, pet: 'dog', lastTopic: 'mbti' })).toBe(
+      true,
+    );
+    expect(isSettings({ version: 1, pet: 'dog', lastTopic: 3 })).toBe(false);
+    expect(isSettings({ version: 1, pet: 'dog', lastTopic: null })).toBe(false);
+  });
 });

@@ -423,10 +423,48 @@ describe('리뷰 반영', () => {
         },
       },
     });
-    renderAt('/');
+    const user = renderAt('/');
     expect(
       await screen.findByRole('button', { name: /넌센스/ }),
     ).toHaveTextContent('12문제 중 12문제 풂');
+
+    // Value: protects=다 풀면 이어서 풀기 카드가 "다 풀었어요"·"다시 풀어 보기"이고 누르면 스테이지 목록으로; fails_when=다 푼 뒤 stageNo 없음 분기가 깨져 없는 스테이지로 가거나 문구가 틀리면; why_new=다 푼 상태의 첫 화면은 테스트가 없었음; seam=none; no_claim=칭호 문구
+    expect(screen.getByText('넌센스 다 풀었어요')).toBeInTheDocument();
+    expect(
+      screen.getByRole('progressbar', { name: '푼 문제' }),
+    ).toHaveAttribute('aria-valuenow', '12');
+    await user.click(screen.getByRole('button', { name: '다시 풀어 보기' }));
+    expect(
+      await screen.findByRole('button', {
+        name: /^스테이지 1, 10문제 중 10문제 풂, 완료/,
+      }),
+    ).toBeInTheDocument();
+  });
+
+  // Value: protects=⚙ 설정이 첫 화면 밖 모든 머리 줄(목록·풀이·문제 하나·개인정보)에 있다; fails_when=어느 화면 머리 줄에서 SettingsButton이 빠지면; why_new=⚙ 테스트는 첫 화면만 봄; seam=none; no_claim=360px 배치(design-review가 봄)
+  it.each([
+    ['스테이지 목록', '/topics/nonsense', /^스테이지 1/],
+    [
+      '스테이지 풀이',
+      '/topics/nonsense/stages/2',
+      '지구가 제일 힘들었던 시기는?',
+    ],
+    ['문제 하나', '/q/11/', '지구가 제일 힘들었던 시기는?'],
+    ['개인정보처리방침', '/privacy', '개인정보처리방침'],
+  ] as const)('%s 머리 줄에 ⚙ 설정이 있고 열린다', async (_, path, ready) => {
+    // 문제 하나 모드는 공유 대상(shareable) 문제만 연다.
+    vi.mocked(repository.fetchTopicFile).mockResolvedValue({
+      ...NONSENSE,
+      items: NONSENSE.items.map((item) => ({ ...item, shareable: true })),
+    });
+    const user = renderAt(path);
+    if (typeof ready === 'string') {
+      await screen.findAllByText(ready);
+    } else {
+      await screen.findByRole('button', { name: ready });
+    }
+    await user.click(screen.getByRole('button', { name: '설정' }));
+    expect(screen.getByRole('dialog', { name: '설정' })).toBeInTheDocument();
   });
 });
 
