@@ -120,6 +120,17 @@ async function waitAnswering() {
   );
 }
 
+// 머리 줄 진행 칸(문제마다 한 칸): 맞힌 칸과 지금 칸 표시.
+function navCells() {
+  const nav = screen.getByRole('group', { name: '문제 이동' });
+  const cells = [...nav.querySelectorAll('[class*="cell"]')];
+  return {
+    count: cells.length,
+    solved: cells.map((c) => c.hasAttribute('data-solved')),
+    current: cells.findIndex((c) => c.hasAttribute('data-current')),
+  };
+}
+
 describe('첫 화면', () => {
   it('골드 30, 넌센스에 들어갈 수 있다', async () => {
     const user = renderAt('/');
@@ -130,7 +141,7 @@ describe('첫 화면', () => {
 
     await user.click(nonsense);
     expect(
-      await screen.findByRole('button', { name: /^1단계/ }),
+      await screen.findByRole('button', { name: /^스테이지 1/ }),
     ).toBeInTheDocument();
   });
 
@@ -170,7 +181,9 @@ describe('스테이지 목록 → 풀이 → 결과', () => {
   it('맞히기·힌트·다음 후 결과, 목록에 진행률이 반영되고 저장된다', async () => {
     const user = renderAt('/topics/nonsense');
     await user.click(
-      await screen.findByRole('button', { name: /^2단계, 2문제 중 0문제/ }),
+      await screen.findByRole('button', {
+        name: /^스테이지 2, 2문제 중 0문제/,
+      }),
     );
 
     // 1번째: 고생대. 무료 힌트 → 5골드 힌트 → 맞힘(+5)
@@ -204,7 +217,9 @@ describe('스테이지 목록 → 풀이 → 결과', () => {
 
     await user.click(within(result).getByRole('button', { name: '목록으로' }));
     expect(
-      await screen.findByRole('button', { name: /^2단계, 2문제 중 1문제/ }),
+      await screen.findByRole('button', {
+        name: /^스테이지 2, 2문제 중 1문제/,
+      }),
     ).toBeInTheDocument();
     expect(store.load()).toMatchObject({
       gold: 30,
@@ -239,7 +254,14 @@ describe('스테이지 목록 → 풀이 → 결과', () => {
   it('맞히면 확인 자리가 "다음 ›"이 되고, 0.4초 뒤 Enter로도 다음 문제로 간다', async () => {
     const user = renderAt('/topics/nonsense/stages/2');
     await screen.findByText('지구가 제일 힘들었던 시기는?');
+    // Value: protects=이번에 맞힌 문제의 진행 칸이 바로 맞힘으로 바뀌고 다음 문제로 가도 남는다; fails_when=solvedMarks가 이번 판 earned를 보지 않거나 진행 칸에 solved를 넘기지 않으면; why_new=진행 칸은 FINDING-004에서 새로 생김(QuestionNav 단독 테스트는 연결을 못 본다); seam=none; no_claim=칸 색·크기(CSS)
+    expect(navCells()).toEqual({
+      count: 2,
+      solved: [false, false],
+      current: 0,
+    });
     await typeAnswer(user, '고생대');
+    expect(navCells().solved).toEqual([true, false]);
     // 맞힌 직후: 확인 연타로 넘어가지 않게 잠시 막혀 있고, 힌트 버튼은 숨는다.
     expect(screen.getByRole('button', { name: '다음 ›' })).toBeDisabled();
     expect(
@@ -256,6 +278,7 @@ describe('스테이지 목록 → 풀이 → 결과', () => {
     await user.keyboard('{Enter}');
     expect(screen.getByText('진짜 새는?')).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: '정답 입력' })).toHaveFocus();
+    expect(navCells()).toEqual({ count: 2, solved: [true, false], current: 1 });
   });
 
   it('상태 줄은 피드백만 읽어 준다(글자 수는 입력창 설명으로)', async () => {
@@ -288,7 +311,7 @@ describe('스테이지 목록 → 풀이 → 결과', () => {
       topics: { nonsense: { solved: ['11', '12'], hintsOpened: {} } },
     });
     const user = renderAt('/topics/nonsense/stages/2');
-    expect(await screen.findByText('2단계 · 1 / 2')).toBeInTheDocument();
+    expect(await screen.findByText('스테이지 2 · 1 / 2')).toBeInTheDocument();
     expect(screen.getByText('다시 풀기')).toBeInTheDocument();
     await typeAnswer(user, '고생대');
     expect(screen.getByText('정답! 고생대')).toBeInTheDocument();
@@ -341,13 +364,33 @@ describe('이전·다음 이동', () => {
       },
     });
     const user = renderAt('/topics/nonsense/stages/1');
-    expect(await screen.findByText('1단계 · 5 / 10')).toBeInTheDocument();
+    expect(await screen.findByText('스테이지 1 · 5 / 10')).toBeInTheDocument();
     expect(screen.getByText('문제 5')).toBeInTheDocument();
+    // Value: protects=들어오기 전에 푼 문제의 진행 칸이 처음부터 맞힘으로 보이고 머리 줄에 게임 이름이 있다; fails_when=solvedMarks가 solvedBefore를 빼먹거나 제목에서 주제 이름이 빠지면; why_new=진행 칸·게임 이름은 FINDING-004에서 새로 생김; seam=none; no_claim=칸 색(CSS)
+    expect(navCells()).toEqual({
+      count: 10,
+      solved: [
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+      ],
+      current: 4,
+    });
+    expect(document.querySelector('header')).toHaveTextContent(
+      '넌센스스테이지 1',
+    );
     const input = () => screen.getByRole('textbox', { name: '정답 입력' });
     await user.type(input(), '쓰다만');
 
     await user.click(screen.getByRole('button', { name: '이전 문제' }));
-    expect(screen.getByText('1단계 · 4 / 10')).toBeInTheDocument();
+    expect(screen.getByText('스테이지 1 · 4 / 10')).toBeInTheDocument();
     expect(screen.getByText('정답! 정답4')).toBeInTheDocument();
     expect(input()).toHaveValue('정답4');
     // 옮겨 온 맞힌 문제는 확인 자리의 "다음 ›"을 바로 누를 수 있다.
@@ -359,12 +402,12 @@ describe('이전·다음 이동', () => {
 
   it('1번에서는 이전이 막히고, 10번에서는 결과 보기', async () => {
     const user = renderAt('/topics/nonsense/stages/1');
-    await screen.findByText('1단계 · 1 / 10');
+    await screen.findByText('스테이지 1 · 1 / 10');
     expect(screen.getByRole('button', { name: '이전 문제' })).toBeDisabled();
     for (let i = 0; i < 9; i += 1) {
       await user.click(screen.getByRole('button', { name: '다음 문제' }));
     }
-    expect(screen.getByText('1단계 · 10 / 10')).toBeInTheDocument();
+    expect(screen.getByText('스테이지 1 · 10 / 10')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: '결과 보기' }));
     expect(
       screen.getByRole('region', { name: '스테이지 결과' }),
@@ -381,7 +424,7 @@ describe('주소 에러', () => {
       within(alert).getByRole('button', { name: '스테이지 목록' }),
     );
     expect(
-      await screen.findByRole('button', { name: /^1단계/ }),
+      await screen.findByRole('button', { name: /^스테이지 1/ }),
     ).toBeInTheDocument();
   });
 
@@ -397,14 +440,14 @@ describe('주소 에러', () => {
 describe('리뷰 반영', () => {
   it('목록에서 들어간 풀이 화면의 "← 목록"은 뒤로 가기(기록이 쌓이지 않음)', async () => {
     const user = renderAt('/topics/nonsense');
-    await screen.findByRole('button', { name: /^2단계/ });
+    await screen.findByRole('button', { name: /^스테이지 2/ });
     const listKey = screen.getByTestId('location-key').textContent;
 
-    await user.click(screen.getByRole('button', { name: /^2단계/ }));
+    await user.click(screen.getByRole('button', { name: /^스테이지 2/ }));
     await screen.findByText('지구가 제일 힘들었던 시기는?');
     await user.click(screen.getByRole('button', { name: '스테이지 목록' }));
 
-    await screen.findByRole('button', { name: /^2단계/ });
+    await screen.findByRole('button', { name: /^스테이지 2/ });
     expect(screen.getByTestId('location-key').textContent).toBe(listKey);
   });
 
@@ -419,10 +462,48 @@ describe('리뷰 반영', () => {
         },
       },
     });
-    renderAt('/');
+    const user = renderAt('/');
     expect(
       await screen.findByRole('button', { name: /넌센스/ }),
     ).toHaveTextContent('12문제 중 12문제 풂');
+
+    // Value: protects=다 풀면 이어서 풀기 카드가 "다 풀었어요"·"다시 풀어 보기"이고 누르면 스테이지 목록으로; fails_when=다 푼 뒤 stageNo 없음 분기가 깨져 없는 스테이지로 가거나 문구가 틀리면; why_new=다 푼 상태의 첫 화면은 테스트가 없었음; seam=none; no_claim=칭호 문구
+    expect(screen.getByText('넌센스 다 풀었어요')).toBeInTheDocument();
+    expect(
+      screen.getByRole('progressbar', { name: '푼 문제' }),
+    ).toHaveAttribute('aria-valuenow', '12');
+    await user.click(screen.getByRole('button', { name: '다시 풀어 보기' }));
+    expect(
+      await screen.findByRole('button', {
+        name: /^스테이지 1, 10문제 중 10문제 풂, 완료/,
+      }),
+    ).toBeInTheDocument();
+  });
+
+  // Value: protects=⚙ 설정이 첫 화면 밖 모든 머리 줄(목록·풀이·문제 하나·개인정보)에 있다; fails_when=어느 화면 머리 줄에서 SettingsButton이 빠지면; why_new=⚙ 테스트는 첫 화면만 봄; seam=none; no_claim=360px 배치(design-review가 봄)
+  it.each([
+    ['스테이지 목록', '/topics/nonsense', /^스테이지 1/],
+    [
+      '스테이지 풀이',
+      '/topics/nonsense/stages/2',
+      '지구가 제일 힘들었던 시기는?',
+    ],
+    ['문제 하나', '/q/11/', '지구가 제일 힘들었던 시기는?'],
+    ['개인정보처리방침', '/privacy', '개인정보처리방침'],
+  ] as const)('%s 머리 줄에 ⚙ 설정이 있고 열린다', async (_, path, ready) => {
+    // 문제 하나 모드는 공유 대상(shareable) 문제만 연다.
+    vi.mocked(repository.fetchTopicFile).mockResolvedValue({
+      ...NONSENSE,
+      items: NONSENSE.items.map((item) => ({ ...item, shareable: true })),
+    });
+    const user = renderAt(path);
+    if (typeof ready === 'string') {
+      await screen.findAllByText(ready);
+    } else {
+      await screen.findByRole('button', { name: ready });
+    }
+    await user.click(screen.getByRole('button', { name: '설정' }));
+    expect(screen.getByRole('dialog', { name: '설정' })).toBeInTheDocument();
   });
 });
 

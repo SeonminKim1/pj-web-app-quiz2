@@ -13,6 +13,7 @@ import { HintPanel } from '../components/HintPanel.tsx';
 import { MbtiAxesPicker } from '../components/MbtiAxesPicker.tsx';
 import { PestLayer } from '../components/PestLayer.tsx';
 import { PetPortrait } from '../components/PetPortrait.tsx';
+import { SettingsButton } from '../components/SettingsButton.tsx';
 import { ShareButton } from '../components/ShareButton.tsx';
 import { ManualCopy, ShareToast } from '../components/ShareFeedback.tsx';
 import { Playground } from '../components/Playground.tsx';
@@ -235,7 +236,10 @@ function Session({
         >
           ←
         </button>
-        <GoldBadge gold={progress.gold} compact />
+        <span className={pageStyles.headerEnd}>
+          <GoldBadge gold={progress.gold} compact />
+          <SettingsButton />
+        </span>
       </header>
       {finished ? (
         <section className={styles.result} aria-live="polite">
@@ -332,6 +336,7 @@ function Session({
             <p ref={questionRef} className={pageStyles.question}>
               {item.question}
             </p>
+            <ShareButton onClick={sharePre} />
           </div>
           <HintPanel
             key={item.id}
@@ -345,7 +350,6 @@ function Session({
               play.openNextHint();
               pest.hint();
             }}
-            leading={<ShareButton onClick={sharePre} />}
           />
           {axesMode ? (
             <MbtiAxesPicker

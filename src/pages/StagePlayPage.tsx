@@ -1,8 +1,10 @@
+import { SettingsButton } from '../components/SettingsButton.tsx';
 import { playCue } from '../lib/sound.ts';
 import { TitleToast } from '../components/TitleToast.tsx';
 import { useTitleUp } from '../hooks/useTitleUp.ts';
 import { usePhaseSound } from '../hooks/usePhaseSound.ts';
-import type { ReactElement } from 'react';
+import { useEffect, type ReactElement } from 'react';
+import { useSettings } from '../hooks/useSettings.ts';
 import { AnswerInput } from '../components/AnswerInput.tsx';
 import { DataErrorView } from '../components/DataErrorView.tsx';
 import { HintPanel } from '../components/HintPanel.tsx';
@@ -100,6 +102,12 @@ function StageSession({
   } = useStageSession(target);
   const { state, item, hints } = play;
   usePhaseSound({ phase: state.phase, fresh: state.fresh });
+  // 첫 화면 "이어서 풀기"가 이 주제로 오도록 기억한다.
+  const { setLastTopic } = useSettings();
+  useEffect(
+    () => setLastTopic(target.topic.id),
+    [setLastTopic, target.topic.id],
+  );
   const newTitle = useTitleUp({
     topicId: target.topic.id,
     total: target.itemCount,
@@ -159,16 +167,27 @@ function StageSession({
         >
           ←
         </button>
-        {/* 이전·다음은 진행 표시 양옆 화살표(마지막의 ›는 결과 보기). */}
-        <QuestionNav
-          label={`${target.stageLabel} · ${state.index + 1} / ${play.total}`}
-          canPrev={play.canPrev}
-          next={play.isLast ? 'result' : 'next'}
-          onPrev={play.prev}
-          onNext={play.next}
-        />
-        <GoldBadge gold={gold} compact />
+        {/* 어느 게임의 어느 판인지: 작은 게임 이름 위, 판 이름 아래. */}
+        <span className={styles.playTitle} aria-hidden="true">
+          <span className={styles.playTopic}>{target.topic.label}</span>
+          <span className={styles.playStage}>{target.stageLabel}</span>
+        </span>
+        <span className={styles.headerEnd}>
+          <GoldBadge gold={gold} compact />
+          <SettingsButton />
+        </span>
       </header>
+      {/* 이전·다음은 머리 줄 아래 한 줄(마지막의 ›는 결과 보기). 360px에서 머리 줄이 넘치지 않게. */}
+      <QuestionNav
+        label={target.stageLabel}
+        current={state.index + 1}
+        total={play.total}
+        solved={play.solvedMarks}
+        canPrev={play.canPrev}
+        next={play.isLast ? 'result' : 'next'}
+        onPrev={play.prev}
+        onNext={play.next}
+      />
       <PestLayer
         areaRef={pestAreaRef}
         behavior={pest.behavior}
@@ -198,6 +217,7 @@ function StageSession({
           <p ref={questionRef} className={styles.question}>
             {item?.question}
           </p>
+          {canShare && <ShareButton onClick={shareCurrent} />}
         </div>
         {shareView.manualText && (
           <ManualCopy
@@ -217,9 +237,6 @@ function StageSession({
             play.openNextHint();
             pest.hint();
           }}
-          leading={
-            canShare ? <ShareButton onClick={shareCurrent} /> : undefined
-          }
         />
         {axesMode ? (
           <MbtiAxesPicker

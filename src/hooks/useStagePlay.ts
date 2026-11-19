@@ -159,6 +159,8 @@ export type StagePlay = {
   item: QuizItem | undefined;
   /** 스테이지 문제 수. */
   total: number;
+  /** 자리마다 맞혔는지(들어오기 전이든 이번이든): 머리 줄 진행 칸. */
+  solvedMarks: boolean[];
   /** 이번에 풀 수 있던 문제 수(들어올 때 못 푼 문제 수, 다시 풀기면 전체). */
   playable: number;
   /** 지금 문제를 맞혀 얻은 골드(이번에 맞힌 경우만, 아니면 0). */
@@ -339,6 +341,9 @@ export function useStagePlay({
     state,
     item,
     total: items.length,
+    solvedMarks: items.map(
+      (it, i) => solvedBefore.has(it.id) || state.earned[i] !== undefined,
+    ),
     playable: items.filter((it) => !solvedBefore.has(it.id)).length,
     lastGold: state.earned[state.index] ?? 0,
     pestPhase:

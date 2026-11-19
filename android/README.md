@@ -49,7 +49,7 @@ bubblewrap build --signingKeyPath ~/keystores/quiz-noriteo.keystore   # → app-
 
 ### 3. Play Console에 앱 만들기
 
-1. 앱 만들기: 이름 `퀴즈 놀이터`, 기본 언어 한국어, 게임, 무료.
+1. 앱 만들기: 이름 `게임 놀이터`, 기본 언어 한국어, 게임, 무료.
 2. 테스트 → 비공개 테스트(또는 내부 테스트)에 `app-release-bundle.aab`를 올립니다. Play 앱 서명은 기본값(사용)으로 둡니다.
 3. 스토어 등록정보: `store/listing.md`의 문구와 `store/`의 이미지를 넣습니다.
 4. 앱 콘텐츠: 개인정보처리방침 주소, 광고 없음, 콘텐츠 등급 설문, 타깃층, 데이터 보안(`store/listing.md` 참고).

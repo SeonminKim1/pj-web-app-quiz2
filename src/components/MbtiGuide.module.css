@@ -170,6 +170,7 @@
   }
 }
 
-.sheet:focus {
+/* 열 때 시트 자체에 포커스를 둔다. 마우스·터치로 열면 테두리를 숨기고, 키보드로 열면 보인다. */
+.sheet:focus:not(:focus-visible) {
   outline: none;
 }

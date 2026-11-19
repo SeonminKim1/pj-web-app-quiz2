@@ -1,8 +1,8 @@
 {
   "packageId": "com.quiznoriteo.app",
   "host": "quiz-noriteo.netlify.app",
-  "name": "퀴즈 놀이터",
-  "launcherName": "퀴즈 놀이터",
+  "name": "게임 놀이터",
+  "launcherName": "게임 놀이터",
   "display": "standalone",
   "orientation": "portrait",
   "themeColor": "#FFF6EC",

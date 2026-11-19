@@ -1,4 +1,10 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -7,7 +13,10 @@ import {
   createProgressStore,
   type ProgressStore,
 } from '../data/progressRepository.ts';
-import { createSettingsStore } from '../data/settingsRepository.ts';
+import {
+  createSettingsStore,
+  type SettingsStore,
+} from '../data/settingsRepository.ts';
 import * as repository from '../data/quizRepository.ts';
 import type { QuizManifest, QuizTopicFile } from '../types/quiz.ts';
 
@@ -74,11 +83,14 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function renderAt(path: string) {
+function renderAt(
+  path: string,
+  settings: SettingsStore = createSettingsStore({ storage: null }),
+) {
   const user = userEvent.setup();
   render(
     <ProgressProvider store={store}>
-      <SettingsProvider store={createSettingsStore({ storage: null })}>
+      <SettingsProvider store={settings}>
         <MemoryRouter initialEntries={[path]}>
           <AppRoutes />
         </MemoryRouter>
@@ -114,6 +126,9 @@ describe('MBTI 카테고리 목록', () => {
     expect(dialog).toHaveTextContent('외향');
     await user.click(within(dialog).getByRole('button', { name: '알겠어요' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // Value: protects=MBTI 카테고리 목록(/topics/mbti) 머리 줄에도 ⚙ 설정이 있고 열린다; fails_when=MBTI 카테고리 목록 화면만 SettingsButton을 빠뜨리면; why_new=⚙ 머리 줄 테스트는 넌센스 화면만 봄; seam=none; no_claim=360px 배치
+    await user.click(screen.getByRole('button', { name: '설정' }));
+    expect(screen.getByRole('dialog', { name: '설정' })).toBeInTheDocument();
   });
 
   // Value: protects=설명 시트(aria-modal)에서 Tab이 시트 밖으로 나가지 않고, 밖에 포커스가 있어도 Esc로 닫힌다; fails_when=시트 전용 onKeyDown만 남거나 Tab 가두기가 빠지면; why_new=기존 테스트는 버튼으로 닫기만 봄; seam=none; no_claim=실제 스크린리더 동작
@@ -184,11 +199,22 @@ describe('MBTI 풀이(카테고리 = 스테이지)', () => {
     expect(screen.queryByText(/4개 중/)).not.toBeInTheDocument();
     expect(screen.getByText('축마다 한 글자씩 골라요')).toBeInTheDocument();
 
+    // Value: protects=MBTI 카테고리 풀이의 진행 칸이 16유형 한 칸씩이고 맞히면 그 칸이 맞힘으로 바뀐다; fails_when=진행 칸 수가 카테고리 문제 수(16)와 어긋나거나 맞힌 칸이 표시되지 않으면; why_new=진행 칸은 FINDING-004에서 새로 생김; seam=none; no_claim=칸 색(CSS)
+    const nav = screen.getByRole('group', { name: '문제 이동' });
+    const cells = () => [...nav.querySelectorAll('[class*="cell"]')];
+    expect(cells()).toHaveLength(16);
+    expect(cells().filter((c) => c.hasAttribute('data-solved'))).toHaveLength(
+      0,
+    );
     await pick(user, 'ISTJ');
     await user.click(screen.getByRole('button', { name: '확인' }));
     expect(
       await screen.findByText('정답! ISTJ · 골드 +10'),
     ).toBeInTheDocument();
+    expect(cells()[0]).toHaveAttribute('data-solved');
+    expect(cells().filter((c) => c.hasAttribute('data-solved'))).toHaveLength(
+      1,
+    );
     expect(screen.getByLabelText('보유 골드 40')).toBeInTheDocument();
     expect(store.load().topics.mbti?.solved).toEqual(['1']);
   });
@@ -283,6 +309,36 @@ describe('MBTI 풀이(카테고리 = 스테이지)', () => {
     expect(
       await screen.findByRole('button', { name: /^연애, 16문제 중/ }),
     ).toBeInTheDocument();
+  });
+
+  // Value: protects=MBTI를 풀다 첫 화면에 오면 "이어서 풀기"가 MBTI의 못 푼 카테고리로 간다; fails_when=첫 화면이 넌센스만 이어 주거나 마지막 주제를 기억하지 않으면; why_new=사용자가 겪은 버그(MBTI 이어서 풀기 안 됨); seam=none; no_claim=실제 localStorage
+  it('MBTI를 풀다 첫 화면에 오면 이어서 풀기가 MBTI 다음 카테고리로 간다', async () => {
+    const settings = createSettingsStore({ storage: null });
+    // 일상 16문제를 다 풀어 둔다.
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {
+        mbti: {
+          solved: Array.from({ length: 16 }, (_, i) => String(i + 1)),
+          hintsOpened: {},
+        },
+      },
+    });
+    renderAt('/topics/mbti/categories/2', settings);
+    await screen.findByText('연애 상황 1');
+    cleanup();
+
+    const user = renderAt('/', settings);
+    const go = await screen.findByRole('button', {
+      name: '이어서 풀기 · 연애',
+    });
+    expect(screen.getByText('MBTI · 연애 차례예요')).toBeInTheDocument();
+    // Value: protects=MBTI(titles: false)를 이어서 풀 때 첫 화면 카드에 넌센스 칭호가 나오지 않는다; fails_when=HomePage가 next?.titles 확인 없이 아무 주제에나 titleFor를 그리면(16문제면 말장난 꿈나무); why_new=칭호 숨김을 보는 테스트가 없음; seam=none; no_claim=풀이 중 칭호 알림(MBTI 칭호 테스트가 봄)
+    expect(screen.queryByText('말장난 꿈나무')).not.toBeInTheDocument();
+    expect(screen.queryByText(/까지 \d+문제$/)).not.toBeInTheDocument();
+    await user.click(go);
+    expect(await screen.findByText(/연애 · 1 \/ 16/)).toBeInTheDocument();
   });
 
   it('없는 카테고리 번호는 "없는 카테고리예요"', async () => {

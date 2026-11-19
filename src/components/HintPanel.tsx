@@ -1,4 +1,4 @@
-import { useState, type ReactElement, type ReactNode } from 'react';
+import { useState, type ReactElement } from 'react';
 import { HINT_PRICE, type OpenableHint } from '../lib/progress.ts';
 import styles from './HintPanel.module.css';
 
@@ -13,8 +13,6 @@ type HintPanelProps = {
   /** 유료 힌트인데 골드가 모자람("골드 부족"). */
   goldShort: boolean;
   onOpen: () => void;
-  /** 힌트 카드와 같은 줄 왼쪽에 둘 것(친구한테 내기 버튼). */
-  leading?: ReactNode;
 };
 
 /**
@@ -29,7 +27,6 @@ export function HintPanel({
   canOpen,
   goldShort,
   onOpen,
-  leading,
 }: HintPanelProps): ReactElement {
   // 방금 연 카드 번호(그 카드·문장만 뒤집기 연출).
   const [fresh, setFresh] = useState(-1);
@@ -43,7 +40,6 @@ export function HintPanel({
   return (
     <section aria-label="힌트" className={styles.panel}>
       <div className={styles.row}>
-        {leading}
         {next && (
           <div className={styles.deck} data-pest-spot="hint">
             {Array.from({ length: Math.max(total, nextIndex + 1) }, (_, i) => {
