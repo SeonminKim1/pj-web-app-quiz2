@@ -33,14 +33,14 @@ npm run preview      # http://localhost:4173/q/<id>/
 
 `build`는 아래 단계를 차례로 돌립니다. 단계 하나만 다시 돌릴 수도 있습니다.
 
-| 단계          | 하는 일                                                                    |
-| ------------- | -------------------------------------------------------------------------- |
-| `build:data`  | `data/nonsense.json` 검사, 공유 카드·등록부 검사, `public/data/quiz/` 생성 |
-| `build:fonts` | Pretendard 글꼴을 `public/fonts/`로 복사                                   |
-| `build:app`   | `tsc -b && vite build` → `dist/`                                           |
-| `build:og`    | 주제별 등록부의 id마다 `dist/<q·m>/<id>/index.html`과 카드 PNG             |
-| `build:sw`    | `dist/sw.js`(오프라인용 서비스 워커) 생성                                  |
-| `check:dist`  | 빌드 결과 검사(파일, OG 주소, `#q-data`, 서비스 워커·manifest 아이콘)      |
+| 단계          | 하는 일                                                                        |
+| ------------- | ------------------------------------------------------------------------------ |
+| `build:data`  | 주제 파일(`data/*.json`) 검사, 공유 카드·등록부 검사, `public/data/quiz/` 생성 |
+| `build:fonts` | Pretendard 글꼴을 `public/fonts/`로 복사                                       |
+| `build:app`   | `tsc -b && vite build` → `dist/`                                               |
+| `build:og`    | 주제별 등록부의 id마다 `dist/<q·m>/<id>/index.html`과 카드 PNG                 |
+| `build:sw`    | `dist/sw.js`(오프라인용 서비스 워커) 생성                                      |
+| `check:dist`  | 빌드 결과 검사(파일, OG 주소, `#q-data`, 서비스 워커·manifest 아이콘)          |
 
 `SITE_ORIGIN`은 환경 변수가 먼저이고, 없으면 `site.config.json`을 읽습니다. 둘 다 비었으면 `build:og`가 `OG_NO_ORIGIN`으로 실패합니다. 실패 메시지의 코드는 [docs/errors.md](docs/errors.md)에서 찾으세요.
 
