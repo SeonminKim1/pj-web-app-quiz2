@@ -255,7 +255,12 @@ export function usePestMotion({
       }
       if (spot === 'below') {
         const b = below();
-        if (!b) return undefined;
+        // 아래에 몸이 들어갈 자리가 없으면(작은 화면, 힌트 목록이 열림) 놀이터 앞쪽 가운데로 나와 놀린다.
+        if (!b) {
+          return m.roam
+            ? { x: (m.roam.left + m.roam.right) / 2, y: m.roam.bottom }
+            : undefined;
+        }
         // 입력칸 바로 아래에서 놀린다.
         return {
           x: b.left + randomRef.current() * (b.right - b.left),

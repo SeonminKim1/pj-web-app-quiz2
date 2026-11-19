@@ -424,7 +424,7 @@ describe('usePestMotion', () => {
 
   describe('반응해서 달려가기·산책', () => {
     // 놀이터(맨 위 88px), 내용은 영역 위에서 300px까지, 힌트 카드 더미는 오른쪽 (240~360, 200~254).
-    function setupScene(random: () => number = () => 0) {
+    function setupScene(random: () => number = () => 0, contentBottom = 300) {
       const area = element(AREA);
       const playground = element({
         left: AREA.left,
@@ -436,7 +436,7 @@ describe('usePestMotion', () => {
         left: AREA.left,
         top: AREA.top + 100,
         width: AREA.width,
-        height: 200,
+        height: contentBottom - 100,
       });
       const deck = element({
         left: AREA.left + 240,
@@ -486,6 +486,15 @@ describe('usePestMotion', () => {
       rerender({ pest: fakePest({ visit: { id: 1, spot: 'below' } }) });
       act(() => vi.advanceTimersByTime(800));
       expect(last().y - last().size).toBeGreaterThan(300);
+    });
+
+    it('아래에 자리가 없으면 틀렸을 때 놀이터 앞쪽 가운데로 나온다', () => {
+      // 내용이 영역 거의 끝(580px)까지 차 있다. 난수 0.99: 처음 자리는 놀이터 오른쪽.
+      const { rerender, last } = setupScene(() => 0.99, 580);
+      rerender({ pest: fakePest({ visit: { id: 1, spot: 'below' } }) });
+      act(() => vi.advanceTimersByTime(800));
+      expect(last().x).toBeCloseTo((B.left + B.right) / 2);
+      expect(last().y).toBeLessThanOrEqual(88);
     });
 
     it('맞히면 놀이터 오른쪽 위(골드 쪽)로 간다', () => {
