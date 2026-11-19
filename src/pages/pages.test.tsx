@@ -224,6 +224,8 @@ describe('스테이지 목록 → 풀이 → 결과', () => {
     expect(screen.getByRole('textbox', { name: '정답 입력' })).toHaveValue(
       '고대생',
     );
+    // 주관식은 흔들리는 동안만 "틀렸어요"(4축 고르기처럼 남기지 않는다).
+    expect(screen.queryByText('틀렸어요')).not.toBeInTheDocument();
 
     await user.clear(screen.getByRole('textbox', { name: '정답 입력' }));
     await user.type(

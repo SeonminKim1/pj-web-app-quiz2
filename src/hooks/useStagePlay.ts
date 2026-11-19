@@ -43,7 +43,7 @@ export type StagePlayState = {
   earned: Record<number, number>;
   /** 방금 채점해서 correct가 됐는지(이동으로 맞힌 문제를 연 경우는 false). */
   fresh: boolean;
-  /** 지금 문제에서 마지막으로 틀린 답(오답 문구를 고른 값을 바꾸기 전까지 남긴다). */
+  /** 지금 문제에서 마지막으로 틀린(채점한) 답. 지금 낼 답이 이것과 같을 때만 오답 문구를 남긴다(축을 바꾸거나 힌트로 축이 고정되면 사라짐). */
   missedInput?: string;
   /** 이번 판에서 맞힌 문제 수와 얻은 골드(결과 화면). */
   correctCount: number;
@@ -54,7 +54,8 @@ export type StagePlayAction =
   | { type: 'input'; value: string }
   /** 4축 고르기: 지금 입력에서 축 하나를 고른다(연달아 눌러도 앞 선택이 남게 reducer가 합친다). */
   | { type: 'pickAxis'; axis: number; letter: string }
-  | { type: 'judged'; correct: boolean; gold: number }
+  /** submitted: 실제로 채점한 답(4축 고르기는 공개된 축을 덮은 값). 오답 문구를 남길지 비교하는 데 쓴다. */
+  | { type: 'judged'; correct: boolean; gold: number; submitted?: string }
   | { type: 'clear' }
   /** 다른 문제로. solvedAnswer가 있으면 이미 맞힌 문제(정답을 보여 준다). */
   | { type: 'move'; to: number; solvedAnswer: string | undefined }
@@ -107,7 +108,11 @@ export function stagePlayReducer(
             correctCount: state.correctCount + 1,
             goldTotal: state.goldTotal + action.gold,
           }
-        : { ...state, phase: 'wrong', missedInput: state.input };
+        : {
+            ...state,
+            phase: 'wrong',
+            missedInput: action.submitted ?? state.input,
+          };
     case 'clear':
       // 오답 흔들림이 끝나면 다시 쓸 수 있게(쓴 답은 남긴다).
       if (state.phase !== 'wrong') return state;
@@ -327,7 +332,7 @@ export function useStagePlay({
     axesMode &&
     item &&
     (state.phase === 'wrong' ||
-      (state.phase === 'answering' && state.missedInput === state.input))
+      (state.phase === 'answering' && state.missedInput === answerInput))
       ? matchedAxisCount({ answer: item.answer, input: answerInput })
       : undefined;
   return {
@@ -365,7 +370,12 @@ export function useStagePlay({
         const gold = recordCorrect({ topicId: topic.id, itemId: item.id });
         dispatch({ type: 'judged', correct: true, gold });
       } else {
-        dispatch({ type: 'judged', correct: false, gold: 0 });
+        dispatch({
+          type: 'judged',
+          correct: false,
+          gold: 0,
+          submitted: answerInput,
+        });
       }
     },
     openNextHint: () => {
