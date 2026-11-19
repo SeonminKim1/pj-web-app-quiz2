@@ -8,15 +8,15 @@
 
 ## 이 폴더
 
-| 파일                              | 내용                                                 | 커밋  |
-| --------------------------------- | ---------------------------------------------------- | ----- |
-| `twa-manifest.json`               | Bubblewrap 설정(패키지 이름, 주소, 색, 아이콘, 버전) | 함    |
-| `store/listing.md`                | 스토어 등록 문구, 데이터 보안 답변                   | 함    |
-| `store/play-icon-512.png`         | 스토어 아이콘(`npx tsx scripts/app-icon.ts`가 만듦)  | 함    |
-| `store/feature-graphic.png`       | 그래픽 이미지 1024×500                               | 함    |
-| `store/screenshots/`              | 휴대폰 스크린샷 1080×1920                            | 함    |
-| `android.keystore`                | **업로드 서명 키. 잃어버리지 않게 따로 보관**        | 안 함 |
-| 그 밖(`app/`, `*.aab`, gradle 등) | Bubblewrap이 만드는 생성물                           | 안 함 |
+| 파일                              | 내용                                                                  | 커밋  |
+| --------------------------------- | --------------------------------------------------------------------- | ----- |
+| `twa-manifest.json`               | Bubblewrap 설정(패키지 이름, 주소, 색, 아이콘, 버전)                  | 함    |
+| `store/listing.md`                | 스토어 등록 문구, 데이터 보안 답변                                    | 함    |
+| `store/play-icon-512.png`         | 스토어 아이콘(`npx tsx scripts/app-icon.ts`가 만듦)                   | 함    |
+| `store/feature-graphic.png`       | 그래픽 이미지 1024×500                                                | 함    |
+| `store/screenshots/`              | 휴대폰 스크린샷 1080×1920                                             | 함    |
+| (없음)                            | 업로드 서명 키는 저장소 밖 `~/keystores/quiz-noriteo.keystore`에 둔다 | 안 함 |
+| 그 밖(`app/`, `*.aab`, gradle 등) | Bubblewrap이 만드는 생성물                                            | 안 함 |
 
 ## 처음 올리기
 
@@ -29,19 +29,19 @@
 ### 1. 서명 키 만들기(한 번)
 
 ```sh
-cd android
-keytool -genkeypair -v -keystore android.keystore -alias android \
+mkdir -p ~/keystores && chmod 700 ~/keystores
+keytool -genkeypair -v -keystore ~/keystores/quiz-noriteo.keystore -alias android \
   -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-비밀번호와 `android.keystore` 파일은 비밀번호 관리자 등에 백업합니다. 이 키는 "업로드 키"이고, 실제 배포 서명은 Google Play가 따로 관리합니다(Play 앱 서명). 업로드 키를 잃어버리면 Play Console에서 재설정을 요청해야 합니다.
+키는 저장소 밖에 둡니다. 비밀번호와 키 파일은 비밀번호 관리자 등에 백업합니다. 이 키는 "업로드 키"이고, 실제 배포 서명은 Google Play가 따로 관리합니다(Play 앱 서명). 업로드 키를 잃어버리면 Play Console에서 재설정을 요청해야 합니다.
 
 ### 2. 앱 묶음(AAB) 만들기
 
 ```sh
 cd android
 bubblewrap update   # twa-manifest.json으로 안드로이드 프로젝트를 (다시) 만든다
-bubblewrap build    # → app-release-bundle.aab (스토어용), app-release-signed.apk (기기 테스트용)
+bubblewrap build --signingKeyPath ~/keystores/quiz-noriteo.keystore   # → app-release-bundle.aab (스토어용), app-release-signed.apk (기기 테스트용)
 ```
 
 폰을 USB로 연결했다면 `bubblewrap install`로 APK를 바로 깔아 볼 수 있습니다.
