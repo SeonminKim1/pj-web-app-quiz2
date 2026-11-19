@@ -10,6 +10,7 @@ import {
   fleeTarget,
   isInside,
   playgroundBounds,
+  spaceBelow,
   isDragStart,
   nudge,
   pickRoamTarget,
@@ -205,5 +206,25 @@ describe('depthScale', () => {
     expect(depthScale({ y: 300, area: { width: 0, height: 0 } })).toBe(
       PEST_SIZE.near,
     );
+  });
+});
+
+describe('spaceBelow', () => {
+  it('내용 아래가 넉넉하면 몸이 내용과 겹치지 않는 높이부터 영역 아래까지', () => {
+    const b = spaceBelow({ area: AREA, floor: 300 })!;
+    expect(b.bottom).toBe(B.bottom);
+    expect(b.left).toBe(B.left);
+    expect(b.right).toBe(B.right);
+    // 가장 높은 발밑에서도 몸 위쪽(크기 + 깡충)이 내용 아랫변 아래에 있다.
+    expect(
+      b.top - depthScale({ y: b.top, area: AREA }) - MAX_GAIT_LIFT,
+    ).toBeGreaterThanOrEqual(300);
+  });
+
+  it('몸이 들어갈 만큼 비어 있지 않으면 없다', () => {
+    expect(spaceBelow({ area: AREA, floor: 560 })).toBeUndefined();
+    expect(
+      spaceBelow({ area: { width: 360, height: 0 }, floor: 0 }),
+    ).toBeUndefined();
   });
 });

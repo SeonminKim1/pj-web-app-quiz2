@@ -6,6 +6,15 @@ import { randomIntBetween } from './random.ts';
 export type PestBehavior =
   'roaming' | 'covering' | 'fleeing' | 'dragged' | 'paused';
 
+/**
+ * 반응해서 달려갈 곳: 힌트 카드 옆(힌트를 열면), 골드 쪽(맞히면 동전을 쫓아),
+ * 입력칸 아래 빈 곳(틀리면 놀리러).
+ */
+export type PestSpot = 'hint' | 'gold' | 'below';
+
+/** 돌아다니다 놀이터 대신 입력칸 아래 빈 곳으로 산책 갈 확률(빈 곳이 있을 때). */
+export const STROLL_CHANCE = 0.2;
+
 /** 표정. */
 export type PestMood =
   'idle' | 'smug' | 'taunt' | 'sulky' | 'surprised' | 'happy';
@@ -36,6 +45,12 @@ export const PEST_TIMING = {
   lookAroundMax: 2_000,
   /** 끌기에서 놓인 뒤 어지러워하는 시간. */
   dizzyDuration: 1_000,
+  /** 반응해서 달려갈 때(힌트 카드·동전·입력칸 아래) 도착까지 시간. */
+  visitTravel: 700,
+  /** 달려간 곳에 머무는 시간. 그 뒤 놀이터로 돌아간다. */
+  visitStay: 2_500,
+  /** 반응 요청이 이보다 오래되면(끌리거나 어지러운 동안 지나감) 가지 않는다. */
+  visitStale: 1_500,
 } as const;
 
 /** 말풍선 종류마다 띄울 표정. */

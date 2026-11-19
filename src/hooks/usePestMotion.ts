@@ -10,7 +10,13 @@ import {
   type RefObject,
 } from 'react';
 import type { RandomFn } from '../lib/random.ts';
-import { PEST_TIMING, lookAroundDelay, type PestMood } from '../lib/pest.ts';
+import {
+  PEST_TIMING,
+  STROLL_CHANCE,
+  lookAroundDelay,
+  type PestMood,
+  type PestSpot,
+} from '../lib/pest.ts';
 import {
   gaitLift,
   getPestAnimal,
@@ -22,9 +28,11 @@ import {
   depthScale,
   fleeTarget,
   isDragStart,
+  isInside,
   nudge,
   pickRoamTarget,
   playgroundBounds,
+  spaceBelow,
   type Bounds,
   stepToward,
   travelSpeed,
@@ -142,6 +150,10 @@ export function usePestMotion({
     reducedMotion: false,
     /** 움직임 줄이기에서 머무는 자리(처음엔 왼쪽 아래, 사용자가 옮기면 그 자리). */
     home: undefined as Point | undefined,
+    /** 아직 가지 않은 달려가기 요청(받은 시각). */
+    pending: undefined as { spot: PestSpot; at: number } | undefined,
+    /** 달려가는 중(도착하면 오래 머문다). */
+    visiting: false,
   });
   const listeners = useRef(new Set<(frame: PestFrame) => void>());
   const press = useRef({
@@ -210,6 +222,61 @@ export function usePestMotion({
       area: m.area,
     });
   }, [areaRef, coverRef]);
+
+  // 반응해서 달려갈 요청이 오면 받아 둔다(움직일 수 있을 때 프레임에서 간다).
+  const visitId = pest.visit?.id;
+  useEffect(() => {
+    const spot = pestRef.current.visit?.spot;
+    if (visitId === undefined || !spot) return;
+    motion.current.pending = { spot, at: performance.now() };
+  }, [visitId]);
+
+  // 화면 내용(놀이터·문제·힌트·입력칸) 아래 빈 곳. 방해꾼 그림·잡는 영역·말풍선은 뺀다.
+  const below = useCallback((): Bounds | undefined => {
+    const element = areaRef.current;
+    if (!element) return undefined;
+    const top = element.getBoundingClientRect().top;
+    let floor = -1;
+    for (const child of element.children) {
+      if (child instanceof HTMLElement && child.dataset.pestPart) continue;
+      floor = Math.max(floor, child.getBoundingClientRect().bottom - top);
+    }
+    if (floor < 0) return undefined;
+    return spaceBelow({ area: motion.current.area, floor });
+  }, [areaRef]);
+
+  // 달려갈 지점. 그 자리가 없으면(힌트 카드가 없음, 아래 빈 곳이 없음) undefined.
+  const spotPoint = useCallback(
+    (spot: PestSpot): Point | undefined => {
+      const m = motion.current;
+      if (spot === 'gold') {
+        // 동전이 날아가는 골드 배지 쪽: 놀이터 오른쪽 위.
+        return m.roam ? { x: m.roam.right, y: m.roam.top } : undefined;
+      }
+      if (spot === 'below') {
+        const b = below();
+        if (!b) return undefined;
+        // 입력칸 바로 아래에서 놀린다.
+        return {
+          x: b.left + randomRef.current() * (b.right - b.left),
+          y: Math.min(b.bottom, b.top + 12),
+        };
+      }
+      const area = areaRef.current;
+      const deck = area?.querySelector('[data-pest-spot="hint"]');
+      if (!area || !deck) return undefined;
+      const a = area.getBoundingClientRect();
+      const d = deck.getBoundingClientRect();
+      const y = d.bottom - a.top;
+      const size = depthScale({ y, area: m.area });
+      // 카드 더미 왼쪽에 서서 카드를 기웃거린다.
+      return clampToArea({
+        point: { x: d.left - a.left - size * 0.3, y },
+        area: m.area,
+      });
+    },
+    [areaRef, below],
+  );
 
   // 놀이 영역 크기를 재고(크기 변경도), 위치를 영역 안으로 당긴다.
   useEffect(() => {
@@ -287,6 +354,33 @@ export function usePestMotion({
         }
       }
 
+      // 반응해서 달려가기: 돌아다니는 중(어지럽지 않음)이면 두리번거리기를 끊고 간다.
+      if (
+        m.pending &&
+        p.behavior === 'roaming' &&
+        !p.dizzy &&
+        !m.reducedMotion
+      ) {
+        const request = m.pending;
+        m.pending = undefined;
+        const to =
+          now - request.at <= PEST_TIMING.visitStale
+            ? spotPoint(request.spot)
+            : undefined;
+        if (to) {
+          m.target = to;
+          m.speed = travelSpeed({
+            from: m.point,
+            to,
+            durationMs: PEST_TIMING.visitTravel,
+            minSpeed: animalRef.current.speed,
+          });
+          m.moveTime = 0;
+          m.restUntil = 0;
+          m.visiting = true;
+        }
+      }
+
       const moving =
         p.behavior === 'fleeing' ||
         p.behavior === 'covering' ||
@@ -305,11 +399,27 @@ export function usePestMotion({
           return;
         }
         // 놀이터 안 다음 지점(놀이터 밖에 있으면 이 걸음으로 놀이터로 돌아온다).
+        // 놀이터에 있을 때 가끔은 입력칸 아래 빈 곳으로 산책 간다.
+        const roam = m.roam ?? areaBounds(m.area);
+        const inPlayground = isInside({ point: m.point, bounds: roam });
+        const stroll = inPlayground ? below() : undefined;
+        const strolling =
+          stroll !== undefined && randomRef.current() < STROLL_CHANCE;
         m.target = pickRoamTarget({
-          bounds: m.roam ?? areaBounds(m.area),
+          bounds: strolling ? stroll : roam,
           random: randomRef.current,
         });
-        m.speed = animalRef.current.speed;
+        // 놀이터 안에서는 그 동물 빠르기로. 먼 길(산책·돌아오기)은 입력칸 위를
+        // 오래 지나지 않게 서둘러 간다.
+        m.speed =
+          strolling || !inPlayground
+            ? travelSpeed({
+                from: m.point,
+                to: m.target,
+                durationMs: PEST_TIMING.visitTravel * 2,
+                minSpeed: animalRef.current.speed,
+              })
+            : animalRef.current.speed;
         m.moveTime = 0;
       }
 
@@ -341,7 +451,13 @@ export function usePestMotion({
         } else if (p.behavior === 'fleeing') {
           p.arrive();
         } else if (!m.reducedMotion) {
-          m.restUntil = now + lookAroundDelay({ random: randomRef.current });
+          // 달려간 곳에서는 오래 머물며 구경하고, 그 뒤 놀이터로 돌아간다.
+          m.restUntil =
+            now +
+            (m.visiting
+              ? PEST_TIMING.visitStay
+              : lookAroundDelay({ random: randomRef.current }));
+          m.visiting = false;
           m.facing = 0;
         } else {
           // 움직임 줄이기에서는 목표 지점에 계속 머문다.
@@ -349,7 +465,7 @@ export function usePestMotion({
         }
       }
     },
-    [coverPoint],
+    [coverPoint, spotPoint, below],
   );
 
   // 프레임 루프. 화면이 숨겨진 동안(paused)과 결과 화면(!active)에서는 돌리지 않는다.

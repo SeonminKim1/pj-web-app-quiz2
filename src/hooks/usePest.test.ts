@@ -74,6 +74,36 @@ describe('pestReducer', () => {
     expect(pestReducer(paused, { type: 'grab', line: 'x' })).toBe(paused);
   });
 
+  it('반응에 갈 곳이 있으면 돌아다닐 때만 달려가기를 정한다', () => {
+    const roaming = initialPestState();
+    const first = pestReducer(roaming, {
+      type: 'react',
+      kind: 'hint',
+      line: 'x',
+      spot: 'hint',
+    });
+    expect(first.visit).toEqual({ id: 1, spot: 'hint' });
+    expect(first.line).toBe('x');
+    const second = pestReducer(first, {
+      type: 'react',
+      kind: 'wrong',
+      line: 'y',
+      spot: 'below',
+    });
+    expect(second.visit).toEqual({ id: 2, spot: 'below' });
+
+    // 도망 중에는 말만 하고 달려가지 않는다.
+    const fleeing = pestReducer(roaming, { type: 'tap', line: 'x' });
+    const said = pestReducer(fleeing, {
+      type: 'react',
+      kind: 'correct',
+      line: 'z',
+      spot: 'gold',
+    });
+    expect(said.line).toBe('z');
+    expect(said.visit).toBeUndefined();
+  });
+
   it('어지러운 동안은 가리러 가지 않는다', () => {
     const dizzy = {
       ...initialPestState(),

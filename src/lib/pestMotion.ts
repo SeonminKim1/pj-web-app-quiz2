@@ -98,6 +98,32 @@ export function playgroundBounds({
   return { ...b, top: minY, bottom: maxY };
 }
 
+/** 내용 아래 빈 곳에서 몸 위로 남길 여백(px). */
+const FLOOR_GAP = 8;
+
+/**
+ * 화면 내용(입력칸 등) 아래 빈 곳에서 발밑 점이 있을 수 있는 범위. floor는 내용의 가장 아랫변
+ * (놀이 영역 기준 px). 몸 전체(그 높이의 크기 + 깡충 높이)가 내용과 겹치지 않는 가장 높은 발밑부터
+ * 영역 아래까지. 몸이 들어갈 만큼 비어 있지 않으면 undefined(키 작은 화면).
+ */
+export function spaceBelow({
+  area,
+  floor,
+}: {
+  area: Area;
+  floor: number;
+}): Bounds | undefined {
+  const b = areaBounds(area);
+  const grow =
+    area.height > 0 ? (PEST_SIZE.near - PEST_SIZE.far) / area.height : 1;
+  if (grow >= 1) return undefined;
+  const fitTop = Math.ceil(
+    (floor + FLOOR_GAP + PEST_SIZE.far + MAX_GAIT_LIFT) / (1 - grow),
+  );
+  if (fitTop > b.bottom) return undefined;
+  return { ...b, top: Math.max(b.top, fitTop) };
+}
+
 /** 띠 아랫변에서 발밑까지 남길 여백(px, 그림자). */
 const PLAYGROUND_FOOT_GAP = 4;
 

@@ -11,6 +11,7 @@ import {
   type PestBehavior,
   type PestLineKind,
   type PestMood,
+  type PestSpot,
 } from '../lib/pest.ts';
 import {
   getPestAnimal,
@@ -38,7 +39,12 @@ export type PestState = {
   scheduleId: number;
   /** 가리기 시각이 지났지만 아직 못 가림(돌아다니는 중·풀이 중이 될 때 가림). */
   coverDue: boolean;
+  /** 반응해서 달려갈 곳(id가 늘 때마다 새로 간다). 돌아다니는 중에만 정한다. */
+  visit: PestVisit | undefined;
 };
+
+/** 달려갈 곳 한 번. */
+export type PestVisit = { id: number; spot: PestSpot };
 
 export type PestAction =
   | { type: 'coverDue' }
@@ -52,7 +58,7 @@ export type PestAction =
   | { type: 'invite'; line: string }
   | { type: 'dizzyEnd' }
   | { type: 'arrive' }
-  | { type: 'react'; kind: PestLineKind; line: string }
+  | { type: 'react'; kind: PestLineKind; line: string; spot?: PestSpot }
   | { type: 'bubbleEnd'; bubbleId: number }
   | { type: 'hide' }
   | { type: 'show' };
@@ -70,6 +76,7 @@ export function initialPestState(hidden = false): PestState {
     bubbleId: 0,
     scheduleId: 0,
     coverDue: false,
+    visit: undefined,
   };
 }
 
@@ -187,9 +194,16 @@ export function pestReducer(state: PestState, action: PestAction): PestState {
     case 'arrive':
       if (state.behavior !== 'fleeing') return state;
       return { ...state, behavior: 'roaming' };
-    case 'react':
+    case 'react': {
       if (state.behavior === 'paused') return state;
-      return say({ state, kind: action.kind, line: action.line });
+      const said = say({ state, kind: action.kind, line: action.line });
+      // 달려가기는 돌아다닐 때만(가리기·도망·끌리는 중에는 말만 한다).
+      if (!action.spot || state.behavior !== 'roaming') return said;
+      return {
+        ...said,
+        visit: { id: (state.visit?.id ?? 0) + 1, spot: action.spot },
+      };
+    }
     case 'bubbleEnd':
       if (action.bubbleId !== state.bubbleId) return state;
       return {
@@ -229,7 +243,9 @@ export type PestView = {
   tap: () => void;
   /** 간식 주기(무료, 아무 때나): 기뻐하며 먹는다. */
   feed: () => void;
-  /** 힌트를 열었을 때: 놀라며 한마디. */
+  /** 반응해서 달려갈 곳(움직임이 읽는다). */
+  visit: PestVisit | undefined;
+  /** 힌트를 열었을 때: 놀라며 한마디하고 힌트 카드 옆으로 달려간다. */
   hint: () => void;
   /** 먹은 횟수(먹는 연출 키). */
   fedId: number;
@@ -343,6 +359,8 @@ export function usePest({
         type: 'react',
         kind: phase,
         line: pickLine({ kind: phase, random }),
+        // 맞히면 동전을 쫓아 골드 쪽으로, 틀리면 입력칸 아래로 놀리러.
+        spot: phase === 'correct' ? 'gold' : 'below',
       });
     }
   }, [phase, random]);
@@ -369,6 +387,7 @@ export function usePest({
         type: 'react',
         kind: 'hint',
         line: pickLine({ kind: 'hint', random }),
+        spot: 'hint',
       }),
     [random],
   );
@@ -401,6 +420,7 @@ export function usePest({
     tap,
     feed,
     hint,
+    visit: state.visit,
     fedId: state.fedId,
     inviting: state.inviting,
     grab,

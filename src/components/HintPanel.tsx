@@ -45,7 +45,7 @@ export function HintPanel({
       <div className={styles.row}>
         {leading}
         {next && (
-          <div className={styles.deck}>
+          <div className={styles.deck} data-pest-spot="hint">
             {Array.from({ length: Math.max(total, nextIndex + 1) }, (_, i) => {
               if (i < nextIndex) {
                 return (

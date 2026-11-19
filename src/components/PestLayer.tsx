@@ -120,6 +120,7 @@ export function PestLayer({
         ref={jellyRef}
         className={styles.jelly}
         data-testid="pest-2d"
+        data-pest-part="figure"
         data-behavior={behavior}
         data-dizzy={dizzy}
         aria-hidden="true"
@@ -141,11 +142,17 @@ export function PestLayer({
         type="button"
         className={styles.hit}
         aria-label="방해꾼 쫓아내기"
+        data-pest-part="hit"
         data-behavior={behavior}
         {...motion.handlers}
       />
       {line && (
-        <span ref={bubbleRef} className={styles.bubble} aria-hidden="true">
+        <span
+          ref={bubbleRef}
+          className={styles.bubble}
+          data-pest-part="bubble"
+          aria-hidden="true"
+        >
           {line}
         </span>
       )}

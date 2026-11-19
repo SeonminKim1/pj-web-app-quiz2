@@ -1,6 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import type { PointerEvent } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { PEST_TIMING } from '../lib/pest.ts';
 import { getPestAnimal } from '../lib/pestAnimals.ts';
 import {
   NUDGE_STEP,
@@ -43,6 +44,7 @@ function fakePest(overrides: Partial<PestView> = {}): PestView {
     tap: vi.fn(),
     feed: vi.fn(),
     hint: vi.fn(),
+    visit: undefined,
     fedId: 0,
     inviting: false,
     grab: vi.fn(),
@@ -417,6 +419,107 @@ describe('usePestMotion', () => {
       expect(moved(dog.frames)).toBeLessThan(moved(rabbit.frames));
       // 강아지는 깡충 대신 걷기: 몸이 위아래로 3px까지만 움직인다.
       expect(Math.max(...dog.frames.map((f) => f.hop))).toBeLessThanOrEqual(3);
+    });
+  });
+
+  describe('반응해서 달려가기·산책', () => {
+    // 놀이터(맨 위 88px), 내용은 영역 위에서 300px까지, 힌트 카드 더미는 오른쪽 (240~360, 200~254).
+    function setupScene(random: () => number = () => 0) {
+      const area = element(AREA);
+      const playground = element({
+        left: AREA.left,
+        top: AREA.top,
+        width: AREA.width,
+        height: 88,
+      });
+      const content = element({
+        left: AREA.left,
+        top: AREA.top + 100,
+        width: AREA.width,
+        height: 200,
+      });
+      const deck = element({
+        left: AREA.left + 240,
+        top: AREA.top + 200,
+        width: 120,
+        height: 54,
+      });
+      deck.dataset.pestSpot = 'hint';
+      content.append(deck);
+      const figure = element({ left: 0, top: 0, width: 1, height: 9999 });
+      figure.dataset.pestPart = 'figure';
+      area.append(playground, content, figure);
+      const refs = {
+        areaRef: { current: area },
+        coverRef: { current: content },
+        playgroundRef: { current: playground },
+      };
+      const view = renderHook(
+        ({ pest }: { pest: PestView }) =>
+          usePestMotion({ pest, ...refs, random }),
+        { initialProps: { pest: fakePest() } },
+      );
+      const frames: PestFrame[] = [];
+      act(() => {
+        view.result.current.subscribe((frame) => frames.push({ ...frame }));
+      });
+      return { ...view, frames, last: () => frames.at(-1)! };
+    }
+
+    it('힌트를 열면 카드 더미 왼쪽으로 달려가 머물다가 놀이터로 돌아간다', () => {
+      // 난수 0.99: 산책은 가지 않는다(돌아오는 걸음만 본다).
+      const { rerender, last, frames } = setupScene(() => 0.99);
+      rerender({ pest: fakePest({ visit: { id: 1, spot: 'hint' } }) });
+      act(() => vi.advanceTimersByTime(800));
+      expect(last().y).toBeCloseTo(254);
+      expect(last().x).toBeLessThan(240);
+      const stay = last();
+      act(() => vi.advanceTimersByTime(2000));
+      expect(last()).toMatchObject({ x: stay.x, y: stay.y });
+      const before = frames.length;
+      act(() => vi.advanceTimersByTime(3000));
+      expect(frames.slice(before).some((f) => f.y <= 88)).toBe(true);
+    });
+
+    it('틀리면 입력칸 아래 빈 곳으로 간다(방해꾼 그림은 내용으로 치지 않음)', () => {
+      const { rerender, last } = setupScene();
+      rerender({ pest: fakePest({ visit: { id: 1, spot: 'below' } }) });
+      act(() => vi.advanceTimersByTime(800));
+      expect(last().y - last().size).toBeGreaterThan(300);
+    });
+
+    it('맞히면 놀이터 오른쪽 위(골드 쪽)로 간다', () => {
+      const { rerender, last } = setupScene();
+      rerender({ pest: fakePest({ visit: { id: 1, spot: 'gold' } }) });
+      act(() => vi.advanceTimersByTime(800));
+      expect(last().x).toBe(B.right);
+      expect(last().y).toBeLessThanOrEqual(88);
+    });
+
+    it('어지러운 동안 받은 요청은 늦으면 버린다', () => {
+      const { rerender, last } = setupScene(() => 0.99);
+      rerender({
+        pest: fakePest({ dizzy: true, visit: { id: 1, spot: 'below' } }),
+      });
+      act(() => vi.advanceTimersByTime(PEST_TIMING.visitStale + 100));
+      rerender({
+        pest: fakePest({ visit: { id: 1, spot: 'below' } }),
+      });
+      act(() => vi.advanceTimersByTime(800));
+      expect(last().y).toBeLessThanOrEqual(88);
+    });
+
+    it('놀이터에 있을 때 가끔은 입력칸 아래로 산책 간다', () => {
+      // 난수 0: 처음 자리 놀이터, 산책 확률 통과, 산책 목표는 빈 곳 왼쪽 위.
+      const { last } = setupScene(() => 0);
+      act(() => vi.advanceTimersByTime(1600));
+      expect(last().y - last().size).toBeGreaterThan(300);
+    });
+
+    it('산책 확률을 넘으면 놀이터 안에서만 돈다', () => {
+      const { last } = setupScene(() => 0.99);
+      act(() => vi.advanceTimersByTime(1600));
+      expect(last().y).toBeLessThanOrEqual(88);
     });
   });
 });
