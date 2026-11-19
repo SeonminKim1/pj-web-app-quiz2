@@ -40,7 +40,7 @@ const MBTI: QuizTopicFile = {
       question: `${category} 상황 ${i + 1}`,
       answer,
       category,
-      shareable: false,
+      shareable: true,
     })),
   ),
 };
@@ -180,12 +180,37 @@ describe('MBTI 풀이(카테고리 = 스테이지)', () => {
     expect(await screen.findByText('정답! ISTJ · 골드 +5')).toBeInTheDocument();
   });
 
-  it('공유 주소가 없는 주제는 공유 버튼을 숨기고, 칭호도 없다', async () => {
-    renderAt('/topics/mbti/categories/2');
+  it('공유 버튼은 MBTI 주소(/m/<id>/)로 보낸다', async () => {
+    const share = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'share', {
+      value: share,
+      configurable: true,
+    });
+    const user = renderAt('/topics/mbti/categories/2');
     await screen.findByText('연애 상황 1');
+    await user.click(
+      screen.getByRole('button', { name: '친구한테 이 문제 내기' }),
+    );
+    await waitFor(() => expect(share).toHaveBeenCalledTimes(1));
+    const sent = share.mock.calls[0]![0] as { text: string; url: string };
+    expect(sent.url).toMatch(/\/m\/17\/\?s=1$/);
+    expect(sent.text).not.toContain('ISTJ');
+  });
+
+  it('공유 주소(/m/<id>/)로 들어와 4축으로 풀고, 카테고리를 이어 푼다', async () => {
+    const user = renderAt('/m/18/');
+    expect(await screen.findByText('연애 상황 2')).toBeInTheDocument();
+    await pick(user, 'ISFJ');
+    await user.click(screen.getByRole('button', { name: '확인' }));
     expect(
-      screen.queryByRole('button', { name: '친구한테 이 문제 내기' }),
-    ).not.toBeInTheDocument();
+      await screen.findByRole('heading', { name: /정답! ISFJ/ }),
+    ).toBeInTheDocument();
+    expect(store.load().topics.mbti?.solved).toEqual(['18']);
+
+    await user.click(
+      screen.getByRole('button', { name: '이 문제가 든 스테이지 계속하기' }),
+    );
+    expect(await screen.findByText(/연애 · 1 \/ 16/)).toBeInTheDocument();
   });
 
   it('없는 카테고리 번호는 "없는 카테고리예요"', async () => {

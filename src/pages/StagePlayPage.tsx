@@ -108,9 +108,10 @@ function StageSession({
   const { topic } = target;
   const axesMode = topic.play[0] === 'mbtiAxes';
   // 공유 주소가 없는 주제는 공유 버튼을 숨긴다.
-  const canShare = topic.sharePrefix !== undefined;
+  const canShare = topic.share !== undefined;
   // 지금 문제를 친구한테 내기. 방금 맞힌 문제면 결과(힌트 수)도 함께 보낸다.
   const shareView = useShare({
+    prefix: topic.share?.prefix,
     id: item?.id ?? '',
     question: item?.question ?? '',
   });

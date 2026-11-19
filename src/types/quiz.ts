@@ -35,8 +35,17 @@ export type QuizTopic = {
   round: QuizRound;
   /** 맞힌 문제 수로 칭호를 주는지(src/lib/titles.ts). */
   titles: boolean;
-  /** 공유 링크 주소 앞부분(/<sharePrefix>/<id>/). 없으면 공유하지 않는다. */
-  sharePrefix?: string;
+  /** 공유 링크. 없으면 공유하지 않는다. */
+  share?: ShareConfig;
+};
+
+/**
+ * 공유 링크 설정. prefix: 주소 앞부분(/<prefix>/<id>/), 주제마다 달라 id가 겹치지 않는다.
+ * card: 카톡 미리보기 카드. question = 문제 문장을 카드에 그림, topic = 주제 공통 카드(문제는 설명 줄에).
+ */
+type ShareConfig = {
+  prefix: string;
+  card: 'question' | 'topic';
 };
 
 /** 문제 하나. 이 필드들 외에는 넣지 않는다(원본 메타 필드 유출 방지). */

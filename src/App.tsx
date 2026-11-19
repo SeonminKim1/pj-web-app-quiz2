@@ -12,6 +12,7 @@ import { TopicPage } from './pages/TopicPage.tsx';
 import { CategoryPlayPage, StagePlayPage } from './pages/StagePlayPage.tsx';
 import { QuestionPage } from './pages/QuestionPage.tsx';
 import { PrivacyPage } from './pages/PrivacyPage.tsx';
+import { SHARE_TOPICS } from './lib/quizTopics.ts';
 
 type ProgressProviderProps = {
   children: ReactNode;
@@ -63,7 +64,14 @@ export function AppRoutes(): ReactElement {
         path="/topics/:topicId/categories/:categoryNo"
         element={<CategoryPlayPage />}
       />
-      <Route path="/q/:id" element={<QuestionPage />} />
+      {/* 주제마다 공유 주소(/q/:id 넌센스, /m/:id MBTI). */}
+      {SHARE_TOPICS.map(({ share: { prefix } }) => (
+        <Route
+          key={prefix}
+          path={`/${prefix}/:id`}
+          element={<QuestionPage key={prefix} prefix={prefix} />}
+        />
+      ))}
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

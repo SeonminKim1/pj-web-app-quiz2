@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import type { QuizTopicId } from '../types/quiz.ts';
 import {
   QUIZ_TOPICS,
+  SHARE_TOPICS,
+  findShareTopic,
   findCategoryTopic,
   findStageTopic,
   isEnterableTopic,
@@ -33,7 +35,7 @@ describe('QUIZ_TOPICS', () => {
       ],
       round: { byCategory: false, stageSize: 10 },
       titles: true,
-      sharePrefix: 'q',
+      share: { prefix: 'q', card: 'question' },
     });
   });
 
@@ -49,6 +51,7 @@ describe('QUIZ_TOPICS', () => {
       ],
       round: { byCategory: true, size: 16 },
       titles: false,
+      share: { prefix: 'm', card: 'topic' },
     });
   });
 });
@@ -86,6 +89,15 @@ describe('findStageTopic', () => {
     expect(findStageTopic('mbti')).toBeUndefined();
     expect(findStageTopic('movie')).toBeUndefined();
     expect(findStageTopic(undefined)).toBeUndefined();
+  });
+});
+
+describe('findShareTopic', () => {
+  it('공유 주소 앞부분으로 주제를 찾는다(주제마다 다름)', () => {
+    expect(SHARE_TOPICS.map((topic) => topic.share.prefix)).toEqual(['q', 'm']);
+    expect(findShareTopic('q')?.id).toBe('nonsense');
+    expect(findShareTopic('m')?.id).toBe('mbti');
+    expect(findShareTopic('x')).toBeUndefined();
   });
 });
 

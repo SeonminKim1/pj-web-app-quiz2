@@ -22,7 +22,7 @@ export const QUIZ_TOPICS: readonly QuizTopic[] = [
     ],
     round: { byCategory: false, stageSize: 10 },
     titles: true,
-    sharePrefix: 'q',
+    share: { prefix: 'q', card: 'question' },
   },
   {
     id: 'mbti',
@@ -37,12 +37,26 @@ export const QUIZ_TOPICS: readonly QuizTopic[] = [
     // 카테고리 하나(16유형이 한 번씩)가 한 스테이지.
     round: { byCategory: true, size: 16 },
     titles: false,
+    // 문제 문장이 길어(69~90자) 카드에 들어가지 않으므로 MBTI 공통 카드를 쓴다.
+    share: { prefix: 'm', card: 'topic' },
   },
 ];
 
 const TOPIC_IDS: ReadonlySet<string> = new Set(
   QUIZ_TOPICS.map((topic) => topic.id),
 );
+
+/** 공유 링크가 있는 주제(QUIZ_TOPICS 순서). */
+export type ShareTopic = QuizTopic & { share: NonNullable<QuizTopic['share']> };
+
+export const SHARE_TOPICS: readonly ShareTopic[] = QUIZ_TOPICS.filter(
+  (topic): topic is ShareTopic => topic.share !== undefined,
+);
+
+/** 공유 주소 앞부분(q, m)으로 주제를 찾는다. */
+export function findShareTopic(prefix: string): ShareTopic | undefined {
+  return SHARE_TOPICS.find((topic) => topic.share.prefix === prefix);
+}
 
 /** 값이 등록된 주제 id인지 확인한다. */
 export function isQuizTopicId(value: unknown): value is QuizTopicId {

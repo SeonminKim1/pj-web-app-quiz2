@@ -21,11 +21,11 @@
 
 ## qd_unregistered
 
-`shareable: true`인 문제가 등록부(`data/share/published-ids.json`)에 없습니다.
+`shareable: true`인 문제가 그 주제의 등록부(넌센스 `data/share/published-ids.json`, MBTI `data/share/mbti-published-ids.json`)에 없습니다.
 
 ```sh
 npm run register-ids
-git add data/share/published-ids.json
+git add data/share/
 ```
 
 ## qd_answer_changed
@@ -34,7 +34,7 @@ git add data/share/published-ids.json
 
 - 실수였다면 예전 정답으로 되돌리세요.
 - 정말 정답을 바꿔야 한다면: 새 id로 문제를 추가하고(`shareable: true`), 예전 id는 `shareable: false`로 둡니다. 예전 링크는 "쉬는 중" 화면이 됩니다.
-- `published-ids.json`을 손으로 고치지 마세요.
+- 등록부(`data/share/*published-ids.json`)를 손으로 고치지 마세요.
 
 공백, 대소문자, 한글 조합 방식(NFC/NFD) 차이는 같은 정답으로 봅니다.
 
@@ -51,7 +51,7 @@ git add data/share/published-ids.json
 
 ## qd_registry_shape
 
-`data/share/published-ids.json`이 JSON 배열이 아니거나, 항목에 `id`·`answerKey`(16자리 16진수)·`firstPublished`(YYYY-MM-DD)가 없습니다. 같은 id가 두 번 있거나 id가 숫자 오름차순이 아니어도 여기에 걸립니다. 손으로 고쳤다면 `git checkout data/share/published-ids.json`으로 되돌린 뒤 `npm run register-ids`를 쓰세요.
+등록부(`data/share/published-ids.json`, `data/share/mbti-published-ids.json`)가 JSON 배열이 아니거나, 항목에 `id`·`answerKey`(16자리 16진수)·`firstPublished`(YYYY-MM-DD)가 없습니다. 같은 id가 두 번 있거나 id가 숫자 오름차순이 아니어도 여기에 걸립니다. 손으로 고쳤다면 `git checkout <그 등록부>`로 되돌린 뒤 `npm run register-ids`를 쓰세요.
 
 ## qd_registry_shrunk
 

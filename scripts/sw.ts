@@ -6,7 +6,7 @@ import { buildSwConfig, swSource, type DistFile } from './sw/config.ts';
 
 const DIST = 'dist';
 // 공유 페이지·카드 그림은 수가 많고 미리 받지 않으므로 해시도 읽지 않는다.
-const SKIP = new Set(['/q', '/og']);
+const SKIP = new Set(['/q', '/m', '/og']);
 
 async function walk(base = ''): Promise<DistFile[]> {
   const out: DistFile[] = [];

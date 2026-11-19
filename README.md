@@ -1,6 +1,6 @@
 # 퀴즈 놀이터
 
-넌센스·MBTI 퀴즈 웹앱입니다. 넌센스 546문제와 MBTI 112문제를 스테이지로 풀고, 넌센스는 어느 문제든 `/q/<id>/` 링크로 단톡방에 낼 수 있습니다. 링크를 붙여 넣으면 카톡 미리보기에 문제 카드가 뜹니다.
+넌센스·MBTI 퀴즈 웹앱입니다. 넌센스 546문제와 MBTI 112문제를 스테이지로 풀고, 어느 문제든 링크(넌센스 `/q/<id>/`, MBTI `/m/<id>/`)로 단톡방에 낼 수 있습니다. 링크를 붙여 넣으면 카톡 미리보기에 카드가 뜹니다(넌센스는 문제 문장 카드, MBTI는 공통 카드 + 설명 줄에 문제).
 
 서버는 없고 정적 사이트(Netlify)입니다. 빌드 때 공유 문제마다 HTML과 카드 PNG를 만듭니다.
 
@@ -13,7 +13,7 @@ npm ci
 npm run dev          # http://localhost:5173 (문제 데이터·글꼴을 먼저 만든다. OG는 만들지 않음)
 ```
 
-`npm run dev`로 `/q/<id>/`를 열면 인라인 문제 자료가 없어서 `nonsense.json`을 받아서 그립니다. 그래도 화면은 똑같습니다.
+`npm run dev`로 `/q/<id>/`(`/m/<id>/`)를 열면 인라인 문제 자료가 없어서 주제 파일(`nonsense.json`, `mbti.json`)을 받아서 그립니다. 그래도 화면은 똑같습니다.
 
 ## 검사
 
@@ -38,7 +38,7 @@ npm run preview      # http://localhost:4173/q/<id>/
 | `build:data`  | `data/nonsense.json` 검사, 공유 카드·등록부 검사, `public/data/quiz/` 생성 |
 | `build:fonts` | Pretendard 글꼴을 `public/fonts/`로 복사                                   |
 | `build:app`   | `tsc -b && vite build` → `dist/`                                           |
-| `build:og`    | 등록부의 id마다 `dist/q/<id>/index.html`과 `dist/og/<id>-<해시>.png`       |
+| `build:og`    | 주제별 등록부의 id마다 `dist/<q·m>/<id>/index.html`과 카드 PNG             |
 | `build:sw`    | `dist/sw.js`(오프라인용 서비스 워커) 생성                                  |
 | `check:dist`  | 빌드 결과 검사(파일, OG 주소, `#q-data`, 서비스 워커·manifest 아이콘)      |
 
@@ -74,13 +74,13 @@ npm run preview      # http://localhost:4173/q/<id>/
 
 공유 관련 필드는 셋입니다.
 
-- `shareable`: 링크로 낼 수 있는 문제인지. 기본은 `false`. 지금은 546문제 모두 켜 두었습니다(새 문제도 `true`로 넣고 `npm run register-ids`).
+- `shareable`: 링크로 낼 수 있는 문제인지. 기본은 `false`. 지금은 넌센스 546문제, MBTI 112문제 모두 켜 두었습니다(새 문제도 `true`로 넣고 `npm run register-ids`).
 - `ogText`: 카드에 보일 문구. 없으면 `question`. 56px 10자×3줄, 또는 48px 12자×4줄에 들어가야 합니다.
 - `allowAnswerInCard`: 카드 문구에 정답이 들어가도 되는 문제만 `true`.
 
 `ogText`와 `allowAnswerInCard`는 빌드에만 쓰고 앱에 보내는 데이터에서는 뺍니다.
 
-`data/share/published-ids.json`은 공개한 id의 등록부입니다. 추가만 하고 손으로 고치지 않습니다. 각 id의 정답 해시가 들어 있어서, 공개한 문제의 정답이 바뀌면 빌드가 막힙니다.
+공개한 id의 등록부는 주제마다 하나입니다: 넌센스 `data/share/published-ids.json`, MBTI `data/share/mbti-published-ids.json`. `npm run register-ids`가 모든 주제를 한 번에 등록합니다. 추가만 하고 손으로 고치지 않습니다. 각 id의 정답 해시가 들어 있어서, 공개한 문제의 정답이 바뀌면 빌드가 막힙니다.
 
 ## 작업 레시피
 
@@ -117,12 +117,14 @@ npm run preview      # http://localhost:4173/q/<id>/
 
 ### 카드에 글자가 안 들어갈 때
 
-`QD_TEXT_FIT`이 나면 짧은 `ogText`를 넣고 `npm run og:preview -- <id>`로 확인합니다.
+`QD_TEXT_FIT`이 나면 짧은 `ogText`를 넣고 `npm run og:preview -- <id>`로 확인합니다. MBTI처럼 공통 카드를 쓰는 주제(`share.card: 'topic'`)는 이 검사를 하지 않습니다.
+
+`og:preview`와 `build:og --only`의 문제 키는 넌센스는 id(`23`), MBTI는 `m` + id(`m12`)입니다.
 
 ### 몇 문제만 OG 다시 만들기
 
 ```sh
-SITE_ORIGIN=http://localhost:4173 npm run build:og -- --only 23,41
+SITE_ORIGIN=http://localhost:4173 npm run build:og -- --only 23,41,m12
 ```
 
 ## 통계 (GoatCounter)

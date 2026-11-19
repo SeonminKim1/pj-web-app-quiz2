@@ -4,7 +4,7 @@
 
 ## 프로젝트 개요
 
-"퀴즈 놀이터": 넌센스 퀴즈 546문제와 MBTI 퀴즈 112문제를 스테이지로 풀고, 어느 문제든 `/q/<id>/` 링크로 단톡방에 낼 수 있는 웹앱. 사용자가 고른 방해꾼 동물이 풀이를 훼방 놓는다(시간 제한 없음). 무료, 광고(Google AdSense) 수익 예정.
+"퀴즈 놀이터": 넌센스 퀴즈 546문제와 MBTI 퀴즈 112문제를 스테이지로 풀고, 어느 문제든 링크(넌센스 `/q/<id>/`, MBTI `/m/<id>/`)로 단톡방에 낼 수 있는 웹앱. 사용자가 고른 방해꾼 동물이 풀이를 훼방 놓는다(시간 제한 없음). 무료, 광고(Google AdSense) 수익 예정.
 
 - 스택: React + TypeScript(Vite) + react-router, CSS Modules. 서버·DB 없는 정적 사이트.
 - 이전 저장소 `web-app-quiz`(비공개)에서 넌센스 주제와 MBTI 데이터를 옮겨 왔다. 나머지는 `TODOS.md`.
@@ -26,8 +26,8 @@ npm run build          # 데이터 → 글꼴 → 앱 → OG 페이지 → 서�
 ## 고유 모듈
 
 - `data/nonsense.json`: 문제 데이터의 기준. `scripts/quiz-data/`가 검사하고 `public/data/quiz/`(생성물, 커밋 안 함)를 만든다.
-- `data/share/published-ids.json`: 공개한 id 등록부. 추가만 하고 손으로 고치지 않는다(`npm run register-ids`). 공개한 문제의 정답은 바꿀 수 없다.
-- `scripts/og/`, `scripts/og-pages.ts`: 공유 문제마다 `dist/q/<id>/index.html`과 카드 PNG(satori + resvg, Jua TTF 동봉).
+- `data/share/published-ids.json`(넌센스), `data/share/mbti-published-ids.json`(MBTI): 주제별 공개 id 등록부(`scripts/share/topics.ts`). 추가만 하고 손으로 고치지 않는다(`npm run register-ids`). 공개한 문제의 정답은 바꿀 수 없다.
+- `scripts/og/`, `scripts/og-pages.ts`: 공유 문제마다 `dist/<q|m>/<id>/index.html`과 카드 PNG(satori + resvg, Jua TTF 동봉). 넌센스는 문제 문장 카드, MBTI는 공통 카드 한 장(문제는 미리보기 설명 줄). 주제 설정 `share.card`.
 - `src/lib/quizTopics.ts`: 주제 설정(풀이 방식, 힌트 단계, 한 판 단위, 칭호, 공유 주소). 주제마다 화면 코드를 따로 만들지 않고 공유 부품을 골라 쓴다. 화면은 주제 id가 아니라 설정으로 분기한다.
 - MBTI(`data/mbti.json`): 풀이 방식 `mbtiAxes`(`src/lib/mbti.ts`, `MbtiAxesPicker`), 카테고리 하나(16유형 한 번씩) = 스테이지 하나(`/topics/mbti/categories/<번호>`), ⓘ 설명 `MbtiGuide`.
 - 방해꾼: 규칙·대사 `src/lib/pest.ts`, 동물 `src/lib/pestAnimals.ts`, 움직임 계산(순수 함수) `src/lib/pestMotion.ts`, 상태 `src/hooks/usePest.ts`(reducer), 프레임 루프 `src/hooks/usePestMotion.ts`, 그리기 `src/components/PestLayer.tsx`.

@@ -4,10 +4,15 @@ import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import siteConfig from '../site.config.json' with { type: 'json' };
 import type { QuizItem } from '../src/types/quiz.ts';
-import { checkDist, type DistPage } from './build-check/check.ts';
+import {
+  checkDist,
+  type DistPage,
+  type DistShare,
+} from './build-check/check.ts';
 import { resolveOrigin } from './og/pages.ts';
 import { readRegistry } from './share/io.ts';
 import { formatShareProblem } from './share/registry.ts';
+import { SHARE_SETUPS } from './share/topics.ts';
 
 const DIST = 'dist';
 
@@ -25,7 +30,13 @@ const origin = resolveOrigin({
   env: process.env.SITE_ORIGIN,
   config: siteConfig.SITE_ORIGIN,
 });
-const { entries, problems: shape } = await readRegistry();
+const registries = await Promise.all(
+  SHARE_SETUPS.map(async (setup) => ({
+    setup,
+    ...(await readRegistry(setup.registryFile)),
+  })),
+);
+const shape = registries.flatMap((registry) => registry.problems);
 if (!origin.ok || shape.length > 0) {
   for (const problem of [...(origin.ok ? [] : [origin.problem]), ...shape])
     console.error(formatShareProblem(problem));
@@ -37,9 +48,13 @@ if (!origin.ok || shape.length > 0) {
       html: await readFile(join(DIST, path), 'utf8'),
     })),
   );
-  const items = JSON.parse(
-    await readFile('data/nonsense.json', 'utf8'),
-  ) as QuizItem[];
+  const shares: DistShare[] = await Promise.all(
+    registries.map(async ({ setup, entries }) => ({
+      prefix: setup.prefix,
+      registry: entries,
+      items: JSON.parse(await readFile(setup.dataFile, 'utf8')) as QuizItem[],
+    })),
+  );
   let manifest: unknown;
   try {
     manifest = JSON.parse(
@@ -53,8 +68,7 @@ if (!origin.ok || shape.length > 0) {
     exists: (path) => existsSync(join(DIST, path)),
     origin: origin.origin,
     production: process.env.CONTEXT === 'production',
-    registry: entries,
-    items,
+    shares,
     manifest,
   });
   if (problems.length > 0) {
@@ -63,7 +77,7 @@ if (!origin.ok || shape.length > 0) {
     process.exitCode = 1;
   } else {
     console.log(
-      `dist 검사 통과: HTML ${pages.length}개, 등록부 ${entries.length}개 · origin ${origin.origin}`,
+      `dist 검사 통과: HTML ${pages.length}개, 등록부 ${shares.map((share) => `/${share.prefix}/ ${share.registry.length}개`).join(', ')} · origin ${origin.origin}`,
     );
   }
 }

@@ -11,33 +11,34 @@ import {
 
 const run = promisify(execFile);
 
-export async function readRegistry(): Promise<{
+export async function readRegistry(file: string = REGISTRY_FILE): Promise<{
   entries: RegistryEntry[];
   problems: ShareProblem[];
 }> {
   let text: string;
   try {
-    text = await readFile(REGISTRY_FILE, 'utf8');
+    text = await readFile(file, 'utf8');
   } catch {
     return { entries: [], problems: [] }; // 아직 없음 = 빈 등록부
   }
   try {
-    return checkRegistryShape(JSON.parse(text) as unknown);
+    return checkRegistryShape(JSON.parse(text) as unknown, file);
   } catch {
-    return checkRegistryShape(undefined);
+    return checkRegistryShape(undefined, file);
   }
 }
 
 /** 직전 커밋의 등록부(git이 없거나 커밋이 없으면 undefined → 비교하지 않음). */
-export async function readPreviousRegistry(): Promise<
-  RegistryEntry[] | undefined
-> {
+export async function readPreviousRegistry(
+  file: string = REGISTRY_FILE,
+): Promise<RegistryEntry[] | undefined> {
   try {
-    const { stdout } = await run('git', ['show', `HEAD:${REGISTRY_FILE}`], {
+    const { stdout } = await run('git', ['show', `HEAD:${file}`], {
       encoding: 'utf8',
     });
     const { entries, problems } = checkRegistryShape(
       JSON.parse(stdout) as unknown,
+      file,
     );
     return problems.length === 0 ? entries : undefined;
   } catch {
@@ -47,8 +48,9 @@ export async function readPreviousRegistry(): Promise<
 
 export async function writeRegistry(
   entries: readonly RegistryEntry[],
+  file: string = REGISTRY_FILE,
 ): Promise<void> {
-  const tmp = `${REGISTRY_FILE}.tmp`;
+  const tmp = `${file}.tmp`;
   await writeFile(tmp, `${JSON.stringify(entries, null, 2)}\n`, 'utf8');
-  await rename(tmp, REGISTRY_FILE);
+  await rename(tmp, file);
 }

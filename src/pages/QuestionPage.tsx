@@ -1,4 +1,4 @@
-// 문제 하나 모드(/q/:id): 공유 링크로 들어온 사람이 메뉴 없이 바로 푸는 화면.
+// 문제 하나 모드(/q/:id, /m/:id …): 공유 링크로 들어온 사람이 메뉴 없이 바로 푸는 화면.
 // 설계 문서 "문제 하나 화면 명세". 풀이 부품(AnswerInput·HintPanel·Playground·PestLayer)은 스테이지 화면과 같다.
 //
 //   [loading] → playable ─ answering/wrong/correct ─(맞힘)→ result(s) ─ share / continue
@@ -10,6 +10,7 @@ import { useEffect, useRef, useState, type ReactElement } from 'react';
 import { AnswerInput } from '../components/AnswerInput.tsx';
 import { DataErrorView } from '../components/DataErrorView.tsx';
 import { HintPanel } from '../components/HintPanel.tsx';
+import { MbtiAxesPicker } from '../components/MbtiAxesPicker.tsx';
 import { PestLayer } from '../components/PestLayer.tsx';
 import { PetPortrait } from '../components/PetPortrait.tsx';
 import { ShareButton } from '../components/ShareButton.tsx';
@@ -36,13 +37,16 @@ import {
   compareLine,
   cutGraphemes,
   displayNumber,
+  shareKey,
   type ShareInfo,
 } from '../lib/shareLink.ts';
 import styles from './QuestionPage.module.css';
 import pageStyles from './Page.module.css';
 
-export function QuestionPage(): ReactElement {
-  const { state, retry, info, fromShare, goHome, goStage } = useQuestionPage();
+/** prefix: 주제의 공유 주소 앞부분(넌센스 q, MBTI m). 라우트가 정한다. */
+export function QuestionPage({ prefix }: { prefix: string }): ReactElement {
+  const { state, retry, info, fromShare, goHome, goStage } =
+    useQuestionPage(prefix);
   if (state.status === 'loading') {
     return (
       <main className={pageStyles.page}>
@@ -158,14 +162,21 @@ function Session({
     phase: play.pestPhase,
     active: !finished,
   });
-  const shareView = useShare({ id: item.id, question: item.question });
+  const shareView = useShare({
+    prefix: topic.share.prefix,
+    id: item.id,
+    question: item.question,
+  });
+  const axesMode = topic.play[0] === 'mbtiAxes';
+  // 통계 키(넌센스는 id, MBTI는 m12).
+  const key = shareKey({ prefix: topic.share.prefix, id: item.id });
   const [nickname, setNickname] = useState(loadNickname);
   const [sheetOpen, setSheetOpen] = useState(false);
   const resultHeading = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
-    if (solved && fromShare) analytics.track(EVENTS.solveFromShare, item.id);
-  }, [solved, fromShare, item.id]);
+    if (solved && fromShare) analytics.track(EVENTS.solveFromShare, key);
+  }, [solved, fromShare, key]);
   useEffect(() => {
     if (finished) resultHeading.current?.focus();
   }, [finished]);
@@ -197,15 +208,25 @@ function Session({
     void shareView.share({ info: myInfo(clean), timing: 'post' });
   };
   const continueStage = () => {
-    if (fromShare) analytics.track(EVENTS.continueStageFromShare, item.id);
+    if (fromShare) analytics.track(EVENTS.continueStageFromShare, key);
     onStage(stageNo);
+  };
+
+  // 제출: 틀리면 "포기하고 정답 보기"를 연다(4축 고르기는 공개된 축을 덮은 값으로 채점).
+  const submit = () => {
+    const input = axesMode ? play.selection : state.input;
+    if (play.canSubmit && !isCorrectAnswer({ answer: item.answer, input }))
+      setMissedOnce(true);
+    play.submit();
   };
 
   const canGiveUp =
     !finished && (missedOnce || (hints.next === undefined && hintsUsed > 0));
   const feedback =
     state.phase === 'wrong'
-      ? '틀렸어요'
+      ? play.matchedAxes !== undefined
+        ? `틀렸어요 · 4개 중 ${play.matchedAxes}개 맞았어요`
+        : '틀렸어요'
       : solved
         ? `정답! ${item.answer}`
         : undefined;
@@ -333,29 +354,39 @@ function Session({
             }}
             leading={<ShareButton onClick={sharePre} />}
           />
-          <AnswerInput
-            questionKey={item.id}
-            reward={state.fresh ? play.lastGold : 0}
-            charCount={play.charCount}
-            wordLengths={play.wordLengths}
-            slots={play.slots}
-            feedback={feedback}
-            value={state.input}
-            phase={state.phase}
-            canSubmit={play.canSubmit}
-            canAdvance={false}
-            advanceLabel=""
-            onChange={play.setInput}
-            onSubmit={() => {
-              if (
-                play.canSubmit &&
-                !isCorrectAnswer({ answer: item.answer, input: state.input })
-              )
-                setMissedOnce(true);
-              play.submit();
-            }}
-            onAdvance={() => {}}
-          />
+          {axesMode ? (
+            <MbtiAxesPicker
+              questionKey={item.id}
+              reward={state.fresh ? play.lastGold : 0}
+              selection={play.selection}
+              lockedAxes={play.lockedAxes}
+              feedback={feedback}
+              phase={state.phase}
+              canSubmit={play.canSubmit}
+              canAdvance={false}
+              advanceLabel=""
+              onPick={play.pickAxis}
+              onSubmit={submit}
+              onAdvance={() => {}}
+            />
+          ) : (
+            <AnswerInput
+              questionKey={item.id}
+              reward={state.fresh ? play.lastGold : 0}
+              charCount={play.charCount}
+              wordLengths={play.wordLengths}
+              slots={play.slots}
+              feedback={feedback}
+              value={state.input}
+              phase={state.phase}
+              canSubmit={play.canSubmit}
+              canAdvance={false}
+              advanceLabel=""
+              onChange={play.setInput}
+              onSubmit={submit}
+              onAdvance={() => {}}
+            />
+          )}
           {/* 정답 보기(한 번 틀렸거나 힌트를 다 쓴 뒤). */}
           <div className={styles.helpRow}>
             {canGiveUp &&
