@@ -36,14 +36,6 @@
   padding: 0 var(--space-3) 0 var(--space-1);
 }
 
-.heroSettings {
-  composes: small from '../styles/ui.module.css';
-  position: absolute;
-  top: 0;
-  left: 0;
-  gap: var(--space-1);
-}
-
 /* 머리: 왼쪽 버튼·가운데 제목(또는 진행)·오른쪽 골드. */
 .header {
   display: flex;
@@ -107,7 +99,8 @@
   align-items: center;
   gap: var(--space-2);
   margin: var(--space-3) 0 56px;
-  padding-top: var(--space-5);
+  /* 위 모서리의 방해꾼·골드·⚙(44px + 그림자)와 로고가 겹치지 않게 그 줄만큼 띄운다. */
+  padding-top: 60px;
   text-align: center;
 }
 
