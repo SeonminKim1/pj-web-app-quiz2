@@ -33,9 +33,9 @@
   border: var(--border);
   border-radius: 999px;
   background: var(--color-mint);
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 0.875rem;
-  font-style: italic;
+  font-family: var(--font-display);
+  font-synthesis: none;
+  font-size: 0.9375rem;
   font-weight: 800;
   line-height: 1;
 }
