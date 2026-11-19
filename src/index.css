@@ -15,6 +15,8 @@
   --color-danger-soft: #fde4e4;
   --color-focus: #3d6bff;
   --color-disabled: #ece5df;
+  /* 시트 뒤를 덮는 막(코코아 잉크 40%). */
+  --color-scrim: rgb(58 46 46 / 40%);
   --color-dot: rgb(194 58 107 / 9%);
 
   --radius-card: 20px;
