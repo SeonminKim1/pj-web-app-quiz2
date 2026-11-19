@@ -1,5 +1,5 @@
 // 퀴즈 주제 설정과 데이터 JSON의 타입. 앱과 개발용 스크립트(scripts/quiz-data/)가 함께 쓴다.
-// 규칙은 docs/domain-quiz-data/spec.md가 기준이다.
+// 형식은 README.md "문제 데이터"에 있다.
 
 /** 주제 id = 데이터 파일 이름(data/<id>.json). 목록은 src/lib/quizTopics.ts의 QUIZ_TOPICS. */
 export type QuizTopicId = 'nonsense';

@@ -1,4 +1,4 @@
-// 사용자 진행 상황(localStorage 'quiz-progress'). 규칙은 docs/ui-nonsense-play/spec.md "골드와 진행 저장".
+// 사용자 진행 상황(localStorage 'quiz-progress').
 
 /** 주제 하나의 진행. */
 export type TopicProgress = {
@@ -8,7 +8,7 @@ export type TopicProgress = {
   hintsOpened: Record<string, number>;
 };
 
-/** 북마크 하나(docs/ui-bookmark/spec.md "북마크 저장"): 주제 id와 문제 id. */
+/** 북마크 하나: 주제 id와 문제 id. */
 export type Bookmark = {
   topic: string;
   id: string;

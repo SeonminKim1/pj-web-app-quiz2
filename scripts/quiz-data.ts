@@ -1,5 +1,5 @@
 // 퀴즈 데이터 명령: npm run quiz-data(검사 → 생성) | npm run quiz-data:check(검사만)
-// 프로젝트 루트에서 실행한다. 규칙은 docs/domain-quiz-data/spec.md가 기준이다.
+// 프로젝트 루트에서 실행한다. 형식은 README.md "문제 데이터"에 있다.
 import { formatQuizDataError, isQuizDataError } from './quiz-data/errors.ts';
 import { readTopicFiles, replaceJsonFiles } from './quiz-data/io.ts';
 import { buildQuizOutputs, playableWarnings } from './quiz-data/outputs.ts';

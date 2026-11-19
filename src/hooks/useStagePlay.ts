@@ -22,7 +22,7 @@ import { useProgress } from './useProgress.ts';
 
 export type PlayPhase = 'answering' | 'wrong' | 'correct' | 'result';
 
-/** 방금 맞힌 뒤 "다음"을 받지 않는 시간(ms). 확인 연타로 정답을 못 보고 넘어가지 않게(docs/ui-play-layout/spec.md). */
+/** 방금 맞힌 뒤 "다음"을 받지 않는 시간(ms). 확인 연타로 정답을 못 보고 넘어가지 않게. */
 export const ADVANCE_DELAY_MS = 400;
 
 export type StagePlayState = {

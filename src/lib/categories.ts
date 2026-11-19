@@ -1,4 +1,4 @@
-// 카테고리 한 판(docs/ui-mbti-play/spec.md "들어갈 수 있는 주제·한 판"): 문제의 category를 처음 나온 순서로 묶는다.
+// 카테고리 한 판: 문제의 category를 처음 나온 순서로 묶는다.
 // 카테고리 진행률은 stages.stageProgress를 그대로 쓴다(문제 목록만 본다).
 import type { QuizItem } from '../types/quiz.ts';
 import { parseStageNo } from './stages.ts';

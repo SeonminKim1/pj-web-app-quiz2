@@ -12,7 +12,7 @@ type PlaygroundProps = {
   animal?: PetId;
 };
 
-/** 풀이 화면 위쪽(머리 줄 아래) 놀이터 띠(docs/ui-play-layout/spec.md "놀이터"). 풀잎·꽃은 장식이라 보조 기술에 숨기고, 간식 버튼만 읽힌다. */
+/** 풀이 화면 위쪽(머리 줄 아래) 놀이터 띠. 풀잎·꽃은 장식이라 보조 기술에 숨기고, 간식 버튼만 읽힌다. */
 export function Playground({
   playgroundRef,
   onFeed,

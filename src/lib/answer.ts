@@ -1,4 +1,4 @@
-// 주관식 정답 규칙(docs/ui-nonsense-play/spec.md "주관식 입력"): 정답 글자, 어절별 글자 수, 채점.
+// 주관식 정답 규칙: 정답 글자, 어절별 글자 수, 채점.
 
 /** 정답에서 공백을 뺀 글자들(유니코드 문자 단위). 문장부호·숫자·영문도 글자다. */
 export function answerChars(answer: string): string[] {
@@ -45,7 +45,7 @@ export type AnswerSlots = {
 };
 
 /**
- * 입력을 정답 글자 칸에 채운다(docs/ui-play-layout/spec.md "글자 칸"). 입력의 공백은 빼고
+ * 입력을 정답 글자 칸에 채운다. 입력의 공백은 빼고
  * 앞에서부터 한 칸에 한 글자씩. 쓴 띄어쓰기 위치는 반영하지 않는다(채점이 무시하므로).
  */
 export function answerSlots({

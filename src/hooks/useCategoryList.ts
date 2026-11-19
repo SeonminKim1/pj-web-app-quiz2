@@ -1,4 +1,4 @@
-// 카테고리 목록 hook(docs/ui-mbti-play/spec.md "UI: 카테고리 목록"): 주제 파일 + 진행 → 카테고리 칸 표시값.
+// 카테고리 목록 hook: 주제 파일 + 진행 → 카테고리 칸 표시값.
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { solvedSet } from '../lib/progress.ts';

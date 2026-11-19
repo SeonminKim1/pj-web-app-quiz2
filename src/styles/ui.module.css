@@ -1,4 +1,4 @@
-/* 공통 모양(docs/ui-design-polish/spec.md "공통 부품 모양"). 컴포넌트 CSS에서 composes로 가져다 쓴다. */
+/* 공통 모양. 컴포넌트 CSS에서 composes로 가져다 쓴다. */
 
 /* 카드: 흰 바탕, 굵은 테두리, 단단한 그림자. */
 .card {
@@ -48,7 +48,7 @@
   background: var(--color-pink);
 }
 
-/* 주 버튼이 막혔을 때: 연분홍은 오류처럼 보여 회색으로(docs/ui-play-layout/spec.md). */
+/* 주 버튼이 막혔을 때: 연분홍은 오류처럼 보여 회색으로. */
 .primary:disabled {
   background: var(--color-disabled);
   color: var(--color-ink-soft);

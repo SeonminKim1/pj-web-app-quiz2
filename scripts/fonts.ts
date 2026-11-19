@@ -6,7 +6,7 @@ import { licenseText, selectFontFaces } from './fonts/fontCss.ts';
 
 const SOURCE_DIR = 'node_modules/pretendard/dist/web/static';
 const OUTPUT_DIR = 'public/fonts/pretendard';
-/** 본문 400, 버튼·제목 700, 로고·문제 800(docs/ui-design-polish/spec.md). */
+/** 본문 400, 버튼·제목 700, 로고·문제 800. */
 const WEIGHTS = [400, 700, 800] as const;
 
 async function main(): Promise<void> {

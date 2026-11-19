@@ -37,7 +37,7 @@ type AnswerInputProps = {
 };
 
 /**
- * 주관식 입력(docs/ui-play-layout/spec.md): 상태 줄(글자 수 ↔ 피드백), 글자 칸, 입력창 + 확인/다음.
+ * 주관식 입력: 상태 줄(글자 수 ↔ 피드백), 글자 칸, 입력창 + 확인/다음.
  * 맞힌 뒤에는 같은 자리 버튼과 Enter가 "다음"이다. 한글 조합 중 Enter는 제출하지 않는다.
  */
 export function AnswerInput({

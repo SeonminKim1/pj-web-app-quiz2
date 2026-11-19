@@ -1,4 +1,4 @@
-// 설정 기본값(docs/ui-pest-skin/spec.md "설정 저장").
+// 설정 기본값.
 import type { Settings } from '../types/settings.ts';
 
 export const SETTINGS_VERSION = 1;

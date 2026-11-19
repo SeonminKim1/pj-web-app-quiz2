@@ -1,4 +1,4 @@
-// /topics/:topicId에서 어떤 목록 화면을 보일지(docs/ui-mbti-play/spec.md "들어갈 수 있는 주제·한 판").
+// /topics/:topicId에서 어떤 목록 화면을 보일지.
 // 주제 id가 아니라 주제 설정의 한 판 단위(round.byCategory)로 고른다.
 import { useParams } from 'react-router';
 import { findCategoryTopic } from '../lib/quizTopics.ts';

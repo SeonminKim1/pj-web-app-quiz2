@@ -1,4 +1,4 @@
-/* 전역 기본값과 디자인 변수(docs/ui-design-polish/spec.md "디자인 변수").
+/* 전역 기본값과 디자인 변수.
    화면·컴포넌트 스타일은 각 파일 옆 CSS Module(*.module.css)에 두고, 색·모서리·그림자는 아래 변수만 쓴다. */
 :root {
   --color-bg: #fff6ec;

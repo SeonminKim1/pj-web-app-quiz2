@@ -1,5 +1,5 @@
 // 퀴즈 데이터 스크립트의 에러. 독자는 개발자라 앱의 AppError(사용자 문구용)와 따로 둔다.
-// 식별자 목록은 docs/domain-quiz-data/spec.md "에러 케이스" 표가 기준이다.
+// 식별자 설명은 docs/errors.md에 있다.
 
 /** spec 에러 식별자. */
 export const QUIZ_DATA_ERROR_CODES = ['quiz_data_invalid'] as const;

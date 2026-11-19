@@ -13,7 +13,7 @@ type QuestionNavProps = {
   onNext: () => void;
 };
 
-/** 머리 줄 "‹ 진행 ›"(docs/ui-play-layout/spec.md "머리 줄"). 화살표는 이름으로 읽힌다. */
+/** 머리 줄 "‹ 진행 ›". 화살표는 이름으로 읽힌다. */
 export function QuestionNav({
   label,
   canPrev,

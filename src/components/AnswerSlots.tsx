@@ -9,7 +9,7 @@ type AnswerSlotsProps = {
 };
 
 /**
- * 글자 칸(docs/ui-play-layout/spec.md "글자 칸"): 입력창에 쓴 글자를 어절별 칸에 비춰 보여 주기만 한다.
+ * 글자 칸: 입력창에 쓴 글자를 어절별 칸에 비춰 보여 주기만 한다.
  * 같은 정보(글자 수)는 입력창 설명 문구가 읽어 주므로 보조 기술에는 숨긴다.
  */
 export function AnswerSlots({ slots, phase }: AnswerSlotsProps): ReactElement {

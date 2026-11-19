@@ -1,4 +1,4 @@
-// 설정 저장(localStorage 'quiz-settings', docs/ui-pest-skin/spec.md "설정 저장").
+// 설정 저장(localStorage 'quiz-settings').
 // 진행 저장과 같은 규칙: 깨진 값·저장 실패·사생활 보호 모드면 처음 값·메모리로 계속.
 import { isPetId } from '../lib/pestAnimals.ts';
 import { isRecord } from '../lib/records.ts';
