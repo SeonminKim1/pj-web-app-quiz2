@@ -158,7 +158,7 @@ export function pickRoamTarget({
 }
 
 /** 두 점 사이 거리. */
-export function distance(a: Point, b: Point): number {
+function distance(a: Point, b: Point): number {
   return Math.hypot(b.x - a.x, b.y - a.y);
 }
 

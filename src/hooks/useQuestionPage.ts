@@ -35,7 +35,7 @@ export type QuestionTarget =
  * 빌드가 /q/<id>/index.html에 넣어 둔 문제 자료(#q-data). 있으면 전체 파일을 받기 전에 바로 그린다.
  * 없거나(npm run dev, SPA fallback) 주소의 id와 다르면 undefined → nonsense.json을 받아서 그린다.
  */
-export function readInlineItem(
+function readInlineItem(
   id: string,
   doc: Document | undefined = globalThis.document,
 ): QuizItem | undefined {
@@ -58,7 +58,7 @@ export function readInlineItem(
 }
 
 /** 그 문제에서 실제로 열 수 있는 힌트 단계 수(문장 힌트는 데이터에 있는 만큼). */
-export function availableHintSteps(topic: StageTopic, item: QuizItem): number {
+function availableHintSteps(topic: StageTopic, item: QuizItem): number {
   const textSteps = Math.min(item.hints?.length ?? 0, textHintCount(topic));
   const letterSteps = topic.hints.filter(
     (step) => step.type === 'revealLetter',
@@ -67,7 +67,7 @@ export function availableHintSteps(topic: StageTopic, item: QuizItem): number {
 }
 
 /** 이 문제가 든 스테이지 번호(id 오름차순 위치 기준). 그 스테이지를 다 풀었으면 못 푼 문제가 남은 다음 스테이지. */
-export function continueStageNo({
+function continueStageNo({
   data,
   item,
   solved,

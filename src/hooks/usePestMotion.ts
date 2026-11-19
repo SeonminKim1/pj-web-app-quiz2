@@ -61,7 +61,7 @@ export type PestFrame = {
 };
 
 /** 잡는 영역 버튼에 붙일 이벤트 처리. */
-export type PestHandlers = {
+type PestHandlers = {
   onPointerDown: (event: PointerEvent<HTMLElement>) => void;
   onPointerMove: (event: PointerEvent<HTMLElement>) => void;
   onPointerUp: (event: PointerEvent<HTMLElement>) => void;

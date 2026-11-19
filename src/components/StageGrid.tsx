@@ -2,7 +2,7 @@ import type { CSSProperties, ReactElement } from 'react';
 import styles from './StageGrid.module.css';
 
 /** 스테이지 칸 하나에 보여 줄 값. */
-export type StageCell = {
+type StageCell = {
   no: number;
   solvedCount: number;
   total: number;

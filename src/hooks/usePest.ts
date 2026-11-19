@@ -44,7 +44,7 @@ export type PestState = {
 };
 
 /** 달려갈 곳 한 번. */
-export type PestVisit = { id: number; spot: PestSpot };
+type PestVisit = { id: number; spot: PestSpot };
 
 export type PestAction =
   | { type: 'coverDue' }

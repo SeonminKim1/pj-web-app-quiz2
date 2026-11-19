@@ -30,7 +30,7 @@ function meta(html: string, property: string): string | undefined {
 }
 
 /** 페이지 안의 #q-data(없으면 undefined, 깨졌으면 null). */
-export function readQData(html: string): unknown {
+function readQData(html: string): unknown {
   const match = html.match(
     /<script type="application\/json" id="q-data">([\s\S]*?)<\/script>/,
   );

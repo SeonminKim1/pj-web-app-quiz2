@@ -4,9 +4,9 @@ import type { HintType, QuizItem, QuizTopic } from '../types/quiz.ts';
 import { answerChars } from './answer.ts';
 
 export const PROGRESS_VERSION = 1;
-export const START_GOLD = 30;
-export const CORRECT_GOLD = 10;
-export const CORRECT_WITH_HINT_GOLD = 5;
+const START_GOLD = 30;
+const CORRECT_GOLD = 10;
+const CORRECT_WITH_HINT_GOLD = 5;
 export const HINT_PRICE = 5;
 
 /** 열 수 있는 힌트 한 단계: 보여 줄 문장과 무료 여부. */
@@ -23,7 +23,7 @@ export function initialProgress(): Progress {
 }
 
 /** 주제의 진행(없으면 빈 진행). */
-export function topicProgress({
+function topicProgress({
   progress,
   topicId,
 }: {
@@ -97,7 +97,7 @@ export function openableHints({
 }
 
 /** 한 글자 공개 힌트 문구. 첫 글자면 "첫 글자는 'X'예요", 아니면 "N번째 글자는 'X'예요". */
-export function revealHintText(position: number, char: string): string {
+function revealHintText(position: number, char: string): string {
   return position === 1
     ? `첫 글자는 '${char}'예요`
     : `${position}번째 글자는 '${char}'예요`;

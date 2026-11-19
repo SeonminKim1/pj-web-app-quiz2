@@ -49,9 +49,7 @@ export function getQuizTopicFileName(id: QuizTopicId): string {
 }
 
 /** 지금 구현된 풀이 방식 부품. 부품을 만들면 여기에 추가한다. */
-export const IMPLEMENTED_PLAY_MODES: ReadonlySet<PlayMode> = new Set([
-  'typing',
-]);
+const IMPLEMENTED_PLAY_MODES: ReadonlySet<PlayMode> = new Set(['typing']);
 
 /** 화면에서 들어갈 수 있는 주제인지: 기본 풀이 방식(play[0])이 구현된 부품이어야 한다. */
 export function isEnterableTopic(topic: QuizTopic): boolean {

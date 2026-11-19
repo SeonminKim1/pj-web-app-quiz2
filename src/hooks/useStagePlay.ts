@@ -113,7 +113,7 @@ export function stagePlayReducer(
 }
 
 /** 화면에 보여 줄 힌트 상태. */
-export type HintView = {
+type HintView = {
   /** 이미 연 힌트. */
   opened: OpenableHint[];
   /** 이 문제에서 열 수 있는 힌트 전체 수(카드 수). */

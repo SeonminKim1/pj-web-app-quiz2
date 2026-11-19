@@ -8,7 +8,7 @@ import type { LoadState } from './useQuizData.ts';
 import { useTopicStages } from './useTopicStages.ts';
 
 /** 스테이지 칸 하나의 표시값. */
-export type StageCellView = {
+type StageCellView = {
   no: number;
   solvedCount: number;
   total: number;

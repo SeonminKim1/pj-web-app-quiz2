@@ -29,7 +29,7 @@ type CategoryMember = {
 export const TOPICS_CONFIG_FILE = 'src/lib/quizTopics.ts';
 
 /** 원본 메타 필드. 문제에 들어가면 개인정보 위반으로 따로 표시한다. */
-export const SOURCE_META_FIELDS = [
+const SOURCE_META_FIELDS = [
   'status',
   'created_at',
   'submit_at',

@@ -12,8 +12,8 @@ import satori from 'satori';
 import { PetPortrait } from '../../src/components/PetPortrait.tsx';
 import type { CardLayout } from '../share/textFit.ts';
 
-export const CARD_WIDTH = 1200;
-export const CARD_HEIGHT = 630;
+const CARD_WIDTH = 1200;
+const CARD_HEIGHT = 630;
 const SAFE = 630;
 
 // src/index.css 토큰과 같은 값(이미지라 CSS 변수를 못 쓴다).
@@ -47,7 +47,7 @@ export type CardFonts = {
 }[];
 
 /** Pretendard OTF 위치(설치된 pretendard 패키지 기준). */
-export function fontPaths(): { bold: string; extraBold: string } {
+function fontPaths(): { bold: string; extraBold: string } {
   const root = dirname(require.resolve('pretendard/package.json'));
   const dir = join(root, 'dist/public/static');
   return {
@@ -77,7 +77,7 @@ export async function loadFonts(): Promise<CardFonts> {
   }
 }
 
-export const JUA_FILE = 'scripts/og/fonts/Jua-Regular.ttf';
+const JUA_FILE = 'scripts/og/fonts/Jua-Regular.ttf';
 
 /** 주아체(OFL, scripts/og/fonts/Jua-Regular.ttf). 카드 그리기에만 쓴다(앱은 @fontsource/jua). */
 async function loadJua(): Promise<CardFonts> {
@@ -228,7 +228,7 @@ export function defaultCard(): ReactElement {
   );
 }
 
-export type RenderStage = 'svg' | 'png';
+type RenderStage = 'svg' | 'png';
 
 export async function renderPng(
   element: ReactElement,

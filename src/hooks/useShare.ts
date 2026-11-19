@@ -42,7 +42,7 @@ function browserEnv(): ShareEnv {
   };
 }
 
-export type ShareOutcome = 'shared' | 'copied' | 'manual' | 'cancelled';
+type ShareOutcome = 'shared' | 'copied' | 'manual' | 'cancelled';
 
 export type ShareView = {
   /** 한 번이라도 보냈는지("또 내기"). */

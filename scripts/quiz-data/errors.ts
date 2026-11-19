@@ -2,7 +2,7 @@
 // 식별자 설명은 docs/errors.md에 있다.
 
 /** spec 에러 식별자. */
-export const QUIZ_DATA_ERROR_CODES = ['quiz_data_invalid'] as const;
+const QUIZ_DATA_ERROR_CODES = ['quiz_data_invalid'] as const;
 
 export type QuizDataErrorCode = (typeof QUIZ_DATA_ERROR_CODES)[number];
 

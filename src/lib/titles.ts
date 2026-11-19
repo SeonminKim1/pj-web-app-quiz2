@@ -1,8 +1,8 @@
 // 칭호: 넌센스에서 맞힌 문제 수로 정한다. 마지막 칭호는 전부 맞혔을 때.
 
-export type Title = { name: string; min: number };
+type Title = { name: string; min: number };
 
-export const TITLES: readonly Title[] = [
+const TITLES: readonly Title[] = [
   { name: '넌센스 새싹', min: 0 },
   { name: '말장난 꿈나무', min: 10 },
   { name: '웃음 사냥꾼', min: 30 },

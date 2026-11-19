@@ -8,7 +8,7 @@ import { useManifest, type LoadState } from './useQuizData.ts';
 import { useTopicStages } from './useTopicStages.ts';
 
 /** 주제 카드 하나의 표시값. */
-export type TopicCardView = {
+type TopicCardView = {
   id: string;
   label: string;
   /** 예: "546문제 중 12문제 풂". */
@@ -29,7 +29,7 @@ export type HomePageView = {
 };
 
 /** 첫 화면의 "이어서 풀기". */
-export type ContinueView = {
+type ContinueView = {
   /** 못 푼 문제가 남은 첫 스테이지(다 풀었으면 undefined). */
   stageNo: number | undefined;
   stageCount: number;

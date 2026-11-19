@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import styles from './QuestionNav.module.css';
 
 /** › 버튼이 하는 일: 다음 문제, 결과 보기(넌센스 마지막), 막힘(MBTI 마지막). */
-export type QuestionNavNext = 'next' | 'result' | 'disabled';
+type QuestionNavNext = 'next' | 'result' | 'disabled';
 
 type QuestionNavProps = {
   /** 가운데 진행 표시(예: "1단계 · 3 / 10"). */

@@ -11,7 +11,7 @@ export type PlayMode = 'typing';
 export type HintType = 'text' | 'revealLetter';
 
 /** 힌트 한 단계. paid가 false면 무료(첫 단계만 가능), true면 골드. */
-export type HintStep = {
+type HintStep = {
   type: HintType;
   paid: boolean;
 };
@@ -20,7 +20,7 @@ export type HintStep = {
  * 한 판 단위. 카테고리 단위면 카테고리 하나의 문제 size개가 한 판,
  * 아니면 문제 id 순서로 stageSize개씩 나눈 고정 스테이지가 한 판이다.
  */
-export type QuizRound =
+type QuizRound =
   { byCategory: false; stageSize: number } | { byCategory: true; size: number };
 
 /** 주제 설정 한 덩어리. 풀이·힌트 방식은 공유 부품 중에서 고른다. */
@@ -69,7 +69,7 @@ export type QuizCategoryInfo = {
 };
 
 /** manifest의 주제 요약 한 줄. 모두 주제 파일에서 계산되는 값이다. */
-export type QuizTopicInfo = {
+type QuizTopicInfo = {
   id: QuizTopicId;
   label: string;
   /** 문제 수. */
