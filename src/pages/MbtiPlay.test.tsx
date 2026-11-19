@@ -91,7 +91,7 @@ function renderAt(path: string) {
 // 축 4개를 차례로 누른다(공개된 축은 건너뜀).
 async function pick(user: ReturnType<typeof userEvent.setup>, type: string) {
   const groups = screen.getAllByRole('group', {
-    name: /에너지 방향|인식|판단|생활 양식/,
+    name: /^(에너지 방향|정보 인식|결정 방식|생활 양식)/,
   });
   for (const [index, letter] of [...type].entries()) {
     const button = within(groups[index]!).getByRole('button', {

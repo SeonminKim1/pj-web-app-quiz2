@@ -28,7 +28,7 @@ export const MBTI_AXES: readonly MbtiAxis[] = [
     ],
   },
   {
-    name: '인식',
+    name: '정보 인식',
     question: '정보를 어떻게 받아들이나요?',
     options: [
       { letter: 'S', label: '감각', desc: '눈앞의 사실과 경험을 믿어요' },
@@ -36,7 +36,7 @@ export const MBTI_AXES: readonly MbtiAxis[] = [
     ],
   },
   {
-    name: '판단',
+    name: '결정 방식',
     question: '결정할 때 무엇을 먼저 보나요?',
     options: [
       { letter: 'T', label: '사고', desc: '논리와 원칙으로 정해요' },
