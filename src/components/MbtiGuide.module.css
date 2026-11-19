@@ -10,16 +10,22 @@
 .iconButton {
   composes: secondary from '../styles/ui.module.css';
   display: inline-flex;
-  width: 46px;
-  min-height: 46px;
+  /* 옆의 확인 버튼(primary, 48px)과 같은 높이. */
+  width: 48px;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
+}
+
+/* composes한 .button의 좌우 여백(16px)·최소 높이(44px)가 나중에 와서 이기므로, 우선순위를 올려 덮는다(아이콘이 찌그러지지 않게). */
+.iconButton.iconButton {
+  min-height: 48px;
   padding: 0;
 }
 
 .info {
   display: inline-flex;
+  flex: none;
   width: 22px;
   height: 22px;
   align-items: center;
