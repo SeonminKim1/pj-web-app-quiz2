@@ -1,7 +1,7 @@
 // 문제 하나 모드(/q/:id) hook. 설계 문서 "사용자 흐름 5"·"문제 하나 화면 명세".
 // - 공유 쿼리(s, from, h, r)를 읽자마자 주소창에서 지운다(새로 고침·북마크로 다시 세지 않게).
 // - s=1이면 공유 착지로 센다(문제 id와 함께).
-// - 공유 대상이 아니거나 없는 문제면 "쉬는 중".
+// - 공유 대상이 아니면 "쉬는 중", 없는 문제면 "없는 문제".
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { analytics } from '../lib/analyticsInstance.ts';
@@ -28,7 +28,8 @@ export type QuestionTarget =
       /** 이 문제가 든 스테이지(전체 데이터를 받기 전·다 풀었으면 undefined → 스테이지 목록). */
       stageNo: number | undefined;
     }
-  | { kind: 'resting' };
+  /** 쉬는 중. missing이면 그런 문제가 아예 없다(주소 오타 등). */
+  | { kind: 'resting'; missing: boolean };
 
 /**
  * 빌드가 /q/<id>/index.html에 넣어 둔 문제 자료(#q-data). 있으면 전체 파일을 받기 전에 바로 그린다.
@@ -123,7 +124,7 @@ export function useQuestionPage(): {
     if (loaded.status === 'ready') {
       const item = loaded.data.items.find((it) => it.id === id);
       if (!item || item.shareable !== true) {
-        return { status: 'ready', data: { kind: 'resting' } };
+        return { status: 'ready', data: { kind: 'resting', missing: !item } };
       }
       const solved = solvedSet({ progress, topicId: TOPIC_ID });
       const stageNo = continueStageNo({ data: loaded.data, item, solved });

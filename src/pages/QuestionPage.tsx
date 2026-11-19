@@ -3,7 +3,7 @@
 //
 //   [loading] → playable ─ answering/wrong/correct ─(맞힘)→ result(s) ─ share / continue
 //                   │                └─(포기 확인)→ result(g)
-//                   └ resting(공유 대상 아님·없는 id) → 다른 문제 풀기
+//                   └ resting(공유 대상 아님 / 없는 id) → 다른 문제 풀기
 import { playCue } from '../lib/sound.ts';
 import { usePhaseSound } from '../hooks/usePhaseSound.ts';
 import { useEffect, useRef, useState, type ReactElement } from 'react';
@@ -58,7 +58,13 @@ export function QuestionPage(): ReactElement {
     );
   }
   if (state.data.kind === 'resting') {
-    return <RestingView info={info} onStage={() => goStage(1)} />;
+    return (
+      <RestingView
+        info={info}
+        missing={state.data.missing}
+        onStage={() => goStage(1)}
+      />
+    );
   }
   return (
     <Session
@@ -87,9 +93,11 @@ function Banner({ info }: { info: ShareInfo }): ReactElement {
 
 function RestingView({
   info,
+  missing,
   onStage,
 }: {
   info: ShareInfo;
+  missing: boolean;
   onStage: () => void;
 }): ReactElement {
   const { settings } = useSettings();
@@ -101,7 +109,9 @@ function RestingView({
           <PetPortrait animal={settings.pet} mood="sulky" />
           <span className={styles.restingZ}>z z</span>
         </div>
-        <h1 className={styles.title}>이 문제는 쉬는 중이에요</h1>
+        <h1 className={styles.title}>
+          {missing ? '그런 문제는 없어요' : '이 문제는 쉬는 중이에요'}
+        </h1>
         <button type="button" className={styles.primary} onClick={onStage}>
           다른 문제 풀기
         </button>

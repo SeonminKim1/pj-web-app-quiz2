@@ -98,10 +98,17 @@ describe('/q/:id 문제 하나 모드', () => {
     expect(screen.queryByText(/힌트 3개로/)).not.toBeInTheDocument();
   });
 
-  it('공유 대상이 아니거나 없는 문제는 "쉬는 중"', async () => {
+  it('공유 대상이 아닌 문제는 "쉬는 중"', async () => {
     renderAt('/q/12/');
     expect(
       await screen.findByRole('heading', { name: '이 문제는 쉬는 중이에요' }),
+    ).toBeInTheDocument();
+  });
+
+  it('없는 문제 번호는 "그런 문제는 없어요"', async () => {
+    renderAt('/q/99999/');
+    expect(
+      await screen.findByRole('heading', { name: '그런 문제는 없어요' }),
     ).toBeInTheDocument();
   });
 
