@@ -39,7 +39,9 @@
 .status[data-tone='correct'] span::before,
 .status[data-tone='correct'] span::after {
   color: var(--color-pink-strong);
+  /* 장식: 대체 글자를 비워 화면 읽기(aria-live)가 별을 읽지 않게. 앞 줄은 옛 브라우저용. */
   content: '✦';
+  content: '✦' / '';
 }
 
 .status[data-tone='correct'] span::before {
