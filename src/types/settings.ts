@@ -10,4 +10,6 @@ export type Settings = {
   pet: PetId;
   /** 효과음·진동(선택 필드, 없으면 꺼짐). */
   sound?: boolean;
+  /** 배경음악(선택 필드, 없으면 꺼짐). */
+  music?: boolean;
 };

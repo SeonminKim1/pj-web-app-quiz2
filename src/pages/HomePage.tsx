@@ -2,6 +2,7 @@ import { useState, type ReactElement } from 'react';
 import { AppIcon } from '../components/AppIcon.tsx';
 import { PetPicker } from '../components/PetPicker.tsx';
 import { PetPortrait } from '../components/PetPortrait.tsx';
+import { MusicToggle } from '../components/MusicToggle.tsx';
 import { SoundToggle } from '../components/SoundToggle.tsx';
 import { useSettings } from '../hooks/useSettings.ts';
 import { PEST_ANIMALS, getPestAnimal } from '../lib/pestAnimals.ts';
@@ -34,6 +35,7 @@ export function HomePage(): ReactElement {
         <span className={styles.heroGold}>
           <GoldBadge gold={gold} />
           <SoundToggle />
+          <MusicToggle />
         </span>
         <AppIcon size={72} />
         <h1 className={styles.logo}>

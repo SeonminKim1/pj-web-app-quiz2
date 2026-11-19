@@ -35,6 +35,7 @@ export function isSettings(value: unknown): value is Settings {
     isRecord(value) &&
     value.version === SETTINGS_VERSION &&
     isPetId(value.pet) &&
-    (value.sound === undefined || typeof value.sound === 'boolean')
+    (value.sound === undefined || typeof value.sound === 'boolean') &&
+    (value.music === undefined || typeof value.music === 'boolean')
   );
 }

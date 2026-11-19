@@ -28,6 +28,24 @@ describe('설정 상태', () => {
     expect(save).toHaveBeenCalledTimes(1);
   });
 
+  it('배경음악은 처음엔 꺼져 있고, 켜고 끄면 바로 저장한다', () => {
+    const store = createSettingsStore({ storage: null });
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <ProgressProvider store={createProgressStore({ storage: null })}>
+        <SettingsProvider store={store}>
+          <MemoryRouter>{children}</MemoryRouter>
+        </SettingsProvider>
+      </ProgressProvider>
+    );
+    const { result } = renderHook(() => useSettings(), { wrapper });
+    expect(result.current.settings.music).toBeUndefined();
+
+    act(() => result.current.setMusic(true));
+    expect(store.load()).toEqual({ version: 1, pet: 'rabbit', music: true });
+    act(() => result.current.setMusic(false));
+    expect(store.load()).toEqual({ version: 1, pet: 'rabbit', music: false });
+  });
+
   it('SettingsProvider 밖에서 쓰면 바로 알린다', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => renderHook(() => useSettings())).toThrow(

@@ -9,6 +9,8 @@ export type SettingsContextValue = {
   choosePet: (pet: PetId) => void;
   /** 효과음·진동 켜고 끄기. */
   setSound: (on: boolean) => void;
+  /** 배경음악 켜고 끄기. */
+  setMusic: (on: boolean) => void;
 };
 
 export const SettingsContext = createContext<SettingsContextValue | undefined>(
