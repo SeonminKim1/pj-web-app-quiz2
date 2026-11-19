@@ -4,6 +4,7 @@ import { useRef, useState, type RefObject } from 'react';
 import { getPestAnimal, type PestAnimal } from '../lib/pestAnimals.ts';
 import { usePest, type PestView } from './usePest.ts';
 import { usePestMotion, type PestMotion } from './usePestMotion.ts';
+import { usePestSound } from './usePestSound.ts';
 import { useSettings } from './useSettings.ts';
 import type { PlayPhase } from './useStagePlay.ts';
 
@@ -35,6 +36,7 @@ export function usePestSession({
   // 화면에 있는 동안에는 동물이 바뀌지 않게 들어올 때 한 번 정한다.
   const [animal] = useState(() => getPestAnimal(settings.pet));
   const pest = usePest({ phase, animal });
+  usePestSound(pest);
   const areaRef = useRef<HTMLDivElement>(null);
   const playgroundRef = useRef<HTMLDivElement>(null);
   const questionRef = useRef<HTMLParagraphElement>(null);

@@ -1,6 +1,7 @@
 // "친구한테 이 문제 내기"(설계 문서 "사용자 흐름 1"·"공유가 세지는 시점"·"공유 뒤 상태").
 // navigator.share는 사용자 동작 안에서만 열리므로 클릭 처리기에서 바로 부른다(await 뒤가 아님).
 // 성공했을 때만 통계에 센다. 취소(AbortError)·복사 실패는 세지 않는다.
+import { playCue } from '../lib/sound.ts';
 import { useCallback, useState } from 'react';
 import { analytics } from '../lib/analyticsInstance.ts';
 import { buildSharePath, shareText, type ShareInfo } from '../lib/shareLink.ts';
@@ -82,6 +83,7 @@ export function useShare({
       const text = shareText(question);
       const done = (outcome: 'shared' | 'copied') => {
         analytics.shared(id, timing);
+        playCue('share');
         setSentOnce(true);
         showToast(
           outcome === 'shared'
