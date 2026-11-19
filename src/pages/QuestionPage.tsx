@@ -299,6 +299,7 @@ function Session({
           animal={animal.id}
           fedId={pest.fedId}
           inviting={pest.inviting}
+          avoidRef={questionRef}
         >
           <Playground
             playgroundRef={playgroundRef}

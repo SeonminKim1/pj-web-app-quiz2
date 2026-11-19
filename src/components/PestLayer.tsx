@@ -30,7 +30,17 @@ type PestLayerProps = {
   fedId?: number;
   /** "날 잡아서 끌어 봐" 중이면 끄는 손 모양을 보여 준다. */
   inviting?: boolean;
+  /** 말풍선이 가리면 안 되는 것(문제 문장). 가리러 앉았을 때만 예외. */
+  avoidRef?: RefObject<HTMLElement | null>;
 };
+
+type Box = { left: number; top: number; right: number; bottom: number };
+
+function overlaps(a: Box, b: Box): boolean {
+  return (
+    a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom
+  );
+}
 
 /**
  * 방해꾼 층(spec "배치와 그리기"). 풀이 화면 위에 동물 그림(2D SVG, 터치 통과)을 겹치고,
@@ -49,12 +59,19 @@ export function PestLayer({
   animal = 'rabbit',
   fedId = 0,
   inviting = false,
+  avoidRef,
 }: PestLayerProps): ReactElement {
   const hitRef = useRef<HTMLButtonElement>(null);
   const jellyRef = useRef<HTMLDivElement>(null);
   const figureRef = useRef<HTMLDivElement>(null);
   const bubbleRef = useRef<HTMLSpanElement>(null);
   const bubbleSize = useRef({ width: 0, height: 0 });
+  // 피할 상자(놀이 영역 기준). 말풍선이 뜰 때 한 번 잰다(프레임마다 재지 않게).
+  const avoidBox = useRef<Box | undefined>(undefined);
+  const covering = useRef(behavior === 'covering');
+  useEffect(() => {
+    covering.current = behavior === 'covering';
+  }, [behavior]);
 
   // 말풍선 크기는 문구가 바뀔 때만 잰다.
   useLayoutEffect(() => {
@@ -62,7 +79,18 @@ export function PestLayer({
     bubbleSize.current = bubble
       ? { width: bubble.offsetWidth, height: bubble.offsetHeight }
       : { width: 0, height: 0 };
-  }, [line]);
+    const area = areaRef.current?.getBoundingClientRect();
+    const avoid = avoidRef?.current?.getBoundingClientRect();
+    avoidBox.current =
+      bubble && area && avoid
+        ? {
+            left: avoid.left - area.left,
+            top: avoid.top - area.top,
+            right: avoid.right - area.left,
+            bottom: avoid.bottom - area.top,
+          }
+        : undefined;
+  }, [line, areaRef, avoidRef]);
 
   // 프레임마다 그림·잡는 영역·말풍선 위치만 바꾼다(리렌더 없음).
   useEffect(() => {
@@ -87,14 +115,30 @@ export function PestLayer({
           Math.max(0, area.width - width),
         );
         let by = top - height - 4;
-        if (by < 0) {
-          // 머리 위에 자리가 없으면 얼굴을 가리지 않게 옆에 띄운다(넓은 쪽).
+        const box = (bx0: number, by0: number): Box => ({
+          left: bx0,
+          top: by0,
+          right: bx0 + width,
+          bottom: by0 + height,
+        });
+        // 가리러 앉은 게 아니면 문제 문장을 덮지 않는다.
+        const avoid = covering.current ? undefined : avoidBox.current;
+        if (by < 0 || (avoid && overlaps(box(bx, by), avoid))) {
+          // 머리 위에 자리가 없거나 문제를 덮으면 얼굴을 가리지 않게 옆에 띄운다(넓은 쪽).
           const right = x + size / 2 + 4;
           bx =
             right + width <= area.width
               ? right
               : Math.max(0, x - size / 2 - 4 - width);
           by = Math.max(0, top + size * 0.15);
+          // 옆도 문제를 덮으면 발밑 아래로.
+          if (avoid && overlaps(box(bx, by), avoid)) {
+            bx = Math.min(
+              Math.max(0, x - width / 2),
+              Math.max(0, area.width - width),
+            );
+            by = Math.max(by, avoid.bottom + 4, y + 4);
+          }
         }
         bubble.style.transform = `translate(${bx}px, ${by}px)`;
       }
