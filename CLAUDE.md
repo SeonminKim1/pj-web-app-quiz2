@@ -64,6 +64,8 @@ When the user's request matches an available skill, invoke it via the Skill tool
 - After a production deploy → /canary
 - Docs out of date after shipping → /document-release
 
+Every skill run is logged to `.gstack/skill-log.jsonl` (git-ignored) by `.claude/hooks/log-skill.sh`: one JSON line per Skill tool call (`by: "claude"`) and per typed `/command` (`by: "user"`). Read it to answer "which skills ran".
+
 ## Health Stack
 
 - typecheck: npm run typecheck
