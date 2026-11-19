@@ -456,3 +456,10 @@
   color: var(--color-ink-soft);
   font-size: 0.875rem;
 }
+
+/* 카테고리 목록 머리 아래 주제 설명 줄(ⓘ MBTI가 뭐예요?). */
+.topicIntro {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 var(--space-3);
+}

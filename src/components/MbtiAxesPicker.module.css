@@ -1,0 +1,104 @@
+.form {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+/* 상태 줄은 주관식 입력과 같은 모양(높이 고정, 오답 빨강, 정답 민트 알약). */
+.status {
+  composes: status from './AnswerInput.module.css';
+  margin: 0;
+}
+
+/* 축 4줄. 360px에서도 한 줄에 두 버튼. */
+.axes {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.axis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.option {
+  composes: pressable from '../styles/ui.module.css';
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-button);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+}
+
+.option[aria-pressed='true'] {
+  background: var(--color-pink);
+}
+
+/* 힌트로 고정된 축: 고른 쪽은 민트, 다른 쪽은 흐리게(색만이 아니라 그룹 이름으로도 알린다). */
+.option[data-locked] {
+  background: var(--color-mint);
+  opacity: 1;
+}
+
+/* 채점 중·맞힌 뒤에도 고른 쪽은 또렷하게. */
+.option:disabled[aria-pressed='true'] {
+  opacity: 1;
+}
+
+.letter {
+  font-family: var(--font-display);
+  font-synthesis: none;
+  font-size: 1.375rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.label {
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.axes[data-phase='wrong'] {
+  animation: shake 0.5s;
+}
+
+.axes[data-phase='correct'] .option[aria-pressed='true'] {
+  background: var(--color-mint);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.submit {
+  composes: primary from '../styles/ui.module.css';
+  flex: 1 1 auto;
+}
+
+@keyframes shake {
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 흔들지 않고 색(상태 줄)으로만 오답을 보여 준다. */
+  .axes[data-phase='wrong'] {
+    animation: none;
+  }
+}

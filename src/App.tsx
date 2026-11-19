@@ -9,7 +9,7 @@ import { SettingsContext } from './hooks/settingsContext.ts';
 import { useSettingsState } from './hooks/useSettingsState.ts';
 import { HomePage } from './pages/HomePage';
 import { TopicPage } from './pages/TopicPage.tsx';
-import { StagePlayPage } from './pages/StagePlayPage.tsx';
+import { CategoryPlayPage, StagePlayPage } from './pages/StagePlayPage.tsx';
 import { QuestionPage } from './pages/QuestionPage.tsx';
 import { PrivacyPage } from './pages/PrivacyPage.tsx';
 
@@ -58,6 +58,10 @@ export function AppRoutes(): ReactElement {
       <Route
         path="/topics/:topicId/stages/:stageNo"
         element={<StagePlayPage />}
+      />
+      <Route
+        path="/topics/:topicId/categories/:categoryNo"
+        element={<CategoryPlayPage />}
       />
       <Route path="/q/:id" element={<QuestionPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />

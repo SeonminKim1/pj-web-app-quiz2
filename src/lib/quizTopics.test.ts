@@ -12,12 +12,12 @@ import {
 } from './quizTopics.ts';
 
 // QuizTopicId 유니온의 모든 값. 유니온에 값을 추가하면 이 객체도 고쳐야 타입 검사를 통과한다.
-const ALL_IDS: Record<QuizTopicId, true> = { nonsense: true };
+const ALL_IDS: Record<QuizTopicId, true> = { nonsense: true, mbti: true };
 
 describe('QUIZ_TOPICS', () => {
   it('타입의 모든 주제 id를 한 번씩, spec 순서로 담는다', () => {
     const ids = QUIZ_TOPICS.map((topic) => topic.id);
-    expect(ids).toEqual(['nonsense']);
+    expect(ids).toEqual(['nonsense', 'mbti']);
     expect([...ids].sort()).toEqual(Object.keys(ALL_IDS).sort());
   });
 
@@ -32,13 +32,30 @@ describe('QUIZ_TOPICS', () => {
         { type: 'text', paid: true },
       ],
       round: { byCategory: false, stageSize: 10 },
+      titles: true,
+      sharePrefix: 'q',
+    });
+  });
+
+  it('MBTI: 4축 고르기, 축 공개(무료) → 축 공개(골드) → 축 공개(골드), 카테고리 16문제', () => {
+    expect(getQuizTopic('mbti')).toEqual({
+      id: 'mbti',
+      label: 'MBTI',
+      play: ['mbtiAxes'],
+      hints: [
+        { type: 'revealLetter', paid: false },
+        { type: 'revealLetter', paid: true },
+        { type: 'revealLetter', paid: true },
+      ],
+      round: { byCategory: true, size: 16 },
+      titles: false,
     });
   });
 });
 
 describe('isQuizTopicId / getQuizTopicFileName / textHintCount', () => {
   it('등록된 주제 id만 true다', () => {
-    expect(isQuizTopicId('mbti')).toBe(false);
+    expect(isQuizTopicId('mbti')).toBe(true);
     expect(isQuizTopicId('nonsense')).toBe(true);
     expect(isQuizTopicId('general')).toBe(false);
     expect(isQuizTopicId('')).toBe(false);
@@ -74,7 +91,10 @@ describe('findStageTopic', () => {
 
 describe('findCategoryTopic', () => {
   it('들어갈 수 있는 카테고리 단위 주제만 찾는다', () => {
-    expect(findCategoryTopic('mbti')).toBeUndefined();
+    expect(findCategoryTopic('mbti')?.round).toEqual({
+      byCategory: true,
+      size: 16,
+    });
     expect(findCategoryTopic('nonsense')).toBeUndefined();
     expect(findCategoryTopic('movie')).toBeUndefined();
     expect(findCategoryTopic(undefined)).toBeUndefined();

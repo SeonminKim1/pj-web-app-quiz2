@@ -1,13 +1,15 @@
 import type { ReactElement } from 'react';
 import { CategoryGrid } from '../components/CategoryGrid.tsx';
 import { DataErrorView } from '../components/DataErrorView.tsx';
+import { MbtiGuideButton } from '../components/MbtiGuide.tsx';
 import { GoldBadge, LoadingView } from '../components/StatusViews.tsx';
 import { useCategoryList } from '../hooks/useCategoryList.ts';
 import styles from './Page.module.css';
 
 /** 카테고리 목록: 카테고리마다 진행률·완료, 잠금 없이 아무 카테고리나 고른다. */
 export function CategoryListPage(): ReactElement {
-  const { label, gold, state, retry, openCategory, goHome } = useCategoryList();
+  const { label, showMbtiGuide, gold, state, retry, openCategory, goHome } =
+    useCategoryList();
   return (
     <main className={styles.page}>
       <header className={styles.header}>
@@ -17,6 +19,11 @@ export function CategoryListPage(): ReactElement {
         <h1>{label}</h1>
         <GoldBadge gold={gold} />
       </header>
+      {showMbtiGuide && (
+        <div className={styles.topicIntro}>
+          <MbtiGuideButton />
+        </div>
+      )}
       {state.status === 'loading' && <LoadingView />}
       {state.status === 'error' && (
         <DataErrorView error={state.error} onRetry={retry} onHome={goHome} />

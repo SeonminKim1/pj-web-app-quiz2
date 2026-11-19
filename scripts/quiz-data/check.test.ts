@@ -21,6 +21,7 @@ const TEXT_TOPIC: QuizTopic = {
     { type: 'text', paid: true },
   ],
   round: { byCategory: false, stageSize: 10 },
+  titles: true,
 };
 
 // 카테고리 단위 주제(가상): 문장 힌트 1단계, 카테고리당 2문제. 카테고리 검사 로직 확인용.
@@ -33,15 +34,42 @@ const MBTI_TOPIC: QuizTopic = {
     { type: 'text', paid: true },
   ],
   round: { byCategory: true, size: 2 },
+  titles: false,
 };
 
 function messages(problems: ReturnType<typeof checkTopicItems>): string[] {
   return describeProblems(problems);
 }
 
-// 실제 QUIZ_TOPICS로 통과하는 최소 파일: 넌센스 2문제.
+// MBTI 한 카테고리: 16유형이 한 번씩.
+const MBTI_TYPES = [
+  'ISTJ',
+  'ISFJ',
+  'INFJ',
+  'INTJ',
+  'ISTP',
+  'ISFP',
+  'INFP',
+  'INTP',
+  'ESTP',
+  'ESFP',
+  'ENFP',
+  'ENTP',
+  'ESTJ',
+  'ESFJ',
+  'ENFJ',
+  'ENTJ',
+];
+
+// 실제 QUIZ_TOPICS로 통과하는 최소 파일: 넌센스 2문제, MBTI 한 카테고리.
 function validFiles(): Record<string, unknown> {
   return {
+    'mbti.json': MBTI_TYPES.map((answer, i) => ({
+      id: String(i + 1),
+      question: `상황 ${i + 1}`,
+      answer,
+      category: '일상',
+    })),
     'nonsense.json': [
       {
         id: '1',
@@ -53,6 +81,24 @@ function validFiles(): Record<string, unknown> {
     ],
   };
 }
+
+describe('MBTI 4축 고르기 정답', () => {
+  it('정답은 MBTI 유형 4글자여야 한다', () => {
+    const topic: QuizTopic = {
+      ...MBTI_TOPIC,
+      id: 'mbti',
+      play: ['mbtiAxes'],
+      hints: [],
+    };
+    const value = [
+      { id: '1', question: '상황', answer: 'ISTJ', category: '일상' },
+      { id: '2', question: '상황', answer: 'ABCD', category: '일상' },
+    ];
+    expect(messages(checkTopicItems({ topic, value }))).toEqual([
+      'mbti.json id 2: answer는 MBTI 유형 4글자(예: ISTJ)여야 해요 (지금: "ABCD")',
+    ]);
+  });
+});
 
 describe('checkTopicConfig', () => {
   it('정상 설정은 위반이 없다', () => {
@@ -262,7 +308,7 @@ describe('코드 리뷰 반영', () => {
   });
 
   it('주제 설정에 같은 id가 두 번 있으면 위반', () => {
-    const files = validFiles();
+    const { 'mbti.json': _mbti, ...files } = validFiles();
     const nonsense = { ...TEXT_TOPIC };
     expect(
       describeProblems(

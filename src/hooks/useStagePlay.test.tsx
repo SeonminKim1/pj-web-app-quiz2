@@ -56,6 +56,28 @@ function type(result: ReturnType<typeof setup>['result'], text: string) {
 }
 
 describe('stagePlayReducer', () => {
+  it('4축 고르기: 연달아 고른 축이 모두 남는다(같은 렌더의 값으로 덮어쓰지 않음)', () => {
+    let state = initialStagePlayState();
+    for (const [axis, letter] of [
+      [1, 'N'],
+      [2, 'F'],
+      [3, 'P'],
+    ] as const) {
+      state = stagePlayReducer(state, { type: 'pickAxis', axis, letter });
+    }
+    expect(state.input).toBe('_NFP');
+    const judged = stagePlayReducer(state, {
+      type: 'judged',
+      correct: false,
+      gold: 0,
+    });
+    // 채점 중에는 고르지 않는다.
+    expect(
+      stagePlayReducer(judged, { type: 'pickAxis', axis: 0, letter: 'E' })
+        .input,
+    ).toBe('_NFP');
+  });
+
   it('answering이 아닐 때의 입력·채점은 무시한다', () => {
     const base = initialStagePlayState();
     const typed = stagePlayReducer(base, { type: 'input', value: '고생' });

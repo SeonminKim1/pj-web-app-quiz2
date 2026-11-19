@@ -19,6 +19,8 @@ export type CategoryCellView = {
 /** 카테고리 목록 상태와 동작. */
 export type CategoryListView = {
   label: string;
+  /** 4축 고르기 주제면 ⓘ MBTI 설명을 보여 준다. */
+  showMbtiGuide: boolean;
   gold: number;
   state: LoadState<CategoryCellView[]>;
   retry: () => void;
@@ -48,6 +50,7 @@ export function useCategoryList(): CategoryListView {
 
   return {
     label: topic?.label ?? '주제',
+    showMbtiGuide: topic?.play[0] === 'mbtiAxes',
     gold: progress.gold,
     state,
     retry,

@@ -2,6 +2,7 @@
 import type { Progress, TopicProgress } from '../types/progress.ts';
 import type { HintType, QuizItem, QuizTopic } from '../types/quiz.ts';
 import { answerChars } from './answer.ts';
+import { revealAxisText } from './mbti.ts';
 
 export const PROGRESS_VERSION = 1;
 const START_GOLD = 30;
@@ -13,7 +14,7 @@ export const HINT_PRICE = 5;
 export type OpenableHint = {
   text: string;
   paid: boolean;
-  /** 힌트 종류(문장 / 한 글자 공개). MBTI는 공개된 축을 고정하는 데 쓴다. */
+  /** 힌트 종류(문장 / 한 글자 공개). MBTI(mbtiAxes)는 공개된 축을 고정하는 데 쓴다. */
   type: HintType;
 };
 
@@ -61,6 +62,7 @@ export function openedHintCount({
  * 문제에서 열 수 있는 힌트 단계(순서대로, spec "힌트 단계").
  * - text: 주제의 n번째 text 단계에 문제의 hints[n]을 짝짓고, 문장이 없는 단계는 뺀다.
  * - revealLetter: 주제의 n번째 공개 단계가 정답의 n번째 글자를 연다. 그 글자로 정답 전체가 드러나면(글자 수 ≤ n) 뺀다.
+ *   4축 고르기(mbtiAxes) 주제는 n번째 축을 연다("E/I 축은 'I' 내향").
  */
 export function openableHints({
   topic,
@@ -71,6 +73,8 @@ export function openableHints({
 }): OpenableHint[] {
   const texts = item.hints ?? [];
   const chars = answerChars(item.answer);
+  const revealText =
+    topic.play[0] === 'mbtiAxes' ? revealAxisText : revealHintText;
   const result: OpenableHint[] = [];
   let textIndex = 0;
   let revealIndex = 0;
@@ -86,7 +90,7 @@ export function openableHints({
       const char = chars[revealIndex - 1];
       if (char !== undefined && chars.length > revealIndex) {
         result.push({
-          text: revealHintText(revealIndex, char),
+          text: revealText(revealIndex, char),
           paid: step.paid,
           type: 'revealLetter',
         });

@@ -1,0 +1,169 @@
+/* ⓘ 버튼: 카테고리 목록에서는 글자와 함께, 풀이 화면에서는 동그란 아이콘만. */
+.button {
+  composes: small from '../styles/ui.module.css';
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.iconButton {
+  composes: secondary from '../styles/ui.module.css';
+  display: inline-flex;
+  width: 46px;
+  min-height: 46px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.info {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--color-mint);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.875rem;
+  font-style: italic;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.backdrop {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgb(58 46 46 / 40%);
+}
+
+.sheet {
+  display: grid;
+  width: 100%;
+  max-width: 480px;
+  max-height: 92dvh;
+  overflow-y: auto;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4)
+    calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  background: var(--color-bg);
+  animation: rise 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-synthesis: none;
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.lead,
+.note {
+  margin: 0;
+  word-break: keep-all;
+}
+
+.note {
+  color: var(--color-ink-soft);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.axes {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.axis {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border: var(--border);
+  border-radius: var(--radius-tile);
+  background: var(--color-surface);
+}
+
+.axisName {
+  margin: 0;
+  font-weight: 800;
+}
+
+.axisName span {
+  color: var(--color-ink-soft);
+  font-weight: 600;
+}
+
+.option {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  word-break: keep-all;
+}
+
+.letter {
+  font-family: var(--font-display);
+  font-synthesis: none;
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--color-pink-soft);
+  font-weight: 800;
+}
+
+.how {
+  padding: var(--space-3);
+  border-radius: var(--radius-tile);
+  background: var(--color-mint-soft);
+}
+
+.how h3 {
+  margin: 0 0 var(--space-1);
+  font-size: 1rem;
+}
+
+.how ul {
+  display: grid;
+  gap: 2px;
+  padding-left: 1.2em;
+  margin: 0;
+  word-break: keep-all;
+}
+
+.done {
+  composes: primary from '../styles/ui.module.css';
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    animation: none;
+  }
+}
+
+.sheet:focus {
+  outline: none;
+}

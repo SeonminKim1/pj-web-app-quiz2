@@ -5,6 +5,7 @@ import {
   getQuizTopicFileName,
   textHintCount,
 } from '../../src/lib/quizTopics.ts';
+import { MBTI_TYPE_PATTERN } from '../../src/lib/mbti.ts';
 import { isRecord } from '../../src/lib/records.ts';
 import type { QuizTopic } from '../../src/types/quiz.ts';
 import { QuizDataError } from './errors.ts';
@@ -265,6 +266,11 @@ function checkAnswerForPlay({
   for (const mode of topic.play) {
     if (mode === 'typing' && withoutSpaces(answer).length === 0) {
       add('answer에 공백 말고 글자가 있어야 해요');
+    }
+    if (mode === 'mbtiAxes' && !MBTI_TYPE_PATTERN.test(answer)) {
+      add(
+        `answer는 MBTI 유형 4글자(예: ISTJ)여야 해요 (지금: ${show(answer)})`,
+      );
     }
   }
 }

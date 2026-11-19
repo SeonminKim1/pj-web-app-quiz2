@@ -21,6 +21,22 @@ export const QUIZ_TOPICS: readonly QuizTopic[] = [
       { type: 'text', paid: true },
     ],
     round: { byCategory: false, stageSize: 10 },
+    titles: true,
+    sharePrefix: 'q',
+  },
+  {
+    id: 'mbti',
+    label: 'MBTI',
+    play: ['mbtiAxes'],
+    // 축 공개: 앞 축부터 하나씩 정답 글자를 고정한다(E/I → S/N → T/F).
+    hints: [
+      { type: 'revealLetter', paid: false },
+      { type: 'revealLetter', paid: true },
+      { type: 'revealLetter', paid: true },
+    ],
+    // 카테고리 하나(16유형이 한 번씩)가 한 스테이지.
+    round: { byCategory: true, size: 16 },
+    titles: false,
   },
 ];
 
@@ -49,7 +65,10 @@ export function getQuizTopicFileName(id: QuizTopicId): string {
 }
 
 /** 지금 구현된 풀이 방식 부품. 부품을 만들면 여기에 추가한다. */
-const IMPLEMENTED_PLAY_MODES: ReadonlySet<PlayMode> = new Set(['typing']);
+const IMPLEMENTED_PLAY_MODES: ReadonlySet<PlayMode> = new Set([
+  'typing',
+  'mbtiAxes',
+]);
 
 /** 화면에서 들어갈 수 있는 주제인지: 기본 풀이 방식(play[0])이 구현된 부품이어야 한다. */
 export function isEnterableTopic(topic: QuizTopic): boolean {
