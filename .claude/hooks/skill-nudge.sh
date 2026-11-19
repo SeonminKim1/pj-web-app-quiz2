@@ -12,8 +12,11 @@ cd "${CLAUDE_PROJECT_DIR:-$PWD}" 2>/dev/null || exit 0
 msg=""
 if grep -Eq '(^|[;&|[:space:]])gh[[:space:]]+pr[[:space:]]+merge([[:space:]]|$)' <<<"$cmd"; then
   msg="PR을 머지했어요. main push로 Netlify가 배포합니다. 배포가 끝나면 /canary로 정식 사이트(https://quiz-noriteo.netlify.app)를 확인하세요(CLAUDE.md Skill routing: 배포 후 /canary)."
-elif grep -Eq '(^|[;&|[:space:]])git[[:space:]]+commit([[:space:]]|$)' <<<"$cmd"; then
-  ui=$(git show --name-only --format= HEAD 2>/dev/null | grep -E '^src/(components|pages)/|\.css$|^public/.*\.(svg|png|webmanifest)$' | grep -vE '\.test\.tsx?$' | head -5)
+elif grep -Eq '(^|[;&|[:space:]])git[[:space:]]+commit([[:space:]]|$)' <<<"$cmd" \
+  && [ $(($(date +%s) - $(git log -1 --format=%ct 2>/dev/null || echo 0))) -lt 120 ]; then
+  # 방금(2분 안) 만든 커밋만 본다: 실패한 커밋·다른 저장소 커밋 뒤에 옛 HEAD를 알리지 않게.
+  # 파일 이름은 안전한 글자만 남겨 Claude 문맥에 넣는다(파일 이름에 섞인 지시문 차단).
+  ui=$(git show --name-only --format= HEAD 2>/dev/null | grep -E '^src/(components|pages)/|\.css$|^public/.*\.(svg|png|webmanifest)$' | grep -vE '\.test\.tsx?$' | grep -E '^[A-Za-z0-9._/-]{1,120}$' | head -5)
   if [ -n "$ui" ]; then
     msg="방금 커밋에 화면 파일이 있어요($(tr '\n' ' ' <<<"$ui"| sed 's/ $//')). PR 전에 /design-review로 360px 화면을 확인하세요(CLAUDE.md Skill routing: UI를 바꾸면 PR 전에 /design-review)."
   fi
