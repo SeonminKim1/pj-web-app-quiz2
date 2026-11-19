@@ -169,7 +169,8 @@ export function checkDist({
     const byId = new Map(items.map((item) => [item.id, item]));
     // 거꾸로: 이 주제 주소 아래 페이지는 모두 등록부에 있어야 한다(남은 옛 페이지·잘못 만든 페이지).
     const registered = new Set(registry.map((entry) => entry.id));
-    const pagePattern = new RegExp(`^/${prefix}/([^/]+)/index\\.html$`);
+    const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pagePattern = new RegExp(`^/${escaped}/([^/]+)/index\\.html$`);
     for (const page of pages) {
       const id = pagePattern.exec(page.path)?.[1];
       if (id !== undefined && !registered.has(id)) {

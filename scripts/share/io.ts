@@ -37,6 +37,20 @@ export async function readPreviousRegistry(
   file: string = REGISTRY_FILE,
   ref: string = process.env.CACHED_COMMIT_REF || 'HEAD',
 ): Promise<RegistryEntry[] | undefined> {
+  const atRef = await registryAt(file, ref);
+  if (atRef !== undefined || ref === 'HEAD') return atRef;
+  // 지난 배포 커밋을 못 읽으면(얕은 clone, force-push로 사라진 커밋) 조용히 넘어가지 않고 알린 뒤 HEAD와 비교한다.
+  console.warn(
+    `경고: ${file}를 ${ref}에서 읽지 못해 등록부 축소 검사를 HEAD 기준으로 해요(지난 배포 커밋이 clone에 없음)`,
+  );
+  return registryAt(file, 'HEAD');
+}
+
+// 그 커밋의 등록부. 없거나 형식이 틀리면 undefined.
+async function registryAt(
+  file: string,
+  ref: string,
+): Promise<RegistryEntry[] | undefined> {
   try {
     const { stdout } = await run('git', ['show', `${ref}:${file}`], {
       encoding: 'utf8',
