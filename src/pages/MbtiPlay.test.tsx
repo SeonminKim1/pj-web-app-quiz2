@@ -199,11 +199,22 @@ describe('MBTI 풀이(카테고리 = 스테이지)', () => {
     expect(screen.queryByText(/4개 중/)).not.toBeInTheDocument();
     expect(screen.getByText('축마다 한 글자씩 골라요')).toBeInTheDocument();
 
+    // Value: protects=MBTI 카테고리 풀이의 진행 칸이 16유형 한 칸씩이고 맞히면 그 칸이 맞힘으로 바뀐다; fails_when=진행 칸 수가 카테고리 문제 수(16)와 어긋나거나 맞힌 칸이 표시되지 않으면; why_new=진행 칸은 FINDING-004에서 새로 생김; seam=none; no_claim=칸 색(CSS)
+    const nav = screen.getByRole('group', { name: '문제 이동' });
+    const cells = () => [...nav.querySelectorAll('[class*="cell"]')];
+    expect(cells()).toHaveLength(16);
+    expect(cells().filter((c) => c.hasAttribute('data-solved'))).toHaveLength(
+      0,
+    );
     await pick(user, 'ISTJ');
     await user.click(screen.getByRole('button', { name: '확인' }));
     expect(
       await screen.findByText('정답! ISTJ · 골드 +10'),
     ).toBeInTheDocument();
+    expect(cells()[0]).toHaveAttribute('data-solved');
+    expect(cells().filter((c) => c.hasAttribute('data-solved'))).toHaveLength(
+      1,
+    );
     expect(screen.getByLabelText('보유 골드 40')).toBeInTheDocument();
     expect(store.load().topics.mbti?.solved).toEqual(['1']);
   });

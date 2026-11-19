@@ -120,6 +120,17 @@ async function waitAnswering() {
   );
 }
 
+// 머리 줄 진행 칸(문제마다 한 칸): 맞힌 칸과 지금 칸 표시.
+function navCells() {
+  const nav = screen.getByRole('group', { name: '문제 이동' });
+  const cells = [...nav.querySelectorAll('[class*="cell"]')];
+  return {
+    count: cells.length,
+    solved: cells.map((c) => c.hasAttribute('data-solved')),
+    current: cells.findIndex((c) => c.hasAttribute('data-current')),
+  };
+}
+
 describe('첫 화면', () => {
   it('골드 30, 넌센스에 들어갈 수 있다', async () => {
     const user = renderAt('/');
@@ -243,7 +254,14 @@ describe('스테이지 목록 → 풀이 → 결과', () => {
   it('맞히면 확인 자리가 "다음 ›"이 되고, 0.4초 뒤 Enter로도 다음 문제로 간다', async () => {
     const user = renderAt('/topics/nonsense/stages/2');
     await screen.findByText('지구가 제일 힘들었던 시기는?');
+    // Value: protects=이번에 맞힌 문제의 진행 칸이 바로 맞힘으로 바뀌고 다음 문제로 가도 남는다; fails_when=solvedMarks가 이번 판 earned를 보지 않거나 진행 칸에 solved를 넘기지 않으면; why_new=진행 칸은 FINDING-004에서 새로 생김(QuestionNav 단독 테스트는 연결을 못 본다); seam=none; no_claim=칸 색·크기(CSS)
+    expect(navCells()).toEqual({
+      count: 2,
+      solved: [false, false],
+      current: 0,
+    });
     await typeAnswer(user, '고생대');
+    expect(navCells().solved).toEqual([true, false]);
     // 맞힌 직후: 확인 연타로 넘어가지 않게 잠시 막혀 있고, 힌트 버튼은 숨는다.
     expect(screen.getByRole('button', { name: '다음 ›' })).toBeDisabled();
     expect(
@@ -260,6 +278,7 @@ describe('스테이지 목록 → 풀이 → 결과', () => {
     await user.keyboard('{Enter}');
     expect(screen.getByText('진짜 새는?')).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: '정답 입력' })).toHaveFocus();
+    expect(navCells()).toEqual({ count: 2, solved: [true, false], current: 1 });
   });
 
   it('상태 줄은 피드백만 읽어 준다(글자 수는 입력창 설명으로)', async () => {
@@ -347,6 +366,26 @@ describe('이전·다음 이동', () => {
     const user = renderAt('/topics/nonsense/stages/1');
     expect(await screen.findByText('스테이지 1 · 5 / 10')).toBeInTheDocument();
     expect(screen.getByText('문제 5')).toBeInTheDocument();
+    // Value: protects=들어오기 전에 푼 문제의 진행 칸이 처음부터 맞힘으로 보이고 머리 줄에 게임 이름이 있다; fails_when=solvedMarks가 solvedBefore를 빼먹거나 제목에서 주제 이름이 빠지면; why_new=진행 칸·게임 이름은 FINDING-004에서 새로 생김; seam=none; no_claim=칸 색(CSS)
+    expect(navCells()).toEqual({
+      count: 10,
+      solved: [
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+      ],
+      current: 4,
+    });
+    expect(document.querySelector('header')).toHaveTextContent(
+      '넌센스스테이지 1',
+    );
     const input = () => screen.getByRole('textbox', { name: '정답 입력' });
     await user.type(input(), '쓰다만');
 

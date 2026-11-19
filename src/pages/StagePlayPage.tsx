@@ -167,8 +167,10 @@ function StageSession({
         >
           ←
         </button>
+        {/* 어느 게임의 어느 판인지: 작은 게임 이름 위, 판 이름 아래. */}
         <span className={styles.playTitle} aria-hidden="true">
-          {target.stageLabel}
+          <span className={styles.playTopic}>{target.topic.label}</span>
+          <span className={styles.playStage}>{target.stageLabel}</span>
         </span>
         <span className={styles.headerEnd}>
           <GoldBadge gold={gold} compact />
@@ -180,6 +182,7 @@ function StageSession({
         label={target.stageLabel}
         current={state.index + 1}
         total={play.total}
+        solved={play.solvedMarks}
         canPrev={play.canPrev}
         next={play.isLast ? 'result' : 'next'}
         onPrev={play.prev}
@@ -214,6 +217,7 @@ function StageSession({
           <p ref={questionRef} className={styles.question}>
             {item?.question}
           </p>
+          {canShare && <ShareButton onClick={shareCurrent} />}
         </div>
         {shareView.manualText && (
           <ManualCopy
@@ -233,9 +237,6 @@ function StageSession({
             play.openNextHint();
             pest.hint();
           }}
-          leading={
-            canShare ? <ShareButton onClick={shareCurrent} /> : undefined
-          }
         />
         {axesMode ? (
           <MbtiAxesPicker

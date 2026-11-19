@@ -336,6 +336,7 @@ function Session({
             <p ref={questionRef} className={pageStyles.question}>
               {item.question}
             </p>
+            <ShareButton onClick={sharePre} />
           </div>
           <HintPanel
             key={item.id}
@@ -349,7 +350,6 @@ function Session({
               play.openNextHint();
               pest.hint();
             }}
-            leading={<ShareButton onClick={sharePre} />}
           />
           {axesMode ? (
             <MbtiAxesPicker

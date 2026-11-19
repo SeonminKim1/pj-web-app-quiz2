@@ -1,7 +1,37 @@
+/* 문제 카드 오른쪽 위 테두리에 걸친 태그. 보이는 높이는 32px, 누르는 곳은 위아래로 넓혀 44px. */
+/* 공통 .pressable을 composes하지 않는다: 그쪽 :active(아래로 3px)가 나중에 와서 이겨, 누르는 순간
+   태그가 카드 안으로 19px 내려가 마우스를 뗀 곳이 카드가 되고 클릭이 사라졌다(리뷰). */
 .button {
-  composes: secondary from '../styles/ui.module.css';
-  gap: 6px;
-  min-height: 44px;
-  padding: 0 var(--space-3);
-  font-size: 0.9375rem;
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: var(--space-3);
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: box-shadow 0.08s ease-out;
+  box-shadow: var(--shadow-pressed);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-synthesis: none;
+  transform: translateY(-50%);
+}
+
+.button::after {
+  position: absolute;
+  inset: -6px -2px;
+  content: '';
+}
+
+/* 카드에 걸친 태그라 눌림은 그림자 대신 살짝 내려앉기만. */
+.button:active {
+  box-shadow: none;
 }

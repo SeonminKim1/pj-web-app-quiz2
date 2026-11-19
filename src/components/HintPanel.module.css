@@ -5,7 +5,7 @@
   margin: var(--space-3) 0 0;
 }
 
-/* 한 줄: 왼쪽 친구한테 내기, 오른쪽 힌트 카드 더미. */
+/* 한 줄: 오른쪽에 힌트 카드 더미(친구한테 내기는 문제 카드 오른쪽 위 태그). */
 .row {
   display: flex;
   align-items: center;
