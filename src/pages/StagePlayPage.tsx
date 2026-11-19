@@ -214,6 +214,7 @@ function StageSession({
           <p ref={questionRef} className={styles.question}>
             {item?.question}
           </p>
+          {canShare && <ShareButton onClick={shareCurrent} />}
         </div>
         {shareView.manualText && (
           <ManualCopy
@@ -233,9 +234,6 @@ function StageSession({
             play.openNextHint();
             pest.hint();
           }}
-          leading={
-            canShare ? <ShareButton onClick={shareCurrent} /> : undefined
-          }
         />
         {axesMode ? (
           <MbtiAxesPicker
