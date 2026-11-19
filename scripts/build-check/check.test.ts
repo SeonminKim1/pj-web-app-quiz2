@@ -64,6 +64,18 @@ describe('checkDist', () => {
         (problem) => problem.where,
       ),
     ).toEqual(['/m/ id 7']);
+    // 등록부에 없는 id의 /m/ 페이지는 거꾸로 잡는다.
+    expect(
+      checkDist({
+        ...base,
+        shares: [...base.shares, mbti],
+        pages: [
+          ...pages,
+          { ...page('7'), path: '/m/7/index.html' },
+          { ...page('7'), path: '/m/99/index.html' },
+        ],
+      }).map((problem) => problem.code),
+    ).toEqual(['DIST_ORPHAN_PAGE']);
     const mPage = { ...page('7'), path: '/m/7/index.html' };
     expect(
       checkDist({
