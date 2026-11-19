@@ -63,6 +63,12 @@
 }
 
 /* 판 이름 위의 작은 게임 이름(넌센스, MBTI). */
+/* 판 이름: 길면 …(플렉스 안이라 칸마다 따로 자른다). */
+.playStage {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .playTopic {
   overflow: hidden;
   color: var(--color-ink-soft);

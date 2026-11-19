@@ -170,7 +170,7 @@ function StageSession({
         {/* 어느 게임의 어느 판인지: 작은 게임 이름 위, 판 이름 아래. */}
         <span className={styles.playTitle} aria-hidden="true">
           <span className={styles.playTopic}>{target.topic.label}</span>
-          {target.stageLabel}
+          <span className={styles.playStage}>{target.stageLabel}</span>
         </span>
         <span className={styles.headerEnd}>
           <GoldBadge gold={gold} compact />
