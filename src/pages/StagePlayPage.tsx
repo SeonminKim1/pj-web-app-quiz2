@@ -167,7 +167,9 @@ function StageSession({
         >
           ←
         </button>
+        {/* 어느 게임의 어느 판인지: 작은 게임 이름 위, 판 이름 아래. */}
         <span className={styles.playTitle} aria-hidden="true">
+          <span className={styles.playTopic}>{target.topic.label}</span>
           {target.stageLabel}
         </span>
         <span className={styles.headerEnd}>
@@ -180,6 +182,7 @@ function StageSession({
         label={target.stageLabel}
         current={state.index + 1}
         total={play.total}
+        solved={play.solvedMarks}
         canPrev={play.canPrev}
         next={play.isLast ? 'result' : 'next'}
         onPrev={play.prev}

@@ -1,28 +1,87 @@
-/* ‹ 진행 › 한 묶음: 360px 머리 줄 가운데에 들어가게 줄어든다. */
+/* ‹ 진행 칸 › 한 줄: 머리 줄 아래, 화면 폭에 맞춰 칸이 줄어든다. */
 .nav {
   display: flex;
   min-width: 0;
   align-items: center;
   justify-content: center;
-  gap: var(--space-3);
-  margin: calc(-1 * var(--space-2)) 0 var(--space-3);
+  gap: var(--space-2);
+  margin: calc(-1 * var(--space-1)) 0 var(--space-3);
 }
 
+/* 화살표: 둥근 44px, 그림자는 얕게(머리 줄 버튼보다 한 단계 가볍게). */
 .arrow {
   composes: secondary from '../styles/ui.module.css';
   width: 44px;
   min-height: 44px;
   flex-shrink: 0;
-  padding: 0;
   font-size: 1.375rem;
   line-height: 1;
 }
 
+/* composes한 .button의 모서리·여백·그림자가 뒤에 와서 이기므로 우선순위를 올린다. */
+.arrow.arrow {
+  padding: 0;
+  border-radius: 50%;
+  box-shadow: var(--shadow-pressed);
+}
+
+.arrow.arrow:active:not(:disabled) {
+  box-shadow: none;
+  transform: translateY(1px);
+}
+
+.arrow.arrow:disabled {
+  box-shadow: none;
+}
+
 .label {
-  composes: pill from '../styles/ui.module.css';
-  min-width: 72px;
-  justify-content: center;
-  font-size: 0.9375rem;
+  display: flex;
+  min-width: 0;
+  max-width: 240px;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+
+/* 문제 한 칸 = 칸 하나. 맞힌 칸 민트, 지금 칸은 분홍 테두리로 키운다. */
+.track {
+  display: flex;
+  height: 14px;
+  align-items: center;
+  gap: 3px;
+}
+
+.cell {
+  height: 10px;
+  flex: 1 1 0;
+  border: 2px solid var(--color-ink);
+  border-radius: 999px;
+  background: var(--color-surface);
+}
+
+.cell[data-solved] {
+  background: var(--color-mint);
+}
+
+.cell[data-current] {
+  height: 14px;
+  border-color: var(--color-pink-strong);
+  background: var(--color-pink);
+}
+
+.cell[data-current][data-solved] {
+  background: var(--color-mint);
+}
+
+.count {
+  color: var(--color-ink-soft);
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-synthesis: none;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .srOnly {
