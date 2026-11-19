@@ -42,6 +42,7 @@ keytool -genkeypair -v -keystore ~/keystores/quiz-noriteo.keystore -alias androi
 cd android
 bubblewrap update   # twa-manifest.json으로 안드로이드 프로젝트를 (다시) 만든다
 bubblewrap build --signingKeyPath ~/keystores/quiz-noriteo.keystore   # → app-release-bundle.aab (스토어용), app-release-signed.apk (기기 테스트용)
+# --signingKeyPath는 꼭 붙인다: twa-manifest.json의 signingKey.path("~/…")는 JSON이라 ~가 풀리지 않는다.
 ```
 
 폰을 USB로 연결했다면 `bubblewrap install`로 APK를 바로 깔아 볼 수 있습니다.

@@ -7,7 +7,7 @@
 "퀴즈 놀이터": 넌센스 퀴즈 546문제와 MBTI 퀴즈 112문제를 스테이지로 풀고, 어느 문제든 링크(넌센스 `/q/<id>/`, MBTI `/m/<id>/`)로 단톡방에 낼 수 있는 웹앱. 사용자가 고른 방해꾼 동물이 풀이를 훼방 놓는다(시간 제한 없음). 무료, 광고(Google AdSense) 수익 예정.
 
 - 스택: React + TypeScript(Vite) + react-router, CSS Modules. 서버·DB 없는 정적 사이트.
-- 이전 저장소 `web-app-quiz`(비공개)에서 넌센스 주제와 MBTI 데이터를 옮겨 왔다. 나머지는 `TODOS.md`.
+- 이전 저장소 `web-app-quiz`(비공개)에서 넌센스 주제와 MBTI 데이터를 옮겨 왔다. 필요한 정보는 거기서 가져와 쓰되 이 저장소만으로 돌아가게 옮겨 둔다(아래 Skill routing "Old repo"). 나머지는 `TODOS.md`.
 - 정식 주소: https://quiz-noriteo.netlify.app (`site.config.json`의 `SITE_ORIGIN`. 첫 링크를 보낸 뒤에는 바꾸지 않는다)
 
 ## 명령
@@ -55,19 +55,33 @@ npm run build          # 데이터 → 글꼴 → 앱 → OG 페이지 → 서�
 
 When the user's request matches an available skill, invoke it via the Skill tool. gstack is set to `proactive: all`, so any matching gstack skill may run without being typed.
 
+**Required (not optional):** these steps run through the named skill, not an ad-hoc substitute (curl, a hand-written browser script, a manual checklist). Skip one only when the user says so, and say in the report which one was skipped and why.
+
+| When                                                                  | Skill (required)                                      |
+| --------------------------------------------------------------------- | ----------------------------------------------------- |
+| Before building a new feature or topic (new `feat/` branch)           | /plan-eng-review (or /autoplan for the full pipeline) |
+| Checks before every commit                                            | /verify                                               |
+| UI changed (`src/components`, `src/pages`, CSS, icons), before the PR | /design-review                                        |
+| Checking behavior in a browser, finding bugs                          | /qa (report only: /qa-only), not /browse alone        |
+| Every PR                                                              | /ship (it runs the review, the docs audit and the PR) |
+| After a production deploy (merge to `main`)                           | /canary on https://quiz-noriteo.netlify.app           |
+
+Also use when they match:
+
 - Product ideas, brainstorming, "is this worth building" → /office-hours
-- Plan or feature review before building → /autoplan (or /plan-ceo-review, /plan-design-review, /plan-devex-review)
-- Visual polish, spacing, "looks off" → /design-review
-- Testing site behavior in a browser, finding bugs → /qa (report only: /qa-only)
-- Running checks while coding, before a commit → /verify
-- Reviewing a diff or branch → /review
+- Strategy or scope → /plan-ceo-review; UX plan → /plan-design-review
+- Reviewing a diff or branch outside /ship → /review
 - Security concerns → /cso
 - Performance → /benchmark
-- Ship, PR, release → /ship
-- After a production deploy → /canary
-- Docs out of date after shipping → /document-release
+- Docs out of date outside /ship → /document-release
 
-Every skill run is logged to `.gstack/skill-log.jsonl` (git-ignored) by `.claude/hooks/log-skill.sh`: one JSON line per Skill tool call (`by: "claude"`) and per typed `/command` (`by: "user"`). Read it to answer "which skills ran".
+**Old repo:** `~/Vscode/web-app-quiz` may be used as a source (specs, data, past designs) when quiz2 lacks something. Port what is needed into quiz2's own files so quiz2 stands alone; never depend on or point to the old repo.
+
+**Hooks (`.claude/settings.json`):**
+
+- `.claude/hooks/log-skill.sh` writes one line per skill use to `.gstack/skill-log.jsonl` (git-ignored): `by: "claude"` (Skill tool), `by: "read"` (a `SKILL.md` read directly; subagents use skills this way), `by: "user"` (typed `/command`). `agent`/`agent_type` say which subagent, when the hook input has them.
+- `.claude/hooks/skill-nudge.sh` reminds after `gh pr merge` (/canary), a fresh commit (made in the last 2 minutes) with UI files, test files not counted (/design-review), and a new `feat/` or `feature/` branch (/plan-eng-review).
+- To answer "which skills ran", read `.gstack/skill-log.jsonl` together with gstack's own `~/.gstack/projects/web-app-quiz2/timeline.jsonl` (skill start/end, including runs inside subagents).
 
 ## Health Stack
 

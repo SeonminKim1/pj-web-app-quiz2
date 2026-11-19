@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactElement } from 'react';
+import type { FormEvent, ReactElement } from 'react';
 import type { PlayPhase } from '../hooks/useStagePlay.ts';
 import { MBTI_AXES, mbtiLetters } from '../lib/mbti.ts';
 import { AnswerSlots } from './AnswerSlots.tsx';
@@ -29,7 +29,7 @@ type MbtiAxesPickerProps = {
 
 /**
  * MBTI 4축 고르기: 상태 줄, 고른 글자 칸(I S T _), 축마다 두 버튼, ⓘ + 확인/다음.
- * 오답 문구("4개 중 N개")는 흔들림이 끝나도 고른 값을 바꾸기 전까지 남겨 둔다.
+ * 오답 문구("4개 중 N개")는 흔들림이 끝나도 고른 값을 바꾸기 전까지 남는다(값은 useStagePlay가 정함).
  */
 export function MbtiAxesPicker({
   questionKey,
@@ -48,27 +48,8 @@ export function MbtiAxesPicker({
   const letters = mbtiLetters(selection);
   const solved = phase === 'correct';
 
-  // 오답 문구를 남겨 둘 조건(같은 문제, 같은 고른 값). 렌더 중에 갱신한다(effect 없이).
-  const [kept, setKept] = useState<
-    { key: string; selection: string; text: string } | undefined
-  >(undefined);
-  if (
-    phase === 'wrong' &&
-    feedback !== undefined &&
-    (kept?.key !== questionKey ||
-      kept.selection !== selection ||
-      kept.text !== feedback)
-  ) {
-    setKept({ key: questionKey, selection, text: feedback });
-  }
-  const keptText =
-    phase === 'answering' &&
-    kept?.key === questionKey &&
-    kept.selection === selection
-      ? kept.text
-      : undefined;
-  const status = feedback ?? keptText;
-  const tone = feedback ? phase : keptText ? 'wrong' : 'answering';
+  // 오답 문구는 흔들림(wrong)이 끝난 answering에서도 남는다(useStagePlay가 고른 값을 바꾸기 전까지 준다).
+  const tone = feedback && phase === 'answering' ? 'wrong' : phase;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
@@ -79,7 +60,11 @@ export function MbtiAxesPicker({
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <p className={styles.status} data-tone={tone} aria-live="polite">
-        {status ? <span>{status}</span> : <span>축마다 한 글자씩 골라요</span>}
+        {feedback ? (
+          <span>{feedback}</span>
+        ) : (
+          <span>축마다 한 글자씩 골라요</span>
+        )}
       </p>
       <AnswerSlots slots={{ groups: [letters], overflow: 0 }} phase={phase} />
       {solved && reward > 0 && <CoinBurst key={questionKey} />}

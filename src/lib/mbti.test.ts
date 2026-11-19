@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  MBTI_AXES,
   MBTI_TYPE_PATTERN,
   isCompleteMbti,
   matchedAxisCount,
@@ -60,6 +61,15 @@ describe('mbti 고른 값', () => {
     expect(MBTI_TYPE_PATTERN.test('ENFP')).toBe(true);
     expect(MBTI_TYPE_PATTERN.test('enfp')).toBe(false);
     expect(MBTI_TYPE_PATTERN.test('EIFP')).toBe(false);
+  });
+});
+
+describe('축 이름', () => {
+  it('축 이름은 선택지 이름과 겹치지 않는다(판단·인식은 J/P 선택지 이름)', () => {
+    const options = MBTI_AXES.flatMap((axis) =>
+      axis.options.map((option) => option.label),
+    );
+    for (const axis of MBTI_AXES) expect(options).not.toContain(axis.name);
   });
 });
 

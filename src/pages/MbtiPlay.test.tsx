@@ -91,7 +91,7 @@ function renderAt(path: string) {
 // 축 4개를 차례로 누른다(공개된 축은 건너뜀).
 async function pick(user: ReturnType<typeof userEvent.setup>, type: string) {
   const groups = screen.getAllByRole('group', {
-    name: /에너지 방향|인식|판단|생활 양식/,
+    name: /^(에너지 방향|정보 인식|결정 방식|생활 양식)/,
   });
   for (const [index, letter] of [...type].entries()) {
     const button = within(groups[index]!).getByRole('button', {
@@ -117,6 +117,18 @@ describe('MBTI 카테고리 목록', () => {
   });
 
   // Value: protects=설명 시트(aria-modal)에서 Tab이 시트 밖으로 나가지 않고, 밖에 포커스가 있어도 Esc로 닫힌다; fails_when=시트 전용 onKeyDown만 남거나 Tab 가두기가 빠지면; why_new=기존 테스트는 버튼으로 닫기만 봄; seam=none; no_claim=실제 스크린리더 동작
+  // Value: protects=설명 시트 밖에 포커스가 있어도 Shift+Tab이 시트 안으로 돌아온다; fails_when=Shift 분기의 !sheet.contains(active)가 빠지면 뒤 화면으로 빠져나감; why_new=기존 테스트는 시트 안에서 앞으로 Tab만 봄; seam=none; no_claim=실제 스크린리더
+  it('설명 시트: 포커스가 시트 밖이어도 Shift+Tab은 시트 안으로 돌아온다', async () => {
+    const user = renderAt('/topics/mbti');
+    await screen.findByRole('button', { name: /^일상/ });
+    await user.click(screen.getByRole('button', { name: /MBTI가 뭐예요/ }));
+    const dialog = screen.getByRole('dialog');
+    (document.activeElement as HTMLElement | null)?.blur();
+    expect(dialog).not.toContainElement(document.activeElement as HTMLElement);
+    await user.keyboard('{Shift>}{Tab}{/Shift}');
+    expect(dialog).toContainElement(document.activeElement as HTMLElement);
+  });
+
   it('설명 시트: Tab은 시트 안에서 돌고, Esc로 닫혀 ⓘ 버튼으로 포커스가 돌아온다', async () => {
     const user = renderAt('/topics/mbti');
     await screen.findByRole('button', { name: /^일상/ });
@@ -162,6 +174,15 @@ describe('MBTI 풀이(카테고리 = 스테이지)', () => {
     expect(
       screen.getByText('틀렸어요 · 4개 중 2개 맞았어요'),
     ).toBeInTheDocument();
+    // 축 하나를 바꾸면 그 오답 문구는 사라진다.
+    await user.click(
+      within(screen.getByRole('group', { name: '에너지 방향' })).getByRole(
+        'button',
+        { name: /^I/ },
+      ),
+    );
+    expect(screen.queryByText(/4개 중/)).not.toBeInTheDocument();
+    expect(screen.getByText('축마다 한 글자씩 골라요')).toBeInTheDocument();
 
     await pick(user, 'ISTJ');
     await user.click(screen.getByRole('button', { name: '확인' }));
@@ -170,6 +191,25 @@ describe('MBTI 풀이(카테고리 = 스테이지)', () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText('보유 골드 40')).toBeInTheDocument();
     expect(store.load().topics.mbti?.solved).toEqual(['1']);
+  });
+
+  // Value: protects=오답 뒤 힌트로 축이 고정되면 낸 적 없는 답의 오답 문구("4개 중 4개")를 보이지 않는다; fails_when=missedInput을 채점한 값이 아니라 원래 입력으로 기억하면; why_new=리뷰가 찾은 결함(힌트 후 오답 문구); seam=none; no_claim=흔들림 애니메이션
+  it('오답 뒤 힌트로 축이 고정되면 그 오답 문구는 사라진다', async () => {
+    const user = renderAt('/topics/mbti/categories/1');
+    await screen.findByText('일상 상황 1');
+    // 정답 ISTJ, ESTJ는 E만 틀렸다(4개 중 3개).
+    await pick(user, 'ESTJ');
+    await user.click(screen.getByRole('button', { name: '확인' }));
+    expect(
+      await screen.findByText('틀렸어요 · 4개 중 3개 맞았어요'),
+    ).toBeInTheDocument();
+    await waitFor(
+      () =>
+        expect(screen.getByRole('button', { name: '힌트 무료' })).toBeEnabled(),
+      { timeout: 2000 },
+    );
+    await user.click(screen.getByRole('button', { name: '힌트 무료' }));
+    expect(screen.queryByText(/4개 중/)).not.toBeInTheDocument();
   });
 
   it('힌트를 열면 앞 축이 정답으로 고정된다', async () => {
@@ -233,6 +273,16 @@ describe('MBTI 풀이(카테고리 = 스테이지)', () => {
       screen.getByRole('button', { name: '이 문제가 든 스테이지 계속하기' }),
     );
     expect(await screen.findByText(/연애 · 1 \/ 16/)).toBeInTheDocument();
+  });
+
+  // Value: protects=카테고리 풀이 화면의 ← 버튼 이름("카테고리 목록")과 목록으로 돌아가기; fails_when=useCategoryPlayPage가 listLabel이나 목록 주소를 잘못 넘기면(스테이지 목록 이름, /topics/mbti/stages로 감); why_new=기존에는 에러 화면의 버튼 이름만 봄; seam=none; no_claim=브라우저 뒤로 가기 기록
+  it('← 카테고리 목록을 누르면 카테고리 목록으로 돌아간다', async () => {
+    const user = renderAt('/topics/mbti/categories/1');
+    await screen.findByText('일상 상황 1');
+    await user.click(screen.getByRole('button', { name: '카테고리 목록' }));
+    expect(
+      await screen.findByRole('button', { name: /^연애, 16문제 중/ }),
+    ).toBeInTheDocument();
   });
 
   it('없는 카테고리 번호는 "없는 카테고리예요"', async () => {

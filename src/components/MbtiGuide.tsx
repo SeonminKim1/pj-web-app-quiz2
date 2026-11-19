@@ -60,7 +60,10 @@ function MbtiGuideSheet({ onClose }: { onClose: () => void }): ReactElement {
       const last = focusable[focusable.length - 1];
       if (!first || !last) return;
       const active = document.activeElement;
-      if (event.shiftKey && (active === first || active === sheet)) {
+      if (
+        event.shiftKey &&
+        (active === first || active === sheet || !sheet.contains(active))
+      ) {
         event.preventDefault();
         last.focus();
       } else if (

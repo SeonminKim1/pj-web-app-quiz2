@@ -5,7 +5,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: rgb(58 46 46 / 40%);
+  background: var(--color-scrim);
 }
 
 .sheet {

@@ -55,7 +55,7 @@ git add data/share/
 
 ## qd_registry_shrunk
 
-직전 커밋의 등록부에 있던 id가 사라졌습니다. 등록부는 추가만 합니다(이미 보낸 링크가 깨지지 않게). 공유를 멈추려면 id를 지우지 말고 문제에 `shareable: false`를 두세요.
+비교 기준 커밋의 등록부에 있던 id가 사라졌습니다. 기준은 로컬에서는 직전 커밋(`HEAD`), Netlify 빌드에서는 지난번 배포 커밋(`CACHED_COMMIT_REF`)입니다. 지난 배포 커밋을 clone에서 읽지 못하면 경고를 찍고 `HEAD`와 비교합니다. 등록부는 추가만 합니다(이미 보낸 링크가 깨지지 않게). 공유를 멈추려면 id를 지우지 말고 문제에 `shareable: false`를 두세요.
 
 ## og_no_origin
 
@@ -97,3 +97,7 @@ HTML이 부르는 파일(스크립트, CSS, OG 이미지)이 `dist`에 없거나
 ## dist_share_param
 
 빌드된 HTML 안에 `from=` 공유 파라미터가 들어 있습니다. 누군가의 닉네임이 모든 사람에게 보이게 되므로, 링크를 HTML에 박아 넣은 코드를 찾아 고치세요.
+
+## dist_orphan_page
+
+`dist/q/<id>/`나 `dist/m/<id>/`처럼 공유 주소 아래 페이지가 있는데, 그 주제의 등록부에는 그 id가 없습니다. 예전 빌드가 남았거나 다른 주제의 페이지가 섞인 경우입니다. `dist/`를 지우고 `npm run build`를 처음부터 다시 돌리세요. 등록부는 손으로 고치지 않습니다.

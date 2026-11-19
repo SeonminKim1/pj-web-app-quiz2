@@ -145,11 +145,7 @@ function StageSession({
   const feedback =
     state.phase === 'correct'
       ? `정답! ${item?.answer ?? ''}${play.lastGold > 0 ? ` · 골드 +${play.lastGold}` : ''}`
-      : state.phase === 'wrong'
-        ? play.matchedAxes !== undefined
-          ? `틀렸어요 · 4개 중 ${play.matchedAxes}개 맞았어요`
-          : '틀렸어요'
-        : undefined;
+      : play.wrongFeedback;
   const advanceLabel = play.isLast ? '결과 보기 ›' : '다음 ›';
 
   return (

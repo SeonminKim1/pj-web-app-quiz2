@@ -167,6 +167,21 @@ export function checkDist({
   const byPath = new Map(pages.map((page) => [page.path, page]));
   for (const { prefix, registry, items } of shares) {
     const byId = new Map(items.map((item) => [item.id, item]));
+    // 거꾸로: 이 주제 주소 아래 페이지는 모두 등록부에 있어야 한다(남은 옛 페이지·잘못 만든 페이지).
+    const registered = new Set(registry.map((entry) => entry.id));
+    const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pagePattern = new RegExp(`^/${escaped}/([^/]+)/index\\.html$`);
+    for (const page of pages) {
+      const id = pagePattern.exec(page.path)?.[1];
+      if (id !== undefined && !registered.has(id)) {
+        add(
+          'DIST_ORPHAN_PAGE',
+          `dist${page.path}`,
+          `/${prefix}/ 등록부에 없는 id ${id}의 페이지가 있어요`,
+          'dist/를 지우고 npm run build를 처음부터 다시 돌리세요(등록부가 기준)',
+        );
+      }
+    }
     for (const entry of registry) {
       const path = `/${prefix}/${entry.id}/index.html`;
       const page = byPath.get(path);
