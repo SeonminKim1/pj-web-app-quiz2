@@ -15,8 +15,17 @@ import styles from './Page.module.css';
 
 /** 첫 화면: 앱 아이콘·로고, 보유 골드, 주제 카드(들어갈 수 없는 주제는 "준비 중"). */
 export function HomePage(): ReactElement {
-  const { gold, state, retry, openTopic, goHome, next, openNext } =
-    useHomePage();
+  const {
+    gold,
+    state,
+    retry,
+    openTopic,
+    goHome,
+    next,
+    openNext,
+    nextError,
+    retryNext,
+  } = useHomePage();
   const { settings, choosePet } = useSettings();
   const [picking, setPicking] = useState(false);
   // 칭호는 칭호를 주는 주제(넌센스)를 이어서 풀 때만.
@@ -110,6 +119,10 @@ export function HomePage(): ReactElement {
               : '다시 풀어 보기'}
           </button>
         </section>
+      )}
+      {/* 이어서 풀 주제의 문제 파일을 못 받으면 카드 자리에 다시 시도(주제 목록 에러와 겹치면 목록 쪽만). */}
+      {nextError && state.status !== 'error' && (
+        <DataErrorView error={nextError} onRetry={retryNext} onHome={goHome} />
       )}
       {state.status === 'loading' && <LoadingView />}
       {state.status === 'error' && (

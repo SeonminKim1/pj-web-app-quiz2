@@ -1,6 +1,7 @@
 // 첫 화면 hook: 주제 목록(manifest)과 보유 골드를 카드 표시값으로 바꾼다.
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
+import type { AppError } from '../errors/AppError.ts';
 import { solvedSet } from '../lib/progress.ts';
 import {
   findCategoryTopic,
@@ -32,6 +33,9 @@ export type HomePageView = {
   /** 이어서 풀 곳(마지막으로 푼 주제, 없으면 넌센스. 문제 파일을 받은 뒤에만). */
   next: ContinueView | undefined;
   openNext: () => void;
+  /** 이어서 풀 주제의 문제 파일을 못 받았을 때(카드 자리에 다시 시도). */
+  nextError: AppError | undefined;
+  retryNext: () => void;
 };
 
 /** 첫 화면의 "이어서 풀기". */
@@ -90,7 +94,7 @@ export function useHomePage(): HomePageView {
     };
   }, [manifest, progress]);
 
-  const { state: rounds } = useTopicRounds(topic);
+  const { state: rounds, retry: retryNext } = useTopicRounds(topic);
   const next = useMemo<ContinueView | undefined>(() => {
     if (rounds.status !== 'ready' || !topic) return undefined;
     const solvedIds = solvedSet({ progress, topicId: topic.id });
@@ -113,6 +117,8 @@ export function useHomePage(): HomePageView {
 
   return {
     next,
+    nextError: rounds.status === 'error' ? rounds.error : undefined,
+    retryNext,
     openNext: () => {
       if (!topic) return;
       const list = `/topics/${topic.id}`;
