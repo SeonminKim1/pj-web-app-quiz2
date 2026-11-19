@@ -78,6 +78,26 @@ describe('stagePlayReducer', () => {
     ).toBe('_NFP');
   });
 
+  it('틀린 답을 기억하고(오답 문구 유지), 다른 문제로 가면 잊는다', () => {
+    const typed = stagePlayReducer(initialStagePlayState(), {
+      type: 'input',
+      value: 'ESFJ',
+    });
+    const wrong = stagePlayReducer(typed, {
+      type: 'judged',
+      correct: false,
+      gold: 0,
+    });
+    expect(wrong.missedInput).toBe('ESFJ');
+    expect(stagePlayReducer(wrong, { type: 'clear' }).missedInput).toBe('ESFJ');
+    const moved = stagePlayReducer(wrong, {
+      type: 'move',
+      to: 1,
+      solvedAnswer: undefined,
+    });
+    expect(moved.missedInput).toBeUndefined();
+  });
+
   it('4축 고르기: 맞힌 뒤·결과 화면에서는 축을 바꾸지 않는다(보여 주는 정답이 그대로)', () => {
     const correct = stagePlayReducer(initialStagePlayState(), {
       type: 'judged',

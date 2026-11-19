@@ -43,6 +43,8 @@ export type StagePlayState = {
   earned: Record<number, number>;
   /** 방금 채점해서 correct가 됐는지(이동으로 맞힌 문제를 연 경우는 false). */
   fresh: boolean;
+  /** 지금 문제에서 마지막으로 틀린 답(오답 문구를 고른 값을 바꾸기 전까지 남긴다). */
+  missedInput?: string;
   /** 이번 판에서 맞힌 문제 수와 얻은 골드(결과 화면). */
   correctCount: number;
   goldTotal: number;
@@ -105,7 +107,7 @@ export function stagePlayReducer(
             correctCount: state.correctCount + 1,
             goldTotal: state.goldTotal + action.gold,
           }
-        : { ...state, phase: 'wrong' };
+        : { ...state, phase: 'wrong', missedInput: state.input };
     case 'clear':
       // 오답 흔들림이 끝나면 다시 쓸 수 있게(쓴 답은 남긴다).
       if (state.phase !== 'wrong') return state;
@@ -122,6 +124,7 @@ export function stagePlayReducer(
         input: solved ? action.solvedAnswer! : (inputs[action.to] ?? ''),
         inputs,
         fresh: false,
+        missedInput: undefined,
       };
     }
     case 'finish':
@@ -168,8 +171,10 @@ export type StagePlay = {
   lockedAxes: number;
   /** 4축 고르기: 공개된 축을 정답으로 덮은 고른 값(맞힌 뒤에는 정답). */
   selection: string;
-  /** 4축 고르기: 틀렸을 때 자리가 맞은 축 수(wrong이 아니면 undefined). */
+  /** 4축 고르기: 틀렸을 때 자리가 맞은 축 수. 흔들림이 끝나도 고른 값을 바꾸기 전까지 남는다(아니면 undefined). */
   matchedAxes: number | undefined;
+  /** 오답 문구: 4축 고르기는 "틀렸어요 · 4개 중 N개 맞았어요"(남아 있는 동안), 아니면 흔들리는 동안 "틀렸어요". */
+  wrongFeedback: string | undefined;
   canPrev: boolean;
   /** 뒤 문제가 있는지(마지막이 아님, 결과가 아님). */
   canNext: boolean;
@@ -318,6 +323,13 @@ export function useStagePlay({
     else moveTo(state.index + 1);
   };
 
+  const matchedAxes =
+    axesMode &&
+    item &&
+    (state.phase === 'wrong' ||
+      (state.phase === 'answering' && state.missedInput === state.input))
+      ? matchedAxisCount({ answer: item.answer, input: answerInput })
+      : undefined;
   return {
     state,
     item,
@@ -332,10 +344,13 @@ export function useStagePlay({
     canSubmit,
     lockedAxes,
     selection: answerInput,
-    matchedAxes:
-      axesMode && item && state.phase === 'wrong'
-        ? matchedAxisCount({ answer: item.answer, input: answerInput })
-        : undefined,
+    matchedAxes,
+    wrongFeedback:
+      matchedAxes !== undefined
+        ? `틀렸어요 · 4개 중 ${matchedAxes}개 맞았어요`
+        : state.phase === 'wrong'
+          ? '틀렸어요'
+          : undefined,
     canPrev: state.phase !== 'result' && state.index > 0,
     canNext: state.phase !== 'result' && !isLast,
     isLast,

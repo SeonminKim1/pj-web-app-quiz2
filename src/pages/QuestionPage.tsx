@@ -222,14 +222,7 @@ function Session({
 
   const canGiveUp =
     !finished && (missedOnce || (hints.next === undefined && hintsUsed > 0));
-  const feedback =
-    state.phase === 'wrong'
-      ? play.matchedAxes !== undefined
-        ? `틀렸어요 · 4개 중 ${play.matchedAxes}개 맞았어요`
-        : '틀렸어요'
-      : solved
-        ? `정답! ${item.answer}`
-        : undefined;
+  const feedback = solved ? `정답! ${item.answer}` : play.wrongFeedback;
 
   return (
     <main className={pageStyles.playPage}>

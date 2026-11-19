@@ -235,6 +235,16 @@ describe('MBTI 풀이(카테고리 = 스테이지)', () => {
     expect(await screen.findByText(/연애 · 1 \/ 16/)).toBeInTheDocument();
   });
 
+  // Value: protects=카테고리 풀이 화면의 ← 버튼 이름("카테고리 목록")과 목록으로 돌아가기; fails_when=useCategoryPlayPage가 listLabel이나 목록 주소를 잘못 넘기면(스테이지 목록 이름, /topics/mbti/stages로 감); why_new=기존에는 에러 화면의 버튼 이름만 봄; seam=none; no_claim=브라우저 뒤로 가기 기록
+  it('← 카테고리 목록을 누르면 카테고리 목록으로 돌아간다', async () => {
+    const user = renderAt('/topics/mbti/categories/1');
+    await screen.findByText('일상 상황 1');
+    await user.click(screen.getByRole('button', { name: '카테고리 목록' }));
+    expect(
+      await screen.findByRole('button', { name: /^연애, 16문제 중/ }),
+    ).toBeInTheDocument();
+  });
+
   it('없는 카테고리 번호는 "없는 카테고리예요"', async () => {
     renderAt('/topics/mbti/categories/9');
     expect(await screen.findByRole('alert')).toHaveTextContent(
