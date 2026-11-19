@@ -127,6 +127,27 @@ npm run preview      # http://localhost:4173/q/<id>/
 SITE_ORIGIN=http://localhost:4173 npm run build:og -- --only 23,41,m12
 ```
 
+### MBTI 문제 추가·공유하기
+
+1. `data/mbti.json`에 문제를 넣습니다. `answer`는 `ISTJ`처럼 4글자, `category`는 필수입니다. 카테고리마다 16문제이고 16유형이 한 번씩 정답이어야 해서, 문제는 16개 한 카테고리 단위로 늘립니다(`quiz_data_invalid`가 검사).
+2. 공유하려면 `"shareable": true`를 넣고 등록합니다. MBTI는 카드에 문제 문장을 그리지 않고 공통 카드를 쓰므로 글자 배치 검사(`QD_TEXT_FIT`)가 없습니다.
+   ```sh
+   npm run register-ids -- --dry-run
+   # MBTI: added: 113 … (16)
+   npm run register-ids
+   git add data/mbti.json data/share/mbti-published-ids.json
+   ```
+3. 공유 주소는 `/m/<id>/`, 카드 미리보기는 `npm run og:preview -- m113`입니다.
+
+카테고리 순서는 데이터에 처음 나온 순서이고, 주소의 카테고리 번호(`/topics/mbti/categories/<번호>`)가 됩니다. 새 카테고리는 끝에 붙여 기존 번호가 바뀌지 않게 합니다.
+
+### 새 주제 추가하기
+
+1. `src/types/quiz.ts`의 `QuizTopicId`에 id를 더하고, `src/lib/quizTopics.ts`의 `QUIZ_TOPICS`에 설정 한 덩어리를 넣습니다: 풀이 방식(`play`), 힌트 단계(`hints`), 한 판 단위(`round`: 스테이지 크기 또는 카테고리), 칭호(`titles`), 공유(`share`: 주소 앞부분과 카드 종류). 화면은 주제 id가 아니라 이 설정으로 갈라집니다.
+2. `data/<id>.json`을 만듭니다. 형식은 위 "문제 데이터"와 같고, 카테고리 단위 주제는 `category`가 필수입니다.
+3. 공유하려면 겹치지 않는 주소 앞부분(`q`, `m` 말고)을 정하고 위 레시피대로 `register-ids`를 돌립니다. 등록부는 `data/share/<id>-published-ids.json`에 생깁니다.
+4. 새 풀이 방식이 필요하면 `PlayMode`에 더하고, `quizTopics.ts`의 `IMPLEMENTED_PLAY_MODES`, 데이터 검사(`scripts/quiz-data/check.ts`의 정답 규칙), 풀이 부품(예: `MbtiAxesPicker`)을 함께 만듭니다.
+
 ## 통계 (GoatCounter)
 
 `site.config.json`의 `GOATCOUNTER_CODE`가 비어 있으면 통계를 보내지 않습니다. 스크립트는 고정 사본 `public/count.js`를 씁니다.

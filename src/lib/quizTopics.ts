@@ -8,7 +8,7 @@ export const PLAYABLE_MIN_COUNT = 30;
 
 /**
  * 주제 설정 목록. 이 순서로 manifest에 나열한다.
- * 주제를 추가할 때 data/<id>.json과 여기 한 덩어리를 함께 추가한다(CLAUDE.md "주제별 설정 + 공유 부품").
+ * 주제를 추가할 때 data/<id>.json과 여기 한 덩어리를 함께 추가한다(CLAUDE.md "고유 모듈"의 quizTopics, README "새 주제 추가하기").
  */
 export const QUIZ_TOPICS: readonly QuizTopic[] = [
   {

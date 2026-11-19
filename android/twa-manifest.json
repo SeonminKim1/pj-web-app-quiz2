@@ -18,7 +18,7 @@
   "maskableIconUrl": "https://quiz-noriteo.netlify.app/icons/maskable-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
-    "path": "./android.keystore",
+    "path": "~/keystores/quiz-noriteo.keystore",
     "alias": "android"
   },
   "appVersionName": "1.0.0",
