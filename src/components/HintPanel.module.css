@@ -5,7 +5,7 @@
   margin: var(--space-3) 0 0;
 }
 
-/* 한 줄: 왼쪽 친구한테 내기, 오른쪽 힌트. */
+/* 한 줄: 왼쪽 친구한테 내기, 오른쪽 힌트 카드 더미. */
 .row {
   display: flex;
   align-items: center;
@@ -13,42 +13,258 @@
   gap: var(--space-2);
 }
 
-.row .button {
+.deck {
+  display: flex;
+  gap: 6px;
   margin-left: auto;
+  perspective: 400px;
 }
 
-/* 연 힌트: 민트 말풍선 목록(번호 붙임). */
+/* 힌트 카드 한 장: 세로로 긴 작은 카드. */
+.card {
+  position: relative;
+  display: inline-flex;
+  width: 44px;
+  height: 54px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 0;
+  border: var(--border);
+  border-radius: 10px;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-synthesis: none;
+}
+
+/* 다음에 뒤집을 카드: 분홍 무늬 뒷면, 살짝 들썩이며 눌러 보라고 한다. */
+.next {
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 5px,
+      rgb(255 255 255 / 45%) 5px 10px
+    ),
+    var(--color-pink);
+  box-shadow: var(--shadow-pop);
+  cursor: pointer;
+  touch-action: manipulation;
+  animation: card-bob 2.4s ease-in-out infinite;
+  transition:
+    transform 0.08s ease-out,
+    box-shadow 0.08s ease-out;
+}
+
+.next:active:not(:disabled) {
+  animation: none;
+  box-shadow: var(--shadow-pressed);
+  transform: translateY(var(--press-offset));
+}
+
+.next:disabled {
+  animation: none;
+  background: var(--color-disabled);
+  box-shadow: none;
+  color: var(--color-ink-soft);
+  cursor: not-allowed;
+}
+
+.cardFace {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 2px solid currentcolor;
+  border-radius: 50%;
+  background: var(--color-surface);
+}
+
+.next:disabled .cardFace {
+  opacity: 0.6;
+}
+
+/* 값: 무료 / 동전+5 / 부족. */
+.price {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.coin {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-gold);
+}
+
+/* 아직 차례가 아닌 카드: 잠김. */
+.locked {
+  background: var(--color-surface);
+  color: var(--color-ink-soft);
+  border-style: dashed;
+  opacity: 0.7;
+}
+
+/* 뒤집힌 카드: 민트 앞면에 번호와 체크. */
+.open {
+  background: var(--color-mint);
+}
+
+.cardNo {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.check {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+}
+
+.open[data-fresh] {
+  animation: card-flip 460ms cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+
+/* 골드를 쓴 표시: 카드 위로 떠오르며 사라진다. */
+.spend {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  padding: 0 5px;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 999px;
+  background: var(--color-gold);
+  font-size: 0.75rem;
+  line-height: 1.3;
+  pointer-events: none;
+  white-space: nowrap;
+  animation: spend-rise 900ms ease-out forwards;
+}
+
+/* 연 힌트: 민트 말풍선 목록(번호 동그라미). */
 .list {
   display: grid;
   width: 100%;
   gap: var(--space-2);
   margin: 0;
   padding: 0;
-  counter-reset: hint;
   list-style: none;
 }
 
 .list li {
-  position: relative;
-  padding: var(--space-2) var(--space-3) var(--space-2) 40px;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
   border: var(--border);
   border-radius: var(--radius-tile) var(--radius-tile) var(--radius-tile) 4px;
   background: var(--color-mint-soft);
-  counter-increment: hint;
 }
 
-.list li::before {
+.list li[data-fresh] {
+  animation: hint-in 420ms cubic-bezier(0.16, 1, 0.3, 1) 160ms both;
+}
+
+.itemNo {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-mint);
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  line-height: 1;
+}
+
+/* 공개된 글자: 답 칸처럼 크게. */
+.letter {
+  display: inline-grid;
+  min-width: 1.6em;
+  margin: 0 2px;
+  padding: 0 4px;
+  place-items: center;
+  border: 2px solid var(--color-ink);
+  border-radius: 8px;
+  background: var(--color-gold);
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  line-height: 1.3;
+}
+
+.srOnly {
   position: absolute;
-  top: var(--space-2);
-  left: var(--space-3);
-  content: counter(hint) '.';
-  font-weight: 700;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-.button {
-  composes: mint from '../styles/ui.module.css';
-  gap: 6px;
-  min-height: 44px;
-  padding: 0 var(--space-3);
-  font-size: 0.9375rem;
+@keyframes card-bob {
+  0%,
+  70%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  78% {
+    transform: translateY(-4px) rotate(-4deg);
+  }
+  86% {
+    transform: translateY(-4px) rotate(4deg);
+  }
+}
+
+@keyframes card-flip {
+  0% {
+    transform: rotateY(180deg) scale(1.1);
+  }
+  100% {
+    transform: rotateY(0) scale(1);
+  }
+}
+
+@keyframes spend-rise {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -4px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -26px);
+  }
+}
+
+@keyframes hint-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .next,
+  .open[data-fresh],
+  .list li[data-fresh] {
+    animation: none;
+  }
+  .spend {
+    display: none;
+  }
 }

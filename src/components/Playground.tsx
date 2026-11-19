@@ -27,8 +27,10 @@ export function Playground({
           aria-label={`간식 주기(${TREAT_NAME[animal]})`}
           onClick={onFeed}
         >
-          <TreatIcon animal={animal} size={22} />
-          간식
+          <span className={styles.bowl}>
+            <TreatIcon animal={animal} size={30} />
+          </span>
+          <span className={styles.feedLabel}>간식</span>
         </button>
       )}
       <svg

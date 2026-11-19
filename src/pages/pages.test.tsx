@@ -166,7 +166,12 @@ describe('스테이지 목록 → 풀이 → 결과', () => {
       screen.getByRole('textbox', { name: '정답 입력' }),
     ).toHaveAccessibleDescription('정답 3글자');
     await user.click(screen.getByRole('button', { name: '힌트 5골드' }));
-    expect(screen.getByText("첫 글자는 '고'예요")).toBeInTheDocument();
+    // 공개된 글자는 글자 칸으로 따로 보인다.
+    expect(
+      screen
+        .getAllByRole('listitem')
+        .some((li) => li.textContent?.includes('첫 글자는 고예요')),
+    ).toBe(true);
     expect(screen.getByLabelText('보유 골드 25')).toBeInTheDocument();
     await typeAnswer(user, '고생대');
     expect(screen.getByText('정답! 고생대 · 골드 +5')).toBeInTheDocument();

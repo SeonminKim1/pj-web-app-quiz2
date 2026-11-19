@@ -229,6 +229,8 @@ export type PestView = {
   tap: () => void;
   /** 간식 주기(무료, 아무 때나): 기뻐하며 먹는다. */
   feed: () => void;
+  /** 힌트를 열었을 때: 놀라며 한마디. */
+  hint: () => void;
   /** 먹은 횟수(먹는 연출 키). */
   fedId: number;
   /** "끌어 봐"라고 말을 거는 중. */
@@ -361,6 +363,15 @@ export function usePest({
     () => dispatch({ type: 'feed', line: pickLine({ kind: 'treat', random }) }),
     [random],
   );
+  const hint = useCallback(
+    () =>
+      dispatch({
+        type: 'react',
+        kind: 'hint',
+        line: pickLine({ kind: 'hint', random }),
+      }),
+    [random],
+  );
   const grab = useCallback(() => {
     dragHint.learned();
     dispatch({ type: 'grab', line: pickLine({ kind: 'dragged', random }) });
@@ -389,6 +400,7 @@ export function usePest({
     line,
     tap,
     feed,
+    hint,
     fedId: state.fedId,
     inviting: state.inviting,
     grab,

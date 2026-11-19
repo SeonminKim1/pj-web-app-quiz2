@@ -33,16 +33,97 @@
   fill: var(--color-gold);
 }
 
-/* 간식 버튼: 놀이터 오른쪽 아래(방해꾼보다 위). */
+/* 간식 버튼: 놀이터 오른쪽 아래 둥근 간식 접시(방해꾼보다 위).
+   놀이터 띠는 터치를 통과시키므로(pointer-events: none) 버튼만 다시 받는다. */
 .feed {
-  composes: small from '../styles/ui.module.css';
   position: absolute;
   /* 방해꾼(2·3)보다 위. 말풍선(6)은 터치를 통과시킨다. */
   z-index: 5;
   right: var(--space-2);
-  bottom: var(--space-2);
-  gap: 2px;
-  min-height: 40px;
-  padding: 0 var(--space-2) 0 6px;
-  font-size: 0.8125rem;
+  bottom: 6px;
+  display: flex;
+  width: 56px;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bowl {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: var(--border);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 38%,
+    #fff3c4 0 45%,
+    var(--color-gold) 46%
+  );
+  box-shadow: var(--shadow-pop);
+  transition:
+    transform 0.08s ease-out,
+    box-shadow 0.08s ease-out;
+}
+
+.bowl svg {
+  animation: treat-wiggle 3.2s ease-in-out infinite;
+  transform-origin: 50% 70%;
+}
+
+/* 이름표: 접시 아래에 살짝 겹친 알약. */
+.feedLabel {
+  margin-top: -8px;
+  padding: 0 6px;
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  line-height: 1.25;
+}
+
+.feed:active .bowl {
+  box-shadow: var(--shadow-pressed);
+  transform: translateY(var(--press-offset)) scale(0.94);
+}
+
+.feed:focus-visible {
+  outline: none;
+}
+
+.feed:focus-visible .bowl {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* 가끔 간식이 들썩여서 눌러 보고 싶게. */
+@keyframes treat-wiggle {
+  0%,
+  80%,
+  100% {
+    transform: rotate(0);
+  }
+  85% {
+    transform: rotate(-14deg) scale(1.08);
+  }
+  90% {
+    transform: rotate(12deg) scale(1.08);
+  }
+  95% {
+    transform: rotate(-6deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bowl svg {
+    animation: none;
+  }
 }

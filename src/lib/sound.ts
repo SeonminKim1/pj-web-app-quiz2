@@ -2,7 +2,7 @@
 // 브라우저는 사용자 동작 뒤에만 소리를 허락하므로, 켤 때와 첫 탭에서 AudioContext를 깨운다.
 // 어떤 이유로든 실패하면 조용히 넘어간다(풀이를 막지 않음).
 
-export type Cue = 'correct' | 'wrong' | 'coin' | 'levelUp' | 'treat';
+export type Cue = 'correct' | 'wrong' | 'coin' | 'levelUp' | 'treat' | 'hint';
 
 let enabled = false;
 let ctx: AudioContext | undefined;
@@ -75,6 +75,14 @@ const CUES: Record<Cue, { notes: Note[]; vibrate?: number | number[] }> = {
       type: 'triangle' as const,
     })),
     vibrate: [30, 60, 30, 60, 60],
+  },
+  // 촤락: 카드 뒤집는 짧은 미끄럼 + 반짝.
+  hint: {
+    notes: [
+      { freq: 520, to: 1040, at: 0, dur: 0.1, type: 'sine', gain: 0.1 },
+      { freq: 1568, at: 0.1, dur: 0.14, type: 'triangle', gain: 0.07 },
+    ],
+    vibrate: 15,
   },
   // 냠냠: 낮게 두 번.
   treat: {

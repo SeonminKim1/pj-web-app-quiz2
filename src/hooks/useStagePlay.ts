@@ -116,6 +116,8 @@ export function stagePlayReducer(
 export type HintView = {
   /** 이미 연 힌트. */
   opened: OpenableHint[];
+  /** 이 문제에서 열 수 있는 힌트 전체 수(카드 수). */
+  total: number;
   /** 다음에 열 힌트(없거나 맞힌 뒤면 undefined: 버튼을 숨김). */
   next: OpenableHint | undefined;
   /** 다음 힌트를 지금 열 수 있는지(유료인데 골드가 모자라면 false). */
@@ -223,7 +225,13 @@ export function useStagePlay({
 
   const hints = useMemo<HintView>(() => {
     if (!item)
-      return { opened: [], next: undefined, canOpen: false, goldShort: false };
+      return {
+        opened: [],
+        total: 0,
+        next: undefined,
+        canOpen: false,
+        goldShort: false,
+      };
     const all = openableHints({ topic, item });
     const count = openedHintCount({
       progress,
@@ -235,6 +243,7 @@ export function useStagePlay({
     const goldShort = next?.paid === true && progress.gold < HINT_PRICE;
     return {
       opened: all.slice(0, count),
+      total: all.length,
       next,
       goldShort,
       canOpen: state.phase === 'answering' && next !== undefined && !goldShort,

@@ -19,7 +19,8 @@ export type PestLineKind =
   | 'treat'
   | 'invite'
   | 'dragged'
-  | 'dropped';
+  | 'dropped'
+  | 'hint';
 
 /** 시간 값(ms). 실제로 해 보고 조정하기 쉽게 한곳에 둔다. */
 export const PEST_TIMING = {
@@ -47,6 +48,7 @@ export const PEST_LINE_MOOD: Record<PestLineKind, PestMood> = {
   invite: 'taunt',
   dragged: 'surprised',
   dropped: 'sulky',
+  hint: 'surprised',
 };
 
 /** 이 시간(ms) 동안 아무 일이 없으면 아직 끌어 보지 않은 사람에게 "끌어 봐"라고 말을 건다. */
@@ -77,6 +79,13 @@ export const PEST_LINES: Record<PestLineKind, readonly string[]> = {
   ],
   dragged: ['으아 어디 가!', '내려 줘~', '우와 하늘을 난다!', '살살 좀 다뤄~'],
   dropped: ['어지러워…', '빙글빙글~', '다시는 안 그럴게…'],
+  hint: [
+    '앗! 힌트 쓰기냐~',
+    '그거 봐도 모를걸?',
+    '치사하게 힌트를…',
+    '힌트 줘도 못 맞힐걸~',
+    '아 그걸 보여 주면 어떡해!',
+  ],
   treat: [
     '냠냠! 고마워',
     '이거 내 최애야!',

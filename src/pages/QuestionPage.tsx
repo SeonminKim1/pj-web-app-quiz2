@@ -309,11 +309,17 @@ function Session({
             </p>
           </div>
           <HintPanel
-            opened={hints.opened.map((hint) => hint.text)}
+            key={item.id}
+            opened={hints.opened}
+            total={hints.total}
             next={hints.next}
             canOpen={hints.canOpen}
             goldShort={hints.goldShort}
-            onOpen={play.openNextHint}
+            onOpen={() => {
+              playCue('hint');
+              play.openNextHint();
+              pest.hint();
+            }}
             leading={<ShareButton onClick={sharePre} />}
           />
           <AnswerInput
