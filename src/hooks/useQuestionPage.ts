@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { AppError, ErrorCode } from '../errors/AppError.ts';
 import { analytics } from '../lib/analyticsInstance.ts';
-import { buildCategories } from '../lib/categories.ts';
 import { solvedSet } from '../lib/progress.ts';
 import {
   findShareTopic,
@@ -19,16 +18,14 @@ import {
   shareKey,
   type ShareInfo,
 } from '../lib/shareLink.ts';
-import { buildStages, type Stage } from '../lib/stages.ts';
 import type { QuizItem, QuizTopic } from '../types/quiz.ts';
 import { useProgress } from './useProgress.ts';
-import { useTopicFile, type LoadState } from './useQuizData.ts';
-
-/** 주제 파일과 한 판 목록(스테이지 또는 카테고리). */
-type TopicRounds = {
-  items: readonly QuizItem[];
-  rounds: Stage[];
-};
+import type { LoadState } from './useQuizData.ts';
+import {
+  roundSegment,
+  useTopicRounds,
+  type TopicRounds,
+} from './useTopicRounds.ts';
 
 export type QuestionTarget =
   | {
@@ -105,29 +102,6 @@ function continueStageNo({
     if (data.rounds[i]!.items.some((it) => !solved.has(it.id))) return i + 1;
   }
   return undefined; // 다 풀었으면 스테이지 목록으로
-}
-
-/** 주제 파일 → 한 판 목록(주제 설정의 한 판 단위대로). */
-function useTopicRounds(topic: ShareTopic | undefined): {
-  state: LoadState<TopicRounds>;
-  retry: () => void;
-} {
-  const { state: fileState, retry } = useTopicFile(topic?.id);
-  const state = useMemo<LoadState<TopicRounds>>(() => {
-    if (fileState.status !== 'ready') return fileState;
-    if (!topic) {
-      return {
-        status: 'error',
-        error: new AppError(ErrorCode.TOPIC_NOT_FOUND),
-      };
-    }
-    const { items } = fileState.data;
-    const rounds = topic.round.byCategory
-      ? buildCategories({ items })
-      : buildStages({ items, stageSize: topic.round.stageSize });
-    return { status: 'ready', data: { items, rounds } };
-  }, [fileState, topic]);
-  return { state, retry };
 }
 
 /** 문제 하나 모드 hook. prefix: 주소의 공유 앞부분(q, m). */
@@ -212,7 +186,7 @@ export function useQuestionPage(prefix: string): {
     goHome: () => void navigate('/'),
     goStage: (no) => {
       const list = `/topics/${topic?.id ?? ''}`;
-      const segment = topic?.round.byCategory ? 'categories' : 'stages';
+      const segment = topic ? roundSegment(topic) : 'stages';
       void navigate(no ? `${list}/${segment}/${no}` : list);
     },
   };

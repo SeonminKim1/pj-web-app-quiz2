@@ -1,3 +1,4 @@
+import { SettingsButton } from '../components/SettingsButton.tsx';
 import type { ReactElement } from 'react';
 import { DataErrorView } from '../components/DataErrorView.tsx';
 import { StageGrid } from '../components/StageGrid.tsx';
@@ -15,7 +16,10 @@ export function StageListPage(): ReactElement {
           ← 처음으로
         </button>
         <h1>{label}</h1>
-        <GoldBadge gold={gold} />
+        <span className={styles.headerEnd}>
+          <GoldBadge gold={gold} />
+          <SettingsButton />
+        </span>
       </header>
       {state.status === 'loading' && <LoadingView />}
       {state.status === 'error' && (

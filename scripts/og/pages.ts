@@ -4,8 +4,8 @@ import { createHash } from 'node:crypto';
 import type { QuizItem } from '../../src/types/quiz.ts';
 import type { ShareProblem } from '../share/registry.ts';
 
-export const SITE_NAME = '퀴즈 놀이터';
-export const DEFAULT_DESCRIPTION = '넌센스 퀴즈 풀고 친구한테 내기';
+export const SITE_NAME = '게임 놀이터';
+export const DEFAULT_DESCRIPTION = '퀴즈 풀고 친구한테 내기';
 
 const ORIGIN = /^https:\/\/[^/\s]+$/;
 const LOCAL_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;

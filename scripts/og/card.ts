@@ -171,7 +171,7 @@ function brand(): ReactElement {
     el(
       'div',
       { fontSize: 30, fontWeight: 400, color: COLOR.inkSoft },
-      '퀴즈 놀이터',
+      '게임 놀이터',
     ),
   );
 }
@@ -238,7 +238,7 @@ export function topicCard({
 export function defaultCard(): ReactElement {
   return frame(
     brand(),
-    el('div', { fontSize: 56, fontWeight: 400 }, '넌센스 퀴즈'),
+    el('div', { fontSize: 56, fontWeight: 400 }, '퀴즈 한 판 할래?'),
     pill('풀고 친구한테 내기'),
   );
 }

@@ -36,14 +36,6 @@
   padding: 0 var(--space-3) 0 var(--space-1);
 }
 
-.heroSettings {
-  composes: small from '../styles/ui.module.css';
-  position: absolute;
-  top: 0;
-  left: 0;
-  gap: var(--space-1);
-}
-
 /* 머리: 왼쪽 버튼·가운데 제목(또는 진행)·오른쪽 골드. */
 .header {
   display: flex;
@@ -51,6 +43,28 @@
   justify-content: space-between;
   gap: var(--space-2);
   margin-bottom: var(--space-4);
+}
+
+/* 풀이 화면 머리 줄 가운데 제목(스테이지 12, 연애). */
+.playTitle {
+  overflow: hidden;
+  min-width: 0;
+  flex: 1 1 auto;
+  font-family: var(--font-display);
+  font-synthesis: none;
+  font-size: 1.125rem;
+  font-weight: 800;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 머리 줄 오른쪽 묶음(골드 + ⚙ 설정). */
+.headerEnd {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .header h1 {
@@ -85,7 +99,8 @@
   align-items: center;
   gap: var(--space-2);
   margin: var(--space-3) 0 56px;
-  padding-top: var(--space-5);
+  /* 위 모서리의 방해꾼·골드·⚙(44px + 그림자)와 로고가 겹치지 않게 그 줄만큼 띄운다. */
+  padding-top: 60px;
   text-align: center;
 }
 
@@ -93,8 +108,8 @@
   position: absolute;
   top: 0;
   right: 0;
-  display: grid;
-  justify-items: end;
+  display: flex;
+  align-items: center;
   gap: var(--space-2);
 }
 

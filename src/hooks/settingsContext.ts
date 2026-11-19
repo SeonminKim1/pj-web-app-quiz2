@@ -11,6 +11,8 @@ export type SettingsContextValue = {
   setSound: (on: boolean) => void;
   /** 배경음악 켜고 끄기. */
   setMusic: (on: boolean) => void;
+  /** 마지막으로 푼 주제 기억하기(풀이 화면에 들어갈 때). */
+  setLastTopic: (topicId: string) => void;
 };
 
 export const SettingsContext = createContext<SettingsContextValue | undefined>(

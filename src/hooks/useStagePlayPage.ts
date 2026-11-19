@@ -15,7 +15,7 @@ export type StagePlayTarget = {
   topic: QuizTopic;
   /** 풀 판(카테고리 단위 주제면 그 카테고리). */
   stage: Stage;
-  /** 머리 줄 진행 표시 앞부분("3단계", "연애"). */
+  /** 머리 줄 진행 표시 앞부분("스테이지 3", "연애"). */
   stageLabel: string;
   stageCount: number;
   /** 주제 전체 문제 수(칭호). */
@@ -53,7 +53,7 @@ export function useStagePlayPage(): StagePlayPageView {
       data: {
         topic: loaded.data.topic,
         stage,
-        stageLabel: `${stage.no}단계`,
+        stageLabel: `스테이지 ${stage.no}`,
         stageCount: stages.length,
         itemCount: loaded.data.items.length,
       },

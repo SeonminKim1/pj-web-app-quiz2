@@ -12,4 +12,6 @@ export type Settings = {
   sound?: boolean;
   /** 배경음악(선택 필드, 없으면 꺼짐). */
   music?: boolean;
+  /** 마지막으로 푼 주제 id(첫 화면 "이어서 풀기"가 이 주제로 간다). 없으면 넌센스. */
+  lastTopic?: string;
 };

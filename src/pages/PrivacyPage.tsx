@@ -1,3 +1,4 @@
+import { SettingsButton } from '../components/SettingsButton.tsx';
 import type { ReactElement } from 'react';
 import { Link } from 'react-router';
 import styles from './Page.module.css';
@@ -17,11 +18,12 @@ export function PrivacyPage(): ReactElement {
         <Link to="/" className={styles.back}>
           ← 처음으로
         </Link>
+        <SettingsButton />
       </header>
       <article className={styles.doc}>
         <h1>개인정보처리방침</h1>
         <p>
-          퀴즈 놀이터(웹사이트와 안드로이드 앱)는 회원 가입이나 로그인이 없고,
+          게임 놀이터(웹사이트와 안드로이드 앱)는 회원 가입이나 로그인이 없고,
           이름·연락처·위치 같은 개인정보를 받지 않아요.
         </p>
 

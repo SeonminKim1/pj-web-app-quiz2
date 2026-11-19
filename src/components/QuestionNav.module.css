@@ -3,7 +3,9 @@
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: var(--space-1);
+  justify-content: center;
+  gap: var(--space-3);
+  margin: calc(-1 * var(--space-2)) 0 var(--space-3);
 }
 
 .arrow {
@@ -18,8 +20,18 @@
 
 .label {
   composes: pill from '../styles/ui.module.css';
+  min-width: 72px;
+  justify-content: center;
+  font-size: 0.9375rem;
+}
+
+.srOnly {
+  position: absolute;
   overflow: hidden;
-  min-width: 0;
-  font-size: 0.875rem;
-  text-overflow: ellipsis;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

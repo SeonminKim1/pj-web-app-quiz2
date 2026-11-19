@@ -59,6 +59,18 @@ export function useSettingsState(
     [store],
   );
 
+  const setLastTopic = useCallback<SettingsContextValue['setLastTopic']>(
+    (topicId) => {
+      setSettings((current) => {
+        if (current.lastTopic === topicId) return current;
+        const next = { ...current, lastTopic: topicId };
+        store.save(next);
+        return next;
+      });
+    },
+    [store],
+  );
+
   // 저장돼 있던 배경음악 설정을 알린다. 소리 장치는 첫 탭에서 깨어난다(main.tsx).
   useEffect(() => {
     setMusicEnabled(settings.music ?? false);
@@ -70,7 +82,7 @@ export function useSettingsState(
   }, [settings.sound]);
 
   return useMemo(
-    () => ({ settings, choosePet, setSound, setMusic }),
-    [settings, choosePet, setSound, setMusic],
+    () => ({ settings, choosePet, setSound, setMusic, setLastTopic }),
+    [settings, choosePet, setSound, setMusic, setLastTopic],
   );
 }

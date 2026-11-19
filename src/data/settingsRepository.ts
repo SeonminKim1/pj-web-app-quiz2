@@ -36,6 +36,7 @@ export function isSettings(value: unknown): value is Settings {
     value.version === SETTINGS_VERSION &&
     isPetId(value.pet) &&
     (value.sound === undefined || typeof value.sound === 'boolean') &&
-    (value.music === undefined || typeof value.music === 'boolean')
+    (value.music === undefined || typeof value.music === 'boolean') &&
+    (value.lastTopic === undefined || typeof value.lastTopic === 'string')
   );
 }
