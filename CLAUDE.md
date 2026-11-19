@@ -63,3 +63,10 @@ When the user's request matches an available skill, invoke it via the Skill tool
 - Ship, PR, release → /ship
 - After a production deploy → /canary
 - Docs out of date after shipping → /document-release
+
+## Health Stack
+
+- typecheck: npm run typecheck
+- lint: npm run lint
+- test: npm test
+- deadcode: npx --yes knip
