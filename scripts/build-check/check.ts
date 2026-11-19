@@ -6,6 +6,13 @@ import type { RegistryEntry, ShareProblem } from '../share/registry.ts';
 
 export type DistPage = { path: string; html: string };
 
+/** 공유 주제 하나: 주소 앞부분, 등록부, 문제 데이터. */
+export type DistShare = {
+  prefix: string;
+  registry: readonly RegistryEntry[];
+  items: readonly QuizItem[];
+};
+
 function attr(html: string, pattern: RegExp): string[] {
   return [...html.matchAll(pattern)].map((match) => decodeEntities(match[1]!));
 }
@@ -61,8 +68,7 @@ export function checkDist({
   exists,
   origin,
   production,
-  registry,
-  items,
+  shares,
   manifest,
 }: {
   pages: readonly DistPage[];
@@ -71,8 +77,8 @@ export function checkDist({
   origin: string;
   /** Netlify 정식 빌드(CONTEXT=production)면 https 정식 origin만 허용. */
   production: boolean;
-  registry: readonly RegistryEntry[];
-  items: readonly QuizItem[];
+  /** 공유 주제마다(넌센스 /q/, MBTI /m/ …). */
+  shares: readonly DistShare[];
   /** dist/manifest.webmanifest를 읽은 값(없거나 JSON이 아니면 undefined). */
   manifest: unknown;
 }): ShareProblem[] {
@@ -157,37 +163,39 @@ export function checkDist({
     }
   }
 
-  // 4) 등록부의 모든 id에 페이지가 있고, 공유 중인 문제는 #q-data가 원래 값과 같다.
+  // 4) 주제마다 등록부의 모든 id에 페이지가 있고, 공유 중인 문제는 #q-data가 원래 값과 같다.
   const byPath = new Map(pages.map((page) => [page.path, page]));
-  const byId = new Map(items.map((item) => [item.id, item]));
-  for (const entry of registry) {
-    const path = `/q/${entry.id}/index.html`;
-    const page = byPath.get(path);
-    if (!page) {
-      add(
-        'DIST_ASSET_MISSING',
-        `id ${entry.id}`,
-        `등록부에 있는데 dist${path}가 없어요`,
-        'npm run build:og를 다시 돌리세요',
-      );
-      continue;
-    }
-    const item = byId.get(entry.id);
-    if (item?.shareable !== true) continue;
-    const qdata = readQData(page.html);
-    if (
-      qdata === undefined ||
-      qdata === null ||
-      !sameJson(qdata, publicItem(item))
-    ) {
-      add(
-        'DIST_QDATA_MISSING',
-        `dist${path}`,
-        qdata === undefined
-          ? '#q-data가 없어요'
-          : '#q-data가 원래 문제 자료와 달라요(이스케이프 확인)',
-        'npm run build:og를 다시 돌리고, 계속되면 scripts/og/pages.ts의 jsonForScript를 확인하세요',
-      );
+  for (const { prefix, registry, items } of shares) {
+    const byId = new Map(items.map((item) => [item.id, item]));
+    for (const entry of registry) {
+      const path = `/${prefix}/${entry.id}/index.html`;
+      const page = byPath.get(path);
+      if (!page) {
+        add(
+          'DIST_ASSET_MISSING',
+          `/${prefix}/ id ${entry.id}`,
+          `등록부에 있는데 dist${path}가 없어요`,
+          'npm run build:og를 다시 돌리세요',
+        );
+        continue;
+      }
+      const item = byId.get(entry.id);
+      if (item?.shareable !== true) continue;
+      const qdata = readQData(page.html);
+      if (
+        qdata === undefined ||
+        qdata === null ||
+        !sameJson(qdata, publicItem(item))
+      ) {
+        add(
+          'DIST_QDATA_MISSING',
+          `dist${path}`,
+          qdata === undefined
+            ? '#q-data가 없어요'
+            : '#q-data가 원래 문제 자료와 달라요(이스케이프 확인)',
+          'npm run build:og를 다시 돌리고, 계속되면 scripts/og/pages.ts의 jsonForScript를 확인하세요',
+        );
+      }
     }
   }
   // 5) 설치(PWA): 서비스 워커와 manifest, manifest가 부르는 아이콘이 있다.

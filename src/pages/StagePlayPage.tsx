@@ -12,18 +12,30 @@ import { Playground } from '../components/Playground.tsx';
 import { StageResult } from '../components/StageResult.tsx';
 import { GoldBadge, LoadingView } from '../components/StatusViews.tsx';
 import {
+  useCategoryPlayPage,
   useStagePlayPage,
+  type StagePlayPageView,
   type StagePlayTarget,
 } from '../hooks/useStagePlayPage.ts';
+import { MbtiAxesPicker } from '../components/MbtiAxesPicker.tsx';
 import { useStageSession } from '../hooks/useStageSession.ts';
 import { loadNickname, useShare } from '../hooks/useShare.ts';
 import { ManualCopy, ShareToast } from '../components/ShareFeedback.tsx';
 import { ShareButton } from '../components/ShareButton.tsx';
 import styles from './Page.module.css';
 
-/** 풀이 화면: 주소의 주제·스테이지를 확인하고 풀이 세션을 띄운다. */
+/** 풀이 화면(/topics/:topicId/stages/:stageNo): 주소의 주제·스테이지를 확인하고 풀이 세션을 띄운다. */
 export function StagePlayPage(): ReactElement {
-  const { state, retry, goHome, goList, goNextStage } = useStagePlayPage();
+  return <PlayScreen view={useStagePlayPage()} />;
+}
+
+/** 카테고리 단위 주제 풀이(/topics/:topicId/categories/:categoryNo): 카테고리 하나를 스테이지처럼 푼다. */
+export function CategoryPlayPage(): ReactElement {
+  return <PlayScreen view={useCategoryPlayPage()} />;
+}
+
+function PlayScreen({ view }: { view: StagePlayPageView }): ReactElement {
+  const { state, listLabel, retry, goHome, goList, goNextStage } = view;
   if (state.status === 'loading') {
     return (
       <Shell>
@@ -49,6 +61,7 @@ export function StagePlayPage(): ReactElement {
       // 다음 스테이지로 가면 세션(풀 문제 목록, 풀이 상태)을 새로 만든다.
       key={`${topic.id}-${stage.no}`}
       target={state.data}
+      listLabel={listLabel}
       onList={goList}
       onNextStage={goNextStage}
     />
@@ -61,6 +74,7 @@ function Shell({ children }: { children: ReactElement }): ReactElement {
 
 type StageSessionProps = {
   target: StagePlayTarget;
+  listLabel: string;
   onList: () => void;
   onNextStage: () => void;
 };
@@ -68,6 +82,7 @@ type StageSessionProps = {
 // 스테이지 한 번 풀기.
 function StageSession({
   target,
+  listLabel,
   onList,
   onNextStage,
 }: StageSessionProps): ReactElement {
@@ -88,10 +103,15 @@ function StageSession({
   const newTitle = useTitleUp({
     topicId: target.topic.id,
     total: target.itemCount,
+    enabled: target.topic.titles,
   });
-  const { stage } = target;
+  const { topic } = target;
+  const axesMode = topic.play[0] === 'mbtiAxes';
+  // 공유 주소가 없는 주제는 공유 버튼을 숨긴다.
+  const canShare = topic.share !== undefined;
   // 지금 문제를 친구한테 내기. 방금 맞힌 문제면 결과(힌트 수)도 함께 보낸다.
   const shareView = useShare({
+    prefix: topic.share?.prefix,
     id: item?.id ?? '',
     question: item?.question ?? '',
   });
@@ -126,8 +146,11 @@ function StageSession({
     state.phase === 'correct'
       ? `정답! ${item?.answer ?? ''}${play.lastGold > 0 ? ` · 골드 +${play.lastGold}` : ''}`
       : state.phase === 'wrong'
-        ? '틀렸어요'
+        ? play.matchedAxes !== undefined
+          ? `틀렸어요 · 4개 중 ${play.matchedAxes}개 맞았어요`
+          : '틀렸어요'
         : undefined;
+  const advanceLabel = play.isLast ? '결과 보기 ›' : '다음 ›';
 
   return (
     <main className={styles.playPage}>
@@ -135,14 +158,14 @@ function StageSession({
         <button
           type="button"
           className={styles.backIcon}
-          aria-label="스테이지 목록"
+          aria-label={listLabel}
           onClick={onList}
         >
           ←
         </button>
         {/* 이전·다음은 진행 표시 양옆 화살표(마지막의 ›는 결과 보기). */}
         <QuestionNav
-          label={`${stage.no}단계 · ${state.index + 1} / ${play.total}`}
+          label={`${target.stageLabel} · ${state.index + 1} / ${play.total}`}
           canPrev={play.canPrev}
           next={play.isLast ? 'result' : 'next'}
           onPrev={play.prev}
@@ -198,24 +221,43 @@ function StageSession({
             play.openNextHint();
             pest.hint();
           }}
-          leading={<ShareButton onClick={shareCurrent} />}
+          leading={
+            canShare ? <ShareButton onClick={shareCurrent} /> : undefined
+          }
         />
-        <AnswerInput
-          questionKey={item?.id ?? ''}
-          reward={state.fresh ? play.lastGold : 0}
-          charCount={play.charCount}
-          wordLengths={play.wordLengths}
-          slots={play.slots}
-          feedback={feedback}
-          value={state.input}
-          phase={state.phase}
-          canSubmit={play.canSubmit}
-          canAdvance={play.canAdvance}
-          advanceLabel={play.isLast ? '결과 보기 ›' : '다음 ›'}
-          onChange={play.setInput}
-          onSubmit={play.submit}
-          onAdvance={play.advance}
-        />
+        {axesMode ? (
+          <MbtiAxesPicker
+            questionKey={item?.id ?? ''}
+            reward={state.fresh ? play.lastGold : 0}
+            selection={play.selection}
+            lockedAxes={play.lockedAxes}
+            feedback={feedback}
+            phase={state.phase}
+            canSubmit={play.canSubmit}
+            canAdvance={play.canAdvance}
+            advanceLabel={advanceLabel}
+            onPick={play.pickAxis}
+            onSubmit={play.submit}
+            onAdvance={play.advance}
+          />
+        ) : (
+          <AnswerInput
+            questionKey={item?.id ?? ''}
+            reward={state.fresh ? play.lastGold : 0}
+            charCount={play.charCount}
+            wordLengths={play.wordLengths}
+            slots={play.slots}
+            feedback={feedback}
+            value={state.input}
+            phase={state.phase}
+            canSubmit={play.canSubmit}
+            canAdvance={play.canAdvance}
+            advanceLabel={advanceLabel}
+            onChange={play.setInput}
+            onSubmit={play.submit}
+            onAdvance={play.advance}
+          />
+        )}
       </PestLayer>
       <ShareToast text={shareView.toast} />
       <TitleToast name={newTitle} />

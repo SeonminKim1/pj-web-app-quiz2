@@ -11,6 +11,12 @@ import {
   normalizeAnswer,
 } from '../lib/answer.ts';
 import {
+  isCompleteMbti,
+  matchedAxisCount,
+  pickMbtiAxis,
+  withRevealedAxes,
+} from '../lib/mbti.ts';
+import {
   HINT_PRICE,
   openableHints,
   openedHintCount,
@@ -44,6 +50,8 @@ export type StagePlayState = {
 
 export type StagePlayAction =
   | { type: 'input'; value: string }
+  /** 4축 고르기: 지금 입력에서 축 하나를 고른다(연달아 눌러도 앞 선택이 남게 reducer가 합친다). */
+  | { type: 'pickAxis'; axis: number; letter: string }
   | { type: 'judged'; correct: boolean; gold: number }
   | { type: 'clear' }
   /** 다른 문제로. solvedAnswer가 있으면 이미 맞힌 문제(정답을 보여 준다). */
@@ -76,6 +84,16 @@ export function stagePlayReducer(
     case 'input':
       if (state.phase !== 'answering') return state;
       return { ...state, input: action.value };
+    case 'pickAxis':
+      if (state.phase !== 'answering') return state;
+      return {
+        ...state,
+        input: pickMbtiAxis({
+          input: state.input,
+          axis: action.axis,
+          letter: action.letter,
+        }),
+      };
     case 'judged':
       if (state.phase !== 'answering') return state;
       return action.correct
@@ -144,8 +162,14 @@ export type StagePlay = {
   wordLengths: number[];
   /** 글자 칸: 지금 입력을 정답 칸에 채운 값(주관식). */
   slots: AnswerSlots;
-  /** 지금 제출할 수 있는지(answering이고 입력에 글자가 있음). */
+  /** 지금 제출할 수 있는지(answering이고 입력에 글자가 있음, 4축 고르기는 4축을 다 고름). */
   canSubmit: boolean;
+  /** 4축 고르기: 공개 힌트로 고정된 앞 축 수. */
+  lockedAxes: number;
+  /** 4축 고르기: 공개된 축을 정답으로 덮은 고른 값(맞힌 뒤에는 정답). */
+  selection: string;
+  /** 4축 고르기: 틀렸을 때 자리가 맞은 축 수(wrong이 아니면 undefined). */
+  matchedAxes: number | undefined;
   canPrev: boolean;
   /** 뒤 문제가 있는지(마지막이 아님, 결과가 아님). */
   canNext: boolean;
@@ -155,6 +179,8 @@ export type StagePlay = {
   canAdvance: boolean;
   hints: HintView;
   setInput: (value: string) => void;
+  /** 4축 고르기: 축 하나 고르기. */
+  pickAxis: (axis: number, letter: string) => void;
   submit: () => void;
   openNextHint: () => void;
   prev: () => void;
@@ -197,10 +223,31 @@ export function useStagePlay({
     }),
   );
   const item = items[state.index];
+  const axesMode = topic.play[0] === 'mbtiAxes';
+  const lockedAxes =
+    axesMode && item
+      ? Math.min(
+          openedHintCount({ progress, topicId: topic.id, itemId: item.id }),
+          openableHints({ topic, item }).filter(
+            (hint) => hint.type === 'revealLetter',
+          ).length,
+        )
+      : 0;
+  // 제출할 답: 4축 고르기는 공개된 축을 정답 글자로 덮는다.
+  const answerInput =
+    axesMode && item
+      ? withRevealedAxes({
+          input: state.input,
+          answer: item.answer,
+          locked: lockedAxes,
+        })
+      : state.input;
   const canSubmit =
     item !== undefined &&
     state.phase === 'answering' &&
-    normalizeAnswer(state.input).length > 0;
+    (axesMode
+      ? isCompleteMbti(answerInput)
+      : normalizeAnswer(state.input).length > 0);
 
   // 오답이면 잠시 흔든 뒤 다시 쓸 수 있게 한다. 다른 문제로 가거나 화면을 떠나면 타이머를 정리한다.
   useEffect(() => {
@@ -283,16 +330,23 @@ export function useStagePlay({
     wordLengths: item ? answerWordLengths(item.answer) : [],
     slots: answerSlots({ answer: item?.answer ?? '', input: state.input }),
     canSubmit,
+    lockedAxes,
+    selection: answerInput,
+    matchedAxes:
+      axesMode && item && state.phase === 'wrong'
+        ? matchedAxisCount({ answer: item.answer, input: answerInput })
+        : undefined,
     canPrev: state.phase !== 'result' && state.index > 0,
     canNext: state.phase !== 'result' && !isLast,
     isLast,
     canAdvance,
     hints,
     setInput,
+    pickAxis: (axis, letter) => dispatch({ type: 'pickAxis', axis, letter }),
     /** 제출: 채점하고, 맞으면 진행에 기록(골드는 진행 규칙이 정함). 빈 입력·answering 밖에서는 무시. */
     submit: () => {
       if (!item || !canSubmit) return;
-      if (isCorrectAnswer({ answer: item.answer, input: state.input })) {
+      if (isCorrectAnswer({ answer: item.answer, input: answerInput })) {
         const gold = recordCorrect({ topicId: topic.id, itemId: item.id });
         dispatch({ type: 'judged', correct: true, gold });
       } else {

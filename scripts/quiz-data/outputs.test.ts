@@ -2,9 +2,34 @@
 import { describe, expect, it } from 'vitest';
 import { buildQuizOutputs, playableWarnings } from './outputs.ts';
 
-// 넌센스 n문제.
+const MBTI_TYPES = [
+  'ISTJ',
+  'ISFJ',
+  'INFJ',
+  'INTJ',
+  'ISTP',
+  'ISFP',
+  'INFP',
+  'INTP',
+  'ESTP',
+  'ESFP',
+  'ENFP',
+  'ENTP',
+  'ESTJ',
+  'ESFJ',
+  'ENFJ',
+  'ENTJ',
+];
+
+// 넌센스 n문제 + MBTI 한 카테고리(16문제).
 function files(nonsenseCount: number): Record<string, unknown> {
   return {
+    'mbti.json': MBTI_TYPES.map((answer, i) => ({
+      id: String(i + 1),
+      question: `상황 ${i + 1}`,
+      answer,
+      category: '일상',
+    })),
     'nonsense.json': Array.from({ length: nonsenseCount }, (_, i) => ({
       id: String(i + 1),
       question: `질문 ${i + 1}`,
@@ -28,9 +53,17 @@ describe('buildQuizOutputs', () => {
           file: 'nonsense.json',
           playable: true,
         },
+        {
+          id: 'mbti',
+          label: 'MBTI',
+          count: 16,
+          file: 'mbti.json',
+          playable: true,
+          categories: [{ name: '일상', count: 16 }],
+        },
       ],
     });
-    expect(Object.keys(topicFiles)).toEqual(['nonsense.json']);
+    expect(Object.keys(topicFiles)).toEqual(['nonsense.json', 'mbti.json']);
     expect(topicFiles['nonsense.json']).toMatchObject({
       version: 1,
       topic: 'nonsense',

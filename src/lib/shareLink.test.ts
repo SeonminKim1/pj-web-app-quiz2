@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   bannerLines,
   buildSharePath,
+  shareKey,
   clampShareInfo,
   cleanNickname,
   compareLine,
@@ -44,6 +45,16 @@ describe('buildSharePath', () => {
     expect(buildSharePath({ id: '23', info: { from: '민지' } })).toBe(
       '/q/23/?s=1&from=%EB%AF%BC%EC%A7%80',
     );
+  });
+});
+
+describe('주제별 공유 주소', () => {
+  it('앞부분을 주제마다 바꾸고, 통계 키는 넌센스만 id 그대로', () => {
+    expect(buildSharePath({ prefix: 'm', id: '12', info: {} })).toBe(
+      '/m/12/?s=1',
+    );
+    expect(shareKey({ prefix: 'q', id: '12' })).toBe('12');
+    expect(shareKey({ prefix: 'm', id: '12' })).toBe('m12');
   });
 });
 

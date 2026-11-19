@@ -1,4 +1,4 @@
-// 공개 id 등록부(data/published-ids.json)와 공유 카드 검사. 설계 문서 "공개 id 등록부"·"빌드 파이프라인 1단계".
+// 공개 id 등록부(주제마다 하나, scripts/share/topics.ts)와 공유 카드 검사. 설계 문서 "공개 id 등록부"·"빌드 파이프라인 1단계".
 // 등록부는 추가만 한다. 같은 id = 같은 answerKey. 공유 대상(shareable: true) ⊆ 등록부.
 import { createHash } from 'node:crypto';
 import { canonicalAnswer } from '../../src/lib/answer.ts';
@@ -39,8 +39,11 @@ const ID_PATTERN = /^[1-9][0-9]*$/;
 const KEY_PATTERN = /^[0-9a-f]{16}$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
-/** 등록부 파일 자체의 형식 검사. */
-export function checkRegistryShape(value: unknown): {
+/** 등록부 파일 자체의 형식 검사. file: 위반에 적을 등록부 경로. */
+export function checkRegistryShape(
+  value: unknown,
+  file: string = REGISTRY_FILE,
+): {
   entries: RegistryEntry[];
   problems: ShareProblem[];
 } {
@@ -48,7 +51,7 @@ export function checkRegistryShape(value: unknown): {
   const add = (where: string, message: string) =>
     problems.push({
       code: 'QD_REGISTRY_SHAPE',
-      where: `${REGISTRY_FILE}${where}`,
+      where: `${file}${where}`,
       message,
       fix: 'git으로 이전 버전을 되살리세요(손으로 고치지 않음)',
     });
@@ -101,22 +104,31 @@ export function checkShareData({
   items,
   registry,
   previousRegistry,
+  dataFile = 'data/nonsense.json',
+  registryFile = REGISTRY_FILE,
+  card = 'question',
 }: {
   items: readonly QuizItem[];
   registry: readonly RegistryEntry[];
   previousRegistry?: readonly RegistryEntry[];
+  /** 위반에 적을 데이터·등록부 경로. */
+  dataFile?: string;
+  registryFile?: string;
+  /** topic(주제 공통 카드)이면 문제 문장을 카드에 그리지 않으므로 글자 배치는 검사하지 않는다. */
+  card?: 'question' | 'topic';
 }): ShareProblem[] {
   const problems: ShareProblem[] = [];
   const byId = new Map(registry.map((entry) => [entry.id, entry]));
+  const drawsQuestion = card === 'question';
   items.forEach((item, index) => {
-    const where = `data/nonsense.json[${index}]`;
+    const where = `${dataFile}[${index}]`;
     const registered = byId.get(item.id);
     if (registered && registered.answerKey !== answerKey(item.answer)) {
       problems.push({
         code: 'QD_ANSWER_CHANGED',
         where: `${where}.answer`,
         message: `id ${item.id}의 정답이 바뀌었어요 (등록 ${registered.answerKey}, 현재 ${answerKey(item.answer)})`,
-        fix: `공개된 id는 정답을 바꿀 수 없어요. 예전 정답으로 되돌리거나, 새 id로 옮기고 ${item.id}는 shareable:false. ${REGISTRY_FILE}을 손으로 고치지 마세요`,
+        fix: `공개된 id는 정답을 바꿀 수 없어요. 예전 정답으로 되돌리거나, 새 id로 옮기고 ${item.id}는 shareable:false. ${registryFile}을 손으로 고치지 마세요`,
       });
     }
     if (item.shareable !== true) return;
@@ -143,7 +155,7 @@ export function checkShareData({
         fix: 'ogText로 문구를 바꾸거나, 의도된 경우 allowAnswerInCard: true',
       });
     }
-    if (!fitCardText(text)) {
+    if (drawsQuestion && !fitCardText(text)) {
       problems.push({
         code: 'QD_TEXT_FIT',
         where: `${where}${item.ogText ? '.ogText' : '.question'}`,
@@ -158,7 +170,7 @@ export function checkShareData({
       if (!now.has(entry.id)) {
         problems.push({
           code: 'QD_REGISTRY_SHRUNK',
-          where: REGISTRY_FILE,
+          where: registryFile,
           message: `직전 커밋에 있던 id ${entry.id}가 지워졌어요`,
           fix: '등록부는 추가만 해요. 공유를 멈추려면 그 문제를 shareable:false로 두세요',
         });

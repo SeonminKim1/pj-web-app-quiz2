@@ -42,9 +42,12 @@ export function cleanNickname(
  * h·r은 둘 다 있을 때만 넣는다.
  */
 export function buildSharePath({
+  prefix = 'q',
   id,
   info,
 }: {
+  /** 주제의 공유 주소 앞부분(넌센스 q, MBTI m). */
+  prefix?: string;
   id: string;
   info: ShareInfo;
 }): string {
@@ -57,7 +60,21 @@ export function buildSharePath({
       params.set('r', info.result);
     }
   }
-  return `/q/${id}/?${params.toString()}`;
+  return `/${prefix}/${id}/?${params.toString()}`;
+}
+
+/**
+ * 통계·착지 기록에 쓰는 문제 키. 넌센스(q)는 예전 그대로 id, 다른 주제는 앞부분을 붙인다(m12).
+ * 주제마다 id를 따로 매기므로 이렇게 해야 겹치지 않는다.
+ */
+export function shareKey({
+  prefix,
+  id,
+}: {
+  prefix: string;
+  id: string;
+}): string {
+  return prefix === 'q' ? id : `${prefix}${id}`;
 }
 
 /** 받은 링크 읽기 결과. */

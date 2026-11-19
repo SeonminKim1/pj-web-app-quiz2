@@ -17,15 +17,15 @@
 
 ## quiz_data_invalid
 
-`data/nonsense.json`의 형식이 틀렸습니다. 필드 타입, id 형식(숫자 문자열), 중복 id, 모르는 필드가 여기에 걸립니다. 출력 아래 `- ` 줄에 문제 위치가 하나씩 나옵니다. 그 줄대로 고치고 `npm run quiz-data:check`로 다시 확인하세요.
+주제 파일(`data/nonsense.json`, `data/mbti.json`)의 형식이 틀렸습니다. 필드 타입, id 형식(숫자 문자열), 중복 id, 모르는 필드가 여기에 걸립니다. MBTI는 정답이 유형 4글자(`ISTJ`)가 아니거나, 카테고리마다 16문제·16유형 한 번씩이 아니어도 걸립니다. 출력 아래 `- ` 줄에 문제 위치가 하나씩 나옵니다. 그 줄대로 고치고 `npm run quiz-data:check`로 다시 확인하세요.
 
 ## qd_unregistered
 
-`shareable: true`인 문제가 등록부(`data/share/published-ids.json`)에 없습니다.
+`shareable: true`인 문제가 그 주제의 등록부(넌센스 `data/share/published-ids.json`, MBTI `data/share/mbti-published-ids.json`)에 없습니다.
 
 ```sh
 npm run register-ids
-git add data/share/published-ids.json
+git add data/share/
 ```
 
 ## qd_answer_changed
@@ -34,7 +34,7 @@ git add data/share/published-ids.json
 
 - 실수였다면 예전 정답으로 되돌리세요.
 - 정말 정답을 바꿔야 한다면: 새 id로 문제를 추가하고(`shareable: true`), 예전 id는 `shareable: false`로 둡니다. 예전 링크는 "쉬는 중" 화면이 됩니다.
-- `published-ids.json`을 손으로 고치지 마세요.
+- 등록부(`data/share/*published-ids.json`)를 손으로 고치지 마세요.
 
 공백, 대소문자, 한글 조합 방식(NFC/NFD) 차이는 같은 정답으로 봅니다.
 
@@ -51,7 +51,7 @@ git add data/share/published-ids.json
 
 ## qd_registry_shape
 
-`data/share/published-ids.json`이 JSON 배열이 아니거나, 항목에 `id`·`answerKey`(16자리 16진수)·`firstPublished`(YYYY-MM-DD)가 없습니다. 같은 id가 두 번 있거나 id가 숫자 오름차순이 아니어도 여기에 걸립니다. 손으로 고쳤다면 `git checkout data/share/published-ids.json`으로 되돌린 뒤 `npm run register-ids`를 쓰세요.
+등록부(`data/share/published-ids.json`, `data/share/mbti-published-ids.json`)가 JSON 배열이 아니거나, 항목에 `id`·`answerKey`(16자리 16진수)·`firstPublished`(YYYY-MM-DD)가 없습니다. 같은 id가 두 번 있거나 id가 숫자 오름차순이 아니어도 여기에 걸립니다. 손으로 고쳤다면 `git checkout <그 등록부>`로 되돌린 뒤 `npm run register-ids`를 쓰세요.
 
 ## qd_registry_shrunk
 
@@ -76,7 +76,7 @@ Pretendard OTF 파일을 찾지 못했습니다. `npm ci`로 다시 설치하세
 
 ## og_render
 
-카드 그리기에 실패했습니다. 메시지에 단계(layout/svg/png)가 나오고, 전체 스택은 `.tmp/og-error-<id>.log`에 있습니다. 한 장만 다시 그려 보세요.
+카드 그리기에 실패했습니다. 메시지에 단계(layout/svg/png)가 나오고, 전체 스택은 `.tmp/og-error-<id>.log`에 있습니다. 한 장만 다시 그려 보세요. `<id>` 자리는 문제 키입니다(넌센스 `23`, MBTI `m12`).
 
 ```sh
 npm run og:preview -- <id>   # → .tmp/og/<id>.png

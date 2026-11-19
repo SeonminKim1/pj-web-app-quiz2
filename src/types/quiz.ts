@@ -2,10 +2,10 @@
 // 형식은 README.md "문제 데이터"에 있다.
 
 /** 주제 id = 데이터 파일 이름(data/<id>.json). 목록은 src/lib/quizTopics.ts의 QUIZ_TOPICS. */
-export type QuizTopicId = 'nonsense';
+export type QuizTopicId = 'nonsense' | 'mbti';
 
-/** 풀이 방식 부품: 주관식(글자 수를 보고 직접 입력). */
-export type PlayMode = 'typing';
+/** 풀이 방식 부품: 주관식(글자 수를 보고 직접 입력) / MBTI 4축 고르기(E/I·S/N·T/F·J/P). */
+export type PlayMode = 'typing' | 'mbtiAxes';
 
 /** 힌트 종류: 데이터에 쓴 문장 / 정답에서 앱이 한 글자를 공개. */
 export type HintType = 'text' | 'revealLetter';
@@ -33,6 +33,19 @@ export type QuizTopic = {
   /** 힌트 단계(0~3개). 앞에서부터 하나씩 연다. */
   hints: readonly HintStep[];
   round: QuizRound;
+  /** 맞힌 문제 수로 칭호를 주는지(src/lib/titles.ts). */
+  titles: boolean;
+  /** 공유 링크. 없으면 공유하지 않는다. */
+  share?: ShareConfig;
+};
+
+/**
+ * 공유 링크 설정. prefix: 주소 앞부분(/<prefix>/<id>/), 주제마다 달라 id가 겹치지 않는다.
+ * card: 카톡 미리보기 카드. question = 문제 문장을 카드에 그림, topic = 주제 공통 카드(문제는 설명 줄에).
+ */
+type ShareConfig = {
+  prefix: string;
+  card: 'question' | 'topic';
 };
 
 /** 문제 하나. 이 필드들 외에는 넣지 않는다(원본 메타 필드 유출 방지). */

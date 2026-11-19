@@ -98,6 +98,18 @@ describe('checkShareData', () => {
         registry: reg(),
       }),
     ).toEqual([]);
+    // 주제 공통 카드(MBTI)는 문제 문장을 그리지 않으므로 길어도 된다. 위반 위치는 그 주제 파일로.
+    expect(
+      checkShareData({ items: [long], registry: reg(), card: 'topic' }),
+    ).toEqual([]);
+    expect(
+      checkShareData({
+        items: [long],
+        registry: [],
+        dataFile: 'data/mbti.json',
+        card: 'topic',
+      }).map((p) => p.where),
+    ).toEqual(['data/mbti.json[0]']);
   });
 
   it('직전 커밋 등록부에 있던 id가 사라지면 QD_REGISTRY_SHRUNK', () => {

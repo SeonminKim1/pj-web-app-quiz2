@@ -4,7 +4,12 @@ import { formatQuizDataError, isQuizDataError } from './quiz-data/errors.ts';
 import { readTopicFiles, replaceJsonFiles } from './quiz-data/io.ts';
 import { buildQuizOutputs, playableWarnings } from './quiz-data/outputs.ts';
 import { readPreviousRegistry, readRegistry } from './share/io.ts';
-import { checkShareData, formatShareProblem } from './share/registry.ts';
+import {
+  checkShareData,
+  formatShareProblem,
+  type ShareProblem,
+} from './share/registry.ts';
+import { SHARE_SETUPS, type ShareSetup } from './share/topics.ts';
 import type { QuizItem } from '../src/types/quiz.ts';
 
 const DATA_DIR = 'data';
@@ -14,24 +19,37 @@ const OUTPUT_DIR = 'public/data/quiz';
 async function loadAndBuild(): Promise<ReturnType<typeof buildQuizOutputs>> {
   const { files, problems: readProblems } = await readTopicFiles(DATA_DIR);
   const outputs = buildQuizOutputs({ files, readProblems });
-  await checkShare(files['nonsense.json'] as QuizItem[]);
+  const problems = (
+    await Promise.all(
+      SHARE_SETUPS.map((setup) =>
+        checkShare(setup, files[`${setup.topic.id}.json`] as QuizItem[]),
+      ),
+    )
+  ).flat();
+  if (problems.length > 0) {
+    for (const problem of problems) console.error(formatShareProblem(problem));
+    throw new ShareCheckFailed(problems.length);
+  }
   return outputs;
 }
 
-/** 공유 카드 검사(등록부·정답 노출·글자 배치). 위반은 모두 출력하고 실패한다. */
-async function checkShare(items: QuizItem[]): Promise<void> {
-  const { entries, problems: shape } = await readRegistry();
-  const problems = [
+/** 주제 하나의 공유 카드 검사(등록부·정답 노출·글자 배치). 위반을 모아 돌려준다. */
+async function checkShare(
+  setup: ShareSetup,
+  items: QuizItem[],
+): Promise<ShareProblem[]> {
+  const { entries, problems: shape } = await readRegistry(setup.registryFile);
+  return [
     ...shape,
     ...checkShareData({
       items,
       registry: entries,
-      previousRegistry: await readPreviousRegistry(),
+      previousRegistry: await readPreviousRegistry(setup.registryFile),
+      dataFile: setup.dataFile,
+      registryFile: setup.registryFile,
+      card: setup.card,
     }),
   ];
-  if (problems.length === 0) return;
-  for (const problem of problems) console.error(formatShareProblem(problem));
-  throw new ShareCheckFailed(problems.length);
 }
 
 class ShareCheckFailed extends Error {

@@ -219,6 +219,21 @@ export function challengeCard(layout: CardLayout): ReactElement {
   );
 }
 
+/** 주제 공통 카드(문제 문장이 카드에 들어가지 않는 주제, 예: MBTI). 문제는 미리보기 설명 줄에 보인다. */
+export function topicCard({
+  title,
+  action,
+}: {
+  title: string;
+  action: string;
+}): ReactElement {
+  return frame(
+    brand(),
+    el('div', { fontSize: 64, fontWeight: 400 }, title),
+    pill(action),
+  );
+}
+
 /** 공통 카드(쉬는 중·첫 화면). */
 export function defaultCard(): ReactElement {
   return frame(

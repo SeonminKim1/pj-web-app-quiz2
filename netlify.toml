@@ -23,6 +23,11 @@
     Cache-Control = "no-cache"
 
 [[headers]]
+  for = "/m/*"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
@@ -54,7 +59,7 @@
   [headers.values]
     Cache-Control = "public, max-age=86400"
 
-# SPA: 파일이 없는 주소는 앱으로(있는 파일 /q/<id>/index.html이 먼저).
+# SPA: 파일이 없는 주소는 앱으로(있는 파일 /q/<id>/index.html, /m/<id>/index.html이 먼저).
 [[redirects]]
   from = "/*"
   to = "/index.html"

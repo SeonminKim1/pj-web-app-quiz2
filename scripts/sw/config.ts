@@ -12,7 +12,7 @@ export type SwConfig = {
   assets: string[];
 };
 
-// 공유 페이지(/q/), OG 카드(/og/), 글꼴 조각, 옛 브라우저용 .woff는 미리 받지 않는다(쓸 때 저장).
+// 공유 페이지(/q/, /m/), OG 카드(/og/), 글꼴 조각, 옛 브라우저용 .woff는 미리 받지 않는다(쓸 때 저장).
 const PRECACHE = [
   /^\/index\.html$/,
   /^\/manifest\.webmanifest$/,

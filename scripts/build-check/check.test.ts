@@ -38,15 +38,42 @@ const base = {
   exists: (path: string) => FILES.has(path),
   origin: ORIGIN,
   production: true,
-  registry: [
-    { id: '7', answerKey: 'x', firstPublished: '2026-11-18' },
-    { id: '8', answerKey: 'y', firstPublished: '2026-11-18' },
+  shares: [
+    {
+      prefix: 'q',
+      registry: [
+        { id: '7', answerKey: 'x', firstPublished: '2026-11-18' },
+        { id: '8', answerKey: 'y', firstPublished: '2026-11-18' },
+      ],
+      items: [NASTY, { id: '8', question: 'q', answer: 'a', shareable: false }],
+    },
   ],
-  items: [NASTY, { id: '8', question: 'q', answer: 'a', shareable: false }],
   manifest: { icons: [{ src: '/icons/icon-192.png' }] },
 };
 
 describe('checkDist', () => {
+  it('주제마다 자기 주소(/m/<id>/) 페이지를 찾는다', () => {
+    const mbti = {
+      prefix: 'm',
+      registry: [{ id: '7', answerKey: 'z', firstPublished: '2026-11-19' }],
+      items: [{ id: '7', question: 'q', answer: 'ISTJ', shareable: false }],
+    };
+    const pages = [page('7', undefined, publicItem(NASTY)), page('8')];
+    expect(
+      checkDist({ ...base, shares: [...base.shares, mbti], pages }).map(
+        (problem) => problem.where,
+      ),
+    ).toEqual(['/m/ id 7']);
+    const mPage = { ...page('7'), path: '/m/7/index.html' };
+    expect(
+      checkDist({
+        ...base,
+        shares: [...base.shares, mbti],
+        pages: [...pages, mPage],
+      }),
+    ).toEqual([]);
+  });
+
   it('정상 빌드는 통과(까다로운 문구도 #q-data가 원래 값으로 돌아온다)', () => {
     const pages = [page('7', undefined, publicItem(NASTY)), page('8')];
     expect(checkDist({ ...base, pages })).toEqual([]);

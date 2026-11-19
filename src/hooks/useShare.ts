@@ -4,7 +4,12 @@
 import { playCue } from '../lib/sound.ts';
 import { useCallback, useState } from 'react';
 import { analytics } from '../lib/analyticsInstance.ts';
-import { buildSharePath, shareText, type ShareInfo } from '../lib/shareLink.ts';
+import {
+  buildSharePath,
+  shareKey,
+  shareText,
+  type ShareInfo,
+} from '../lib/shareLink.ts';
 
 const NICKNAME_KEY = 'qp_nickname';
 
@@ -60,10 +65,13 @@ export type ShareView = {
 };
 
 export function useShare({
+  prefix = 'q',
   id,
   question,
   env = browserEnv(),
 }: {
+  /** 주제의 공유 주소 앞부분(넌센스 q, MBTI m). */
+  prefix?: string;
   id: string;
   question: string;
   env?: ShareEnv;
@@ -79,10 +87,10 @@ export function useShare({
 
   const share = useCallback<ShareView['share']>(
     async ({ info, timing }) => {
-      const url = `${env.origin}${buildSharePath({ id, info })}`;
+      const url = `${env.origin}${buildSharePath({ prefix, id, info })}`;
       const text = shareText(question);
       const done = (outcome: 'shared' | 'copied') => {
-        analytics.shared(id, timing);
+        analytics.shared(shareKey({ prefix, id }), timing);
         playCue('share');
         setSentOnce(true);
         showToast(
@@ -113,7 +121,7 @@ export function useShare({
       setManualText(`${text}\n${url}`);
       return 'manual';
     },
-    [env, id, question, showToast],
+    [env, prefix, id, question, showToast],
   );
 
   return {

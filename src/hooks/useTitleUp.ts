@@ -8,9 +8,12 @@ import { useProgress } from './useProgress.ts';
 export function useTitleUp({
   topicId,
   total,
+  enabled = true,
 }: {
   topicId: string;
   total: number;
+  /** 칭호가 없는 주제면 false(아무것도 보이지 않음). */
+  enabled?: boolean;
 }): string | undefined {
   const { progress } = useProgress();
   const solved = solvedSet({ progress, topicId }).size;
@@ -18,6 +21,7 @@ export function useTitleUp({
   const previous = useRef(title.level);
   const [shown, setShown] = useState<string>();
   useEffect(() => {
+    if (!enabled) return;
     if (title.level <= previous.current) {
       previous.current = title.level;
       return;
@@ -27,6 +31,6 @@ export function useTitleUp({
     playCue('levelUp');
     const timer = setTimeout(() => setShown(undefined), 2800);
     return () => clearTimeout(timer);
-  }, [title.level, title.name]);
+  }, [enabled, title.level, title.name]);
   return shown;
 }
