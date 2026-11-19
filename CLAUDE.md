@@ -80,7 +80,7 @@ Also use when they match:
 **Hooks (`.claude/settings.json`):**
 
 - `.claude/hooks/log-skill.sh` writes one line per skill use to `.gstack/skill-log.jsonl` (git-ignored): `by: "claude"` (Skill tool), `by: "read"` (a `SKILL.md` read directly; subagents use skills this way), `by: "user"` (typed `/command`). `agent`/`agent_type` say which subagent, when the hook input has them.
-- `.claude/hooks/skill-nudge.sh` reminds after `gh pr merge` (/canary), a commit with UI files (/design-review), and a new `feat/` branch (/plan-eng-review).
+- `.claude/hooks/skill-nudge.sh` reminds after `gh pr merge` (/canary), a fresh commit (made in the last 2 minutes) with UI files, test files not counted (/design-review), and a new `feat/` or `feature/` branch (/plan-eng-review).
 - To answer "which skills ran", read `.gstack/skill-log.jsonl` together with gstack's own `~/.gstack/projects/web-app-quiz2/timeline.jsonl` (skill start/end, including runs inside subagents).
 
 ## Health Stack

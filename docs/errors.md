@@ -55,7 +55,7 @@ git add data/share/
 
 ## qd_registry_shrunk
 
-직전 커밋의 등록부에 있던 id가 사라졌습니다. 등록부는 추가만 합니다(이미 보낸 링크가 깨지지 않게). 공유를 멈추려면 id를 지우지 말고 문제에 `shareable: false`를 두세요.
+비교 기준 커밋의 등록부에 있던 id가 사라졌습니다. 기준은 로컬에서는 직전 커밋(`HEAD`), Netlify 빌드에서는 지난번 배포 커밋(`CACHED_COMMIT_REF`)입니다. 지난 배포 커밋을 clone에서 읽지 못하면 경고를 찍고 `HEAD`와 비교합니다. 등록부는 추가만 합니다(이미 보낸 링크가 깨지지 않게). 공유를 멈추려면 id를 지우지 말고 문제에 `shareable: false`를 두세요.
 
 ## og_no_origin
 
