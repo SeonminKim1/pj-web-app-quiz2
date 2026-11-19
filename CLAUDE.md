@@ -18,7 +18,7 @@ npm run lint           # oxlint --deny-warnings
 npm run format:check
 npm run typecheck      # tsc -b
 npm test               # vitest run
-npm run build          # 데이터 → 글꼴 → 앱 → OG 페이지 → dist 검사
+npm run build          # 데이터 → 글꼴 → 앱 → OG 페이지 → 서비스 워커 → dist 검사
 ```
 
 커밋 전에 lint, format:check, typecheck, test를 모두 통과시킨다.
@@ -30,6 +30,7 @@ npm run build          # 데이터 → 글꼴 → 앱 → OG 페이지 → dist 
 - `scripts/og/`, `scripts/og-pages.ts`: 공유 문제마다 `dist/q/<id>/index.html`과 카드 PNG(satori + resvg, Jua TTF 동봉).
 - `src/lib/quizTopics.ts`: 주제 설정(풀이 방식, 힌트 단계, 한 판 단위). 주제마다 화면 코드를 따로 만들지 않고 공유 부품을 골라 쓴다.
 - 방해꾼: 규칙·대사 `src/lib/pest.ts`, 동물 `src/lib/pestAnimals.ts`, 움직임 계산(순수 함수) `src/lib/pestMotion.ts`, 상태 `src/hooks/usePest.ts`(reducer), 프레임 루프 `src/hooks/usePestMotion.ts`, 그리기 `src/components/PestLayer.tsx`.
+- PWA: `public/manifest.webmanifest`, 아이콘 `scripts/app-icon.ts` → `public/icons/`, 서비스 워커 본문 `scripts/sw/worker.js` → 빌드가 `dist/sw.js`로(`scripts/sw.ts`).
 - 에러 코드: `docs/errors.md`.
 
 ## 서비스 요구사항

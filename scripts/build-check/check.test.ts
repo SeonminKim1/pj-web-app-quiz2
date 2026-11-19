@@ -31,6 +31,8 @@ const FILES = new Set([
   '/assets/index-abc.js',
   '/og/7-aaaa.png',
   '/og/8-aaaa.png',
+  '/sw.js',
+  '/icons/icon-192.png',
 ]);
 const base = {
   exists: (path: string) => FILES.has(path),
@@ -41,6 +43,7 @@ const base = {
     { id: '8', answerKey: 'y', firstPublished: '2026-11-18' },
   ],
   items: [NASTY, { id: '8', question: 'q', answer: 'a', shareable: false }],
+  manifest: { icons: [{ src: '/icons/icon-192.png' }] },
 };
 
 describe('checkDist', () => {
@@ -72,6 +75,20 @@ describe('checkDist', () => {
     expect(codes).toContain('DIST_QDATA_MISSING'); // 7: 공유 중인데 #q-data 없음
     expect(codes).toContain('DIST_ASSET_MISSING'); // index-old.js, og 없음, 8 페이지 없음
     expect(codes).toContain('DIST_SHARE_PARAM'); // 9: from=
+  });
+
+  it('서비스 워커·manifest·아이콘이 없으면 DIST_ASSET_MISSING', () => {
+    const pages = [page('7', undefined, publicItem(NASTY)), page('8')];
+    const exists = (path: string) =>
+      path !== '/sw.js' && path !== '/icons/icon-192.png' && FILES.has(path);
+    expect(
+      checkDist({ ...base, pages, exists }).map((problem) => problem.where),
+    ).toEqual(['dist/sw.js', 'dist/manifest.webmanifest']);
+    expect(
+      checkDist({ ...base, pages, manifest: undefined }).map(
+        (problem) => problem.message,
+      ),
+    ).toEqual(['manifest가 없거나 icons가 비었어요']);
   });
 
   it('#q-data가 원래 값과 다르면 DIST_QDATA_MISSING', () => {

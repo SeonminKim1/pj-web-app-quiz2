@@ -37,6 +37,14 @@ loadGoatCounter({
 });
 analytics.pageview(window.location.pathname);
 
+// 오프라인·설치(PWA): 정식 빌드에서만 서비스 워커를 둔다(dev 서버에는 sw.js가 없다).
+// 실패해도 앱은 그대로 돈다. 새 워커는 다음 페이지 이동부터 쓰이므로 화면을 새로 고치지 않는다.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
 // 엔트리포인트: index.html의 #root에 앱을 붙인다.
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

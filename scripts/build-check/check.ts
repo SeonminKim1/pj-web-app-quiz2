@@ -63,6 +63,7 @@ export function checkDist({
   production,
   registry,
   items,
+  manifest,
 }: {
   pages: readonly DistPage[];
   /** dist 기준 경로("/og/1-abc.png")가 있는지. */
@@ -72,6 +73,8 @@ export function checkDist({
   production: boolean;
   registry: readonly RegistryEntry[];
   items: readonly QuizItem[];
+  /** dist/manifest.webmanifest를 읽은 값(없거나 JSON이 아니면 undefined). */
+  manifest: unknown;
 }): ShareProblem[] {
   const problems: ShareProblem[] = [];
   const add = (code: string, where: string, message: string, fix: string) =>
@@ -185,6 +188,38 @@ export function checkDist({
           : '#q-data가 원래 문제 자료와 달라요(이스케이프 확인)',
         'npm run build:og를 다시 돌리고, 계속되면 scripts/og/pages.ts의 jsonForScript를 확인하세요',
       );
+    }
+  }
+  // 5) 설치(PWA): 서비스 워커와 manifest, manifest가 부르는 아이콘이 있다.
+  if (!exists('/sw.js')) {
+    add(
+      'DIST_ASSET_MISSING',
+      'dist/sw.js',
+      '서비스 워커가 없어요',
+      'npm run build:sw를 돌리세요',
+    );
+  }
+  const icons =
+    manifest && typeof manifest === 'object' && 'icons' in manifest
+      ? manifest.icons
+      : undefined;
+  if (!Array.isArray(icons) || icons.length === 0) {
+    add(
+      'DIST_ASSET_MISSING',
+      'dist/manifest.webmanifest',
+      'manifest가 없거나 icons가 비었어요',
+      'public/manifest.webmanifest를 확인하세요',
+    );
+  } else {
+    for (const icon of icons as { src?: unknown }[]) {
+      if (typeof icon.src !== 'string' || !exists(icon.src)) {
+        add(
+          'DIST_ASSET_MISSING',
+          'dist/manifest.webmanifest',
+          `아이콘 ${String(icon.src)}가 dist에 없어요`,
+          'npx tsx scripts/app-icon.ts로 아이콘을 다시 만드세요',
+        );
+      }
     }
   }
   return problems;

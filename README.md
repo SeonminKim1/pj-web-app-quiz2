@@ -39,9 +39,20 @@ npm run preview      # http://localhost:4173/q/<id>/
 | `build:fonts` | Pretendard 글꼴을 `public/fonts/`로 복사                                   |
 | `build:app`   | `tsc -b && vite build` → `dist/`                                           |
 | `build:og`    | 등록부의 id마다 `dist/q/<id>/index.html`과 `dist/og/<id>-<해시>.png`       |
-| `check:dist`  | 빌드 결과 검사(파일, OG 주소, `#q-data`)                                   |
+| `build:sw`    | `dist/sw.js`(오프라인용 서비스 워커) 생성                                  |
+| `check:dist`  | 빌드 결과 검사(파일, OG 주소, `#q-data`, 서비스 워커·manifest 아이콘)      |
 
 `SITE_ORIGIN`은 환경 변수가 먼저이고, 없으면 `site.config.json`을 읽습니다. 둘 다 비었으면 `build:og`가 `OG_NO_ORIGIN`으로 실패합니다. 실패 메시지의 코드는 [docs/errors.md](docs/errors.md)에서 찾으세요.
+
+## 설치와 오프라인(PWA)
+
+홈 화면에 설치할 수 있고, 한 번 연 뒤에는 인터넷이 없어도 문제를 풉니다. 서비스 워커는 정식 빌드(`npm run build` → `npm run preview`)에서만 켜지고 `npm run dev`에서는 쓰지 않습니다.
+
+- `public/manifest.webmanifest`: 앱 이름·색·아이콘
+- `public/icons/`: `npx tsx scripts/app-icon.ts`로 `AppIcon` 그림에서 만듭니다(파비콘 `public/icon.svg`도 같이). 결과는 커밋합니다.
+- `scripts/sw/worker.js`: 서비스 워커 본문(요청별 캐시 전략은 파일 머리말). `build:sw`가 미리 받을 목록과 버전을 앞에 붙여 `dist/sw.js`로 씁니다.
+
+진행 상황(`localStorage`)은 서비스 워커와 상관없이 그 기기 브라우저에 남습니다.
 
 ## 문제 데이터
 

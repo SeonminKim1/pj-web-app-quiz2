@@ -6,11 +6,12 @@
   "scripts": {
     "predev": "npm run build:data && npm run build:fonts",
     "dev": "vite",
-    "build": "npm run build:data && npm run build:fonts && npm run build:app && npm run build:og && npm run check:dist",
+    "build": "npm run build:data && npm run build:fonts && npm run build:app && npm run build:og && npm run build:sw && npm run check:dist",
     "build:data": "tsx scripts/quiz-data.ts build",
     "build:fonts": "tsx scripts/fonts.ts",
     "build:app": "tsc -b && vite build",
     "build:og": "tsx scripts/og-pages.ts",
+    "build:sw": "tsx scripts/sw.ts",
     "check:dist": "tsx scripts/check-dist.ts",
     "og:preview": "tsx scripts/og-pages.ts --preview",
     "register-ids": "tsx scripts/register-ids.ts",

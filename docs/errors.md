@@ -84,7 +84,7 @@ npm run og:preview -- <id>   # → .tmp/og/<id>.png
 
 ## dist_asset_missing
 
-HTML이 부르는 파일(스크립트, CSS, OG 이미지)이 `dist`에 없거나, 등록부의 id에 페이지가 없습니다. 단계를 하나만 다시 돌렸다면 `npm run build`로 처음부터 다시 만드세요.
+HTML이 부르는 파일(스크립트, CSS, OG 이미지)이 `dist`에 없거나, 등록부의 id에 페이지가 없거나, `dist/sw.js`나 manifest의 아이콘이 없습니다. 단계를 하나만 다시 돌렸다면 `npm run build`로 처음부터 다시 만드세요.
 
 ## dist_foreign_origin
 

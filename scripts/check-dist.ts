@@ -40,6 +40,14 @@ if (!origin.ok || shape.length > 0) {
   const items = JSON.parse(
     await readFile('data/nonsense.json', 'utf8'),
   ) as QuizItem[];
+  let manifest: unknown;
+  try {
+    manifest = JSON.parse(
+      await readFile(join(DIST, 'manifest.webmanifest'), 'utf8'),
+    ) as unknown;
+  } catch {
+    manifest = undefined;
+  }
   const problems = checkDist({
     pages,
     exists: (path) => existsSync(join(DIST, path)),
@@ -47,6 +55,7 @@ if (!origin.ok || shape.length > 0) {
     production: process.env.CONTEXT === 'production',
     registry: entries,
     items,
+    manifest,
   });
   if (problems.length > 0) {
     for (const problem of problems) console.error(formatShareProblem(problem));
