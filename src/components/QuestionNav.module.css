@@ -8,7 +8,7 @@
 
 .arrow {
   composes: secondary from '../styles/ui.module.css';
-  width: 40px;
+  width: 44px;
   min-height: 44px;
   flex-shrink: 0;
   padding: 0;
