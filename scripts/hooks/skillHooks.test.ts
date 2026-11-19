@@ -1,9 +1,15 @@
 // @vitest-environment node
 // .claude/hooks의 스킬 기록·알림 스크립트를 실제 훅 입력(JSON)으로 돌려 본다(CLAUDE.md "Skill routing").
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 const ROOT = resolve(import.meta.dirname, '../..');
@@ -43,6 +49,44 @@ describe('skill-nudge.sh', () => {
     expect(nudge('git switch -c fix/typo')).toBe('');
     expect(nudge('ls -la')).toBe('');
     expect(nudge('echo "gh pr merge"x')).toBe('');
+  });
+});
+
+describe('skill-nudge.sh: 화면 파일 커밋', () => {
+  let repo: string;
+  afterEach(() => rmSync(repo, { recursive: true, force: true }));
+
+  // 임시 저장소에 파일 하나를 커밋하고 그 저장소 기준으로 알림을 돌린다.
+  function commitAndNudge(file: string): string {
+    const git = (...args: string[]) =>
+      execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8' });
+    const target = join(repo, file);
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, 'x');
+    git('add', file);
+    git(
+      '-c',
+      'user.name=t',
+      '-c',
+      'user.email=t@example.test',
+      'commit',
+      '-qm',
+      file,
+    );
+    return run(
+      NUDGE,
+      { tool_name: 'Bash', tool_input: { command: 'git commit -m x' } },
+      repo,
+    );
+  }
+
+  it('CSS·컴포넌트 커밋은 /design-review를 알리고, 테스트만 바꾼 커밋은 조용하다', () => {
+    repo = mkdtempSync(join(tmpdir(), 'nudge-repo-'));
+    execFileSync('git', ['init', '-q', repo]);
+    expect(commitAndNudge('src/components/A.module.css')).toContain(
+      '/design-review',
+    );
+    expect(commitAndNudge('src/pages/A.test.tsx')).toBe('');
   });
 });
 

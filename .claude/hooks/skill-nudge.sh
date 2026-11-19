@@ -13,7 +13,7 @@ msg=""
 if grep -Eq '(^|[;&|[:space:]])gh[[:space:]]+pr[[:space:]]+merge([[:space:]]|$)' <<<"$cmd"; then
   msg="PR을 머지했어요. main push로 Netlify가 배포합니다. 배포가 끝나면 /canary로 정식 사이트(https://quiz-noriteo.netlify.app)를 확인하세요(CLAUDE.md Skill routing: 배포 후 /canary)."
 elif grep -Eq '(^|[;&|[:space:]])git[[:space:]]+commit([[:space:]]|$)' <<<"$cmd"; then
-  ui=$(git show --name-only --format= HEAD 2>/dev/null | grep -E '^src/(components|pages)/|\.css$|^public/.*\.(svg|png|webmanifest)$' | head -5)
+  ui=$(git show --name-only --format= HEAD 2>/dev/null | grep -E '^src/(components|pages)/|\.css$|^public/.*\.(svg|png|webmanifest)$' | grep -vE '\.test\.tsx?$' | head -5)
   if [ -n "$ui" ]; then
     msg="방금 커밋에 화면 파일이 있어요($(tr '\n' ' ' <<<"$ui"| sed 's/ $//')). PR 전에 /design-review로 360px 화면을 확인하세요(CLAUDE.md Skill routing: UI를 바꾸면 PR 전에 /design-review)."
   fi
