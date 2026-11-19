@@ -149,6 +149,23 @@ describe('첫 화면', () => {
   });
 });
 
+describe('개인정보처리방침', () => {
+  it('첫 화면 아래 링크로 들어가고, 처음으로 돌아온다', async () => {
+    const user = renderAt('/');
+    await user.click(screen.getByRole('link', { name: '개인정보처리방침' }));
+    expect(
+      screen.getByRole('heading', { level: 1, name: '개인정보처리방침' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: '기기에만 저장하는 정보' }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole('link', { name: '← 처음으로' }));
+    expect(
+      await screen.findByRole('button', { name: /넌센스/ }),
+    ).toBeInTheDocument();
+  });
+});
+
 describe('스테이지 목록 → 풀이 → 결과', () => {
   it('맞히기·힌트·다음 후 결과, 목록에 진행률이 반영되고 저장된다', async () => {
     const user = renderAt('/topics/nonsense');

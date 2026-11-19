@@ -3,6 +3,7 @@
 //   public/icons/icon-192.png, -512  설치 아이콘(purpose any, 둥근 모서리)
 //   public/icons/maskable-512.png    안드로이드 모양 맞춤 아이콘(꽉 찬 바탕, 토끼는 가운데 안전 영역 안)
 //   public/icons/apple-touch-icon.png  iOS 홈 화면(180, 꽉 찬 바탕. 모서리는 iOS가 깎는다)
+//   android/store/play-icon-512.png  플레이스토어 등록 아이콘(512, 꽉 찬 바탕. 모서리는 스토어가 깎는다)
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import { initWasm, Resvg } from '@resvg/resvg-wasm';
@@ -57,6 +58,7 @@ const outputs: [string, string | Uint8Array][] = [
   ['public/icons/icon-512.png', png(rounded, 512)],
   ['public/icons/maskable-512.png', png(maskable, 512)],
   ['public/icons/apple-touch-icon.png', png(apple, 180)],
+  ['android/store/play-icon-512.png', png(apple, 512)],
 ];
 for (const [path, data] of outputs) {
   await writeFile(path, data);

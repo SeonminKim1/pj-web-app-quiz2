@@ -11,6 +11,7 @@ import { HomePage } from './pages/HomePage';
 import { TopicPage } from './pages/TopicPage.tsx';
 import { StagePlayPage } from './pages/StagePlayPage.tsx';
 import { QuestionPage } from './pages/QuestionPage.tsx';
+import { PrivacyPage } from './pages/PrivacyPage.tsx';
 
 type ProgressProviderProps = {
   children: ReactNode;
@@ -59,6 +60,7 @@ export function AppRoutes(): ReactElement {
         element={<StagePlayPage />}
       />
       <Route path="/q/:id" element={<QuestionPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

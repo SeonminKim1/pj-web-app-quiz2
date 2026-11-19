@@ -1,0 +1,39 @@
+{
+  "packageId": "com.quiznoriteo.app",
+  "host": "quiz-noriteo.netlify.app",
+  "name": "퀴즈 놀이터",
+  "launcherName": "퀴즈 놀이터",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#FFF6EC",
+  "themeColorDark": "#FFF6EC",
+  "navigationColor": "#FFF6EC",
+  "navigationColorDark": "#FFF6EC",
+  "navigationDividerColor": "#FFF6EC",
+  "navigationDividerColorDark": "#FFF6EC",
+  "backgroundColor": "#FFF6EC",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://quiz-noriteo.netlify.app/icons/icon-512.png",
+  "maskableIconUrl": "https://quiz-noriteo.netlify.app/icons/maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://quiz-noriteo.netlify.app/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": false,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://quiz-noriteo.netlify.app/",
+  "minSdkVersion": 21
+}

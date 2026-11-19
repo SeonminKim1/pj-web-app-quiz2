@@ -1,4 +1,5 @@
 import { useState, type ReactElement } from 'react';
+import { Link } from 'react-router';
 import { AppIcon } from '../components/AppIcon.tsx';
 import { PetPicker } from '../components/PetPicker.tsx';
 import { PetPortrait } from '../components/PetPortrait.tsx';
@@ -132,6 +133,9 @@ export function HomePage(): ReactElement {
           </ul>
         </>
       )}
+      <footer className={styles.footer}>
+        <Link to="/privacy">개인정보처리방침</Link>
+      </footer>
       {picking && (
         <PetPicker
           current={settings.pet}

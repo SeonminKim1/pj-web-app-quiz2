@@ -44,3 +44,12 @@ public/fonts/
 .claude/skills/
 .gstack/
 .tmp/
+
+# 안드로이드(TWA): Bubblewrap이 만드는 gradle 프로젝트·빌드물·서명 키는 커밋하지 않는다.
+# 설정(twa-manifest.json)·안내·스토어 자료만 커밋. 서명 키(android.keystore)는 따로 안전하게 보관.
+android/*
+!android/twa-manifest.json
+!android/README.md
+!android/store/
+*.keystore
+*.jks
