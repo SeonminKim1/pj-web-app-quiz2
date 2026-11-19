@@ -130,7 +130,7 @@ describe('첫 화면', () => {
 
     await user.click(nonsense);
     expect(
-      await screen.findByRole('button', { name: /^1단계/ }),
+      await screen.findByRole('button', { name: /^스테이지 1/ }),
     ).toBeInTheDocument();
   });
 
@@ -170,7 +170,9 @@ describe('스테이지 목록 → 풀이 → 결과', () => {
   it('맞히기·힌트·다음 후 결과, 목록에 진행률이 반영되고 저장된다', async () => {
     const user = renderAt('/topics/nonsense');
     await user.click(
-      await screen.findByRole('button', { name: /^2단계, 2문제 중 0문제/ }),
+      await screen.findByRole('button', {
+        name: /^스테이지 2, 2문제 중 0문제/,
+      }),
     );
 
     // 1번째: 고생대. 무료 힌트 → 5골드 힌트 → 맞힘(+5)
@@ -204,7 +206,9 @@ describe('스테이지 목록 → 풀이 → 결과', () => {
 
     await user.click(within(result).getByRole('button', { name: '목록으로' }));
     expect(
-      await screen.findByRole('button', { name: /^2단계, 2문제 중 1문제/ }),
+      await screen.findByRole('button', {
+        name: /^스테이지 2, 2문제 중 1문제/,
+      }),
     ).toBeInTheDocument();
     expect(store.load()).toMatchObject({
       gold: 30,
@@ -288,7 +292,7 @@ describe('스테이지 목록 → 풀이 → 결과', () => {
       topics: { nonsense: { solved: ['11', '12'], hintsOpened: {} } },
     });
     const user = renderAt('/topics/nonsense/stages/2');
-    expect(await screen.findByText('2단계 · 1 / 2')).toBeInTheDocument();
+    expect(await screen.findByText('스테이지 2 · 1 / 2')).toBeInTheDocument();
     expect(screen.getByText('다시 풀기')).toBeInTheDocument();
     await typeAnswer(user, '고생대');
     expect(screen.getByText('정답! 고생대')).toBeInTheDocument();
@@ -341,13 +345,13 @@ describe('이전·다음 이동', () => {
       },
     });
     const user = renderAt('/topics/nonsense/stages/1');
-    expect(await screen.findByText('1단계 · 5 / 10')).toBeInTheDocument();
+    expect(await screen.findByText('스테이지 1 · 5 / 10')).toBeInTheDocument();
     expect(screen.getByText('문제 5')).toBeInTheDocument();
     const input = () => screen.getByRole('textbox', { name: '정답 입력' });
     await user.type(input(), '쓰다만');
 
     await user.click(screen.getByRole('button', { name: '이전 문제' }));
-    expect(screen.getByText('1단계 · 4 / 10')).toBeInTheDocument();
+    expect(screen.getByText('스테이지 1 · 4 / 10')).toBeInTheDocument();
     expect(screen.getByText('정답! 정답4')).toBeInTheDocument();
     expect(input()).toHaveValue('정답4');
     // 옮겨 온 맞힌 문제는 확인 자리의 "다음 ›"을 바로 누를 수 있다.
@@ -359,12 +363,12 @@ describe('이전·다음 이동', () => {
 
   it('1번에서는 이전이 막히고, 10번에서는 결과 보기', async () => {
     const user = renderAt('/topics/nonsense/stages/1');
-    await screen.findByText('1단계 · 1 / 10');
+    await screen.findByText('스테이지 1 · 1 / 10');
     expect(screen.getByRole('button', { name: '이전 문제' })).toBeDisabled();
     for (let i = 0; i < 9; i += 1) {
       await user.click(screen.getByRole('button', { name: '다음 문제' }));
     }
-    expect(screen.getByText('1단계 · 10 / 10')).toBeInTheDocument();
+    expect(screen.getByText('스테이지 1 · 10 / 10')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: '결과 보기' }));
     expect(
       screen.getByRole('region', { name: '스테이지 결과' }),
@@ -381,7 +385,7 @@ describe('주소 에러', () => {
       within(alert).getByRole('button', { name: '스테이지 목록' }),
     );
     expect(
-      await screen.findByRole('button', { name: /^1단계/ }),
+      await screen.findByRole('button', { name: /^스테이지 1/ }),
     ).toBeInTheDocument();
   });
 
@@ -397,14 +401,14 @@ describe('주소 에러', () => {
 describe('리뷰 반영', () => {
   it('목록에서 들어간 풀이 화면의 "← 목록"은 뒤로 가기(기록이 쌓이지 않음)', async () => {
     const user = renderAt('/topics/nonsense');
-    await screen.findByRole('button', { name: /^2단계/ });
+    await screen.findByRole('button', { name: /^스테이지 2/ });
     const listKey = screen.getByTestId('location-key').textContent;
 
-    await user.click(screen.getByRole('button', { name: /^2단계/ }));
+    await user.click(screen.getByRole('button', { name: /^스테이지 2/ }));
     await screen.findByText('지구가 제일 힘들었던 시기는?');
     await user.click(screen.getByRole('button', { name: '스테이지 목록' }));
 
-    await screen.findByRole('button', { name: /^2단계/ });
+    await screen.findByRole('button', { name: /^스테이지 2/ });
     expect(screen.getByTestId('location-key').textContent).toBe(listKey);
   });
 

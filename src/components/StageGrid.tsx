@@ -28,7 +28,7 @@ export function StageGrid({ stages, onSelect }: StageGridProps): ReactElement {
             data-completed={stage.completed}
             data-current={stage.no === current}
             aria-current={stage.no === current ? 'step' : undefined}
-            aria-label={`${stage.no}단계, ${stage.total}문제 중 ${stage.solvedCount}문제 풂${stage.completed ? ', 완료' : ''}${stage.no === current ? ', 지금 차례' : ''}`}
+            aria-label={`스테이지 ${stage.no}, ${stage.total}문제 중 ${stage.solvedCount}문제 풂${stage.completed ? ', 완료' : ''}${stage.no === current ? ', 지금 차례' : ''}`}
             onClick={() => onSelect(stage.no)}
           >
             {stage.no === current && (

@@ -1,4 +1,10 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import {
+  cleanup,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -7,7 +13,10 @@ import {
   createProgressStore,
   type ProgressStore,
 } from '../data/progressRepository.ts';
-import { createSettingsStore } from '../data/settingsRepository.ts';
+import {
+  createSettingsStore,
+  type SettingsStore,
+} from '../data/settingsRepository.ts';
 import * as repository from '../data/quizRepository.ts';
 import type { QuizManifest, QuizTopicFile } from '../types/quiz.ts';
 
@@ -74,11 +83,14 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function renderAt(path: string) {
+function renderAt(
+  path: string,
+  settings: SettingsStore = createSettingsStore({ storage: null }),
+) {
   const user = userEvent.setup();
   render(
     <ProgressProvider store={store}>
-      <SettingsProvider store={createSettingsStore({ storage: null })}>
+      <SettingsProvider store={settings}>
         <MemoryRouter initialEntries={[path]}>
           <AppRoutes />
         </MemoryRouter>
@@ -283,6 +295,33 @@ describe('MBTI 풀이(카테고리 = 스테이지)', () => {
     expect(
       await screen.findByRole('button', { name: /^연애, 16문제 중/ }),
     ).toBeInTheDocument();
+  });
+
+  // Value: protects=MBTI를 풀다 첫 화면에 오면 "이어서 풀기"가 MBTI의 못 푼 카테고리로 간다; fails_when=첫 화면이 넌센스만 이어 주거나 마지막 주제를 기억하지 않으면; why_new=사용자가 겪은 버그(MBTI 이어서 풀기 안 됨); seam=none; no_claim=실제 localStorage
+  it('MBTI를 풀다 첫 화면에 오면 이어서 풀기가 MBTI 다음 카테고리로 간다', async () => {
+    const settings = createSettingsStore({ storage: null });
+    // 일상 16문제를 다 풀어 둔다.
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {
+        mbti: {
+          solved: Array.from({ length: 16 }, (_, i) => String(i + 1)),
+          hintsOpened: {},
+        },
+      },
+    });
+    renderAt('/topics/mbti/categories/2', settings);
+    await screen.findByText('연애 상황 1');
+    cleanup();
+
+    const user = renderAt('/', settings);
+    const go = await screen.findByRole('button', {
+      name: '이어서 풀기 · 연애',
+    });
+    expect(screen.getByText('MBTI · 연애 차례예요')).toBeInTheDocument();
+    await user.click(go);
+    expect(await screen.findByText(/연애 · 1 \/ 16/)).toBeInTheDocument();
   });
 
   it('없는 카테고리 번호는 "없는 카테고리예요"', async () => {

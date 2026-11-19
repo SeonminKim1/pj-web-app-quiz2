@@ -2,10 +2,16 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { solvedSet } from '../lib/progress.ts';
-import { isEnterableTopicId } from '../lib/quizTopics.ts';
+import {
+  findCategoryTopic,
+  findStageTopic,
+  isEnterableTopicId,
+} from '../lib/quizTopics.ts';
+import type { QuizTopic } from '../types/quiz.ts';
 import { useProgress } from './useProgress.ts';
 import { useManifest, type LoadState } from './useQuizData.ts';
-import { useTopicStages } from './useTopicStages.ts';
+import { useSettings } from './useSettings.ts';
+import { roundLabel, roundSegment, useTopicRounds } from './useTopicRounds.ts';
 
 /** 주제 카드 하나의 표시값. */
 type TopicCardView = {
@@ -23,15 +29,21 @@ export type HomePageView = {
   retry: () => void;
   openTopic: (id: string) => void;
   goHome: () => void;
-  /** 이어서 풀 곳(넌센스 문제 파일을 받은 뒤에만). */
+  /** 이어서 풀 곳(마지막으로 푼 주제, 없으면 넌센스. 문제 파일을 받은 뒤에만). */
   next: ContinueView | undefined;
   openNext: () => void;
 };
 
 /** 첫 화면의 "이어서 풀기". */
 type ContinueView = {
-  /** 못 푼 문제가 남은 첫 스테이지(다 풀었으면 undefined). */
+  /** 이어서 풀 주제(이름, 칭호를 주는지). */
+  topicLabel: string;
+  titles: boolean;
+  /** 못 푼 문제가 남은 첫 판(스테이지·카테고리) 번호와 이름. 다 풀었으면 undefined. */
   stageNo: number | undefined;
+  stageName: string | undefined;
+  /** 첫 판 이름("스테이지 1", "일상"): 아직 하나도 안 풀었을 때 "…부터 시작하기". */
+  firstName: string;
   stageCount: number;
   solved: number;
   total: number;
@@ -39,11 +51,22 @@ type ContinueView = {
 
 const MAIN_TOPIC = 'nonsense';
 
+// 이어서 풀 주제: 마지막으로 푼 주제가 지금 들어갈 수 있으면 그것, 아니면 넌센스.
+function continueTopic(lastTopic: string | undefined): QuizTopic | undefined {
+  return (
+    findStageTopic(lastTopic) ??
+    findCategoryTopic(lastTopic) ??
+    findStageTopic(MAIN_TOPIC)
+  );
+}
+
 /** 첫 화면 hook. */
 export function useHomePage(): HomePageView {
   const navigate = useNavigate();
   const { state: manifest, retry } = useManifest();
   const { progress } = useProgress();
+  const { settings } = useSettings();
+  const topic = continueTopic(settings.lastTopic);
 
   const state = useMemo<LoadState<TopicCardView[]>>(() => {
     if (manifest.status !== 'ready') return manifest;
@@ -67,30 +90,36 @@ export function useHomePage(): HomePageView {
     };
   }, [manifest, progress]);
 
-  const { state: stages } = useTopicStages(MAIN_TOPIC);
+  const { state: rounds } = useTopicRounds(topic);
   const next = useMemo<ContinueView | undefined>(() => {
-    if (stages.status !== 'ready') return undefined;
-    const solvedIds = solvedSet({ progress, topicId: MAIN_TOPIC });
-    const { items, stages: list } = stages.data;
-    const at = list.findIndex((stage) =>
-      stage.items.some((item) => !solvedIds.has(item.id)),
+    if (rounds.status !== 'ready' || !topic) return undefined;
+    const solvedIds = solvedSet({ progress, topicId: topic.id });
+    const { items, rounds: list } = rounds.data;
+    const at = list.findIndex((round) =>
+      round.items.some((item) => !solvedIds.has(item.id)),
     );
+    const current = at === -1 ? undefined : list[at];
     return {
-      stageNo: at === -1 ? undefined : at + 1,
+      topicLabel: topic.label,
+      titles: topic.titles,
+      stageNo: current?.no,
+      stageName: current ? roundLabel(current) : undefined,
+      firstName: list[0] ? roundLabel(list[0]) : '스테이지 1',
       stageCount: list.length,
       solved: items.filter((item) => solvedIds.has(item.id)).length,
       total: items.length,
     };
-  }, [stages, progress]);
+  }, [rounds, progress, topic]);
 
   return {
     next,
-    openNext: () =>
+    openNext: () => {
+      if (!topic) return;
+      const list = `/topics/${topic.id}`;
       void navigate(
-        next?.stageNo
-          ? `/topics/${MAIN_TOPIC}/stages/${next.stageNo}`
-          : `/topics/${MAIN_TOPIC}`,
-      ),
+        next?.stageNo ? `${list}/${roundSegment(topic)}/${next.stageNo}` : list,
+      );
+    },
     gold: progress.gold,
     state,
     retry,

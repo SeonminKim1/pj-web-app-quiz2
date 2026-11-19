@@ -1,3 +1,4 @@
+import { SettingsButton } from '../components/SettingsButton.tsx';
 import type { ReactElement } from 'react';
 import { CategoryGrid } from '../components/CategoryGrid.tsx';
 import { DataErrorView } from '../components/DataErrorView.tsx';
@@ -17,7 +18,10 @@ export function CategoryListPage(): ReactElement {
           ← 처음으로
         </button>
         <h1>{label}</h1>
-        <GoldBadge gold={gold} />
+        <span className={styles.headerEnd}>
+          <GoldBadge gold={gold} />
+          <SettingsButton />
+        </span>
       </header>
       {showMbtiGuide && (
         <div className={styles.topicIntro}>

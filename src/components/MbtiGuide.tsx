@@ -1,5 +1,6 @@
 // ⓘ MBTI가 뭐예요?: 4축 고르기 주제의 카테고리 목록·풀이 화면에서 연다.
-import { useEffect, useRef, useState, type ReactElement } from 'react';
+import { useRef, useState, type ReactElement } from 'react';
+import { useModalSheet } from '../hooks/useModalSheet.ts';
 import { MBTI_AXES } from '../lib/mbti.ts';
 import styles from './MbtiGuide.module.css';
 
@@ -40,43 +41,8 @@ export function MbtiGuideButton({
 }
 
 function MbtiGuideSheet({ onClose }: { onClose: () => void }): ReactElement {
-  // 시트 맨 위(제목)부터 읽히게 시트 자체에 포커스를 둔다(닫기 버튼은 맨 아래라 스크롤이 내려간다).
-  const sheetRef = useRef<HTMLDivElement>(null);
-  useEffect(() => sheetRef.current?.focus(), []);
-  // 열려 있는 동안 Esc는 어디서든 닫고, Tab은 시트 안에서만 돈다(aria-modal).
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent): void => {
-      const sheet = sheetRef.current;
-      if (!sheet) return;
-      if (event.key === 'Escape') {
-        onClose();
-        return;
-      }
-      if (event.key !== 'Tab') return;
-      const focusable = [
-        ...sheet.querySelectorAll<HTMLElement>('button, a[href]'),
-      ];
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (!first || !last) return;
-      const active = document.activeElement;
-      if (
-        event.shiftKey &&
-        (active === first || active === sheet || !sheet.contains(active))
-      ) {
-        event.preventDefault();
-        last.focus();
-      } else if (
-        !event.shiftKey &&
-        (active === last || !sheet.contains(active))
-      ) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
+  // 시트 맨 위(제목)부터 읽히게 시트에 포커스, Tab은 시트 안, Esc는 어디서든 닫기(useModalSheet).
+  const sheetRef = useModalSheet(onClose);
   return (
     <div className={styles.backdrop} onClick={onClose}>
       <div
