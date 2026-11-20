@@ -378,6 +378,30 @@ describe('MBTI 카테고리 끝까지', () => {
     );
     expect(await screen.findByText(/연애 · 1 \/ 16/)).toBeInTheDocument();
   });
+
+  // Value: protects=MBTI 카테고리(일상)를 다 풀면 결과 화면에 카테고리 이름으로 정한 보상(하늘 밀짚모자) 카드가 뜨고 "일상 칸"에 붙으며 earnedRewards에 기록된다; fails_when=MBTI 보상 표를 카테고리 이름이 아닌 번호로 찾거나(보상 없음·엇갈림) stickerSpot에 번호를 넘기거나 기록을 빠뜨리면; why_new=보상 카드 테스트는 넌센스 스테이지만 봄; seam=none; no_claim=연애 등 다른 카테고리 보상, 붙는 움직임
+  it('일상을 다 풀면 하늘 밀짚모자 보상 카드가 뜨고 기록된다', async () => {
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {
+        mbti: {
+          solved: Array.from({ length: 15 }, (_, i) => String(i + 1)),
+          hintsOpened: {},
+        },
+      },
+    });
+    const user = renderAt('/topics/mbti/categories/1');
+    expect(await screen.findByText(/일상 · 16 \/ 16/)).toBeInTheDocument();
+    await pick(user, 'ENTJ');
+    await user.click(screen.getByRole('button', { name: '확인' }));
+    expect(await screen.findByText(/정답! ENTJ/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '결과 보기' }));
+    const result = await screen.findByRole('region', { name: '스테이지 결과' });
+    expect(result).toHaveTextContent('하늘 밀짚모자');
+    expect(result).toHaveTextContent('스티커첩 일상 칸에 붙었어요');
+    expect(store.load().earnedRewards).toContain('hat-straw-sky');
+  });
 });
 
 // Value: protects=MBTI는 자기 칭호 표로 칭호가 오른다(10문제째 "눈치 새내기"); fails_when=StagePlayPage가 useTitleUp에 주제의 칭호 표를 넘기지 않거나 넌센스 표를 쓰면; why_new=MBTI 칭호가 새로 생김(D25); seam=none; no_claim=넌센스 칭호 표시
