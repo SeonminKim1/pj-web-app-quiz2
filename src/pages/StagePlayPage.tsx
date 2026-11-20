@@ -146,7 +146,11 @@ function StageSession({
           {...overall}
           newReward={newReward}
           newTitle={resultTitle}
-          stageLabel={target.stageLabel}
+          stickerSpot={
+            target.topic.round.byCategory
+              ? target.stageLabel
+              : `${target.stage.no}번`
+          }
           hasNext={hasNextStage}
           onList={onList}
           onNext={onNextStage}

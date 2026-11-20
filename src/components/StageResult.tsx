@@ -17,8 +17,8 @@ type StageResultProps = {
   newReward?: Reward | undefined;
   /** 이번에 새로 오른 칭호. */
   newTitle?: string | undefined;
-  /** 이 판 이름("스테이지 3", "연애"): 보상이 붙은 칸 안내. */
-  stageLabel?: string;
+  /** 보상이 붙은 스티커첩 칸 이름("3번", "연애"). */
+  stickerSpot?: string;
   onList: () => void;
   onNext: () => void;
 };
@@ -40,7 +40,7 @@ export function StageResult({
   hasNext,
   newReward,
   newTitle,
-  stageLabel = '',
+  stickerSpot = '',
   onList,
   onNext,
 }: StageResultProps): ReactElement {
@@ -74,7 +74,7 @@ export function StageResult({
             {KIND_LABEL[newReward.kind]}
           </span>
           <span className={styles.rewardNote}>
-            스티커첩 {stageLabel} 칸에 붙었어요
+            스티커첩 {stickerSpot} 칸에 붙었어요
           </span>
         </div>
       )}

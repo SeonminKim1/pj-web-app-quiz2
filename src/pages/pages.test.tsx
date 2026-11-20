@@ -549,7 +549,7 @@ describe('스티커 보상', () => {
     await clickAdvance(user, '결과 보기 ›');
     const result = screen.getByRole('region', { name: '스테이지 결과' });
     expect(within(result).getByRole('status')).toHaveTextContent(
-      '새 보상!분홍 털실 공놀이터 물건스티커첩 스테이지 2 칸에 붙었어요',
+      '새 보상!분홍 털실 공놀이터 물건스티커첩 2번 칸에 붙었어요',
     );
     expect(store.load()).toMatchObject({
       earnedRewards: ['item-yarn-pink'],
