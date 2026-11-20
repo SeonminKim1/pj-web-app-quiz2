@@ -604,7 +604,7 @@ describe('스티커 보상', () => {
     const sheet = await screen.findByRole('dialog', {
       name: '그동안 모은 스티커 1장을 받았어요',
     });
-    expect(within(sheet).getByRole('list')).toHaveAccessibleName('분홍 리본');
+    expect(within(sheet).getByRole('img')).toHaveAccessibleName('분홍 리본');
     await user.click(within(sheet).getByRole('button', { name: '확인' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(store.load()).toMatchObject({

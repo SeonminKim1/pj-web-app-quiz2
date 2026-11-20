@@ -46,10 +46,9 @@
   border: var(--border);
   border-radius: var(--radius-card);
   background: var(--color-mint-soft);
-  list-style: none;
 }
 
-.row li {
+.sticker {
   line-height: 0;
 }
 
