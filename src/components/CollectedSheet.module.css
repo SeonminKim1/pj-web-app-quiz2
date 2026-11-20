@@ -19,8 +19,12 @@
     calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
   border-radius: var(--radius-card) var(--radius-card) 0 0;
   background: var(--color-bg);
-  outline: none;
   animation: rise 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 시트는 저절로 열리며 자기에게 포커스를 둔다. 누를 수 없는 시트 전체에는 테두리를 그리지 않는다(확인 버튼은 보인다). */
+.sheet:focus {
+  outline: none;
 }
 
 .title {
