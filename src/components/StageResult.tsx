@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import type { Reward } from '../lib/rewards.ts';
 import { RewardArt } from './RewardArt.tsx';
 import styles from './StageResult.module.css';
@@ -44,6 +44,11 @@ export function StageResult({
   onList,
   onNext,
 }: StageResultProps): ReactElement {
+  // 읽어 주기 칸은 비운 채 먼저 그리고 다음 차례에 글을 넣는다. 처음부터 글이 든 상태 칸은 화면 읽기 프로그램이 읽지 않는다.
+  const [announce, setAnnounce] = useState('');
+  useEffect(() => {
+    if (newReward) setAnnounce(`새 보상 ${newReward.name}`);
+  }, [newReward]);
   return (
     <section
       aria-label="스테이지 결과"
@@ -51,8 +56,11 @@ export function StageResult({
       data-completed={completed}
     >
       <h2>{completed ? '스테이지 완료!' : '스테이지 결과'}</h2>
+      <p className={styles.srOnly} role="status">
+        {announce}
+      </p>
       {newReward && (
-        <div className={styles.reward} role="status">
+        <div className={styles.reward}>
           <span className={styles.rewardLabel}>새 보상!</span>
           <span
             className={styles.rewardArt}

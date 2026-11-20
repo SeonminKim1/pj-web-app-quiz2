@@ -548,8 +548,12 @@ describe('스티커 보상', () => {
     await typeAnswer(user, '참새');
     await clickAdvance(user, '결과 보기 ›');
     const result = screen.getByRole('region', { name: '스테이지 결과' });
-    expect(within(result).getByRole('status')).toHaveTextContent(
+    expect(result).toHaveTextContent(
       '새 보상!분홍 털실 공놀이터 물건스티커첩 2번 칸에 붙었어요',
+    );
+    // 처음엔 빈 읽기 칸에 다음 차례에 글을 넣어야 화면 읽기 프로그램이 읽는다.
+    expect(within(result).getByRole('status')).toHaveTextContent(
+      '새 보상 분홍 털실 공',
     );
     expect(store.load()).toMatchObject({
       earnedRewards: ['item-yarn-pink'],
