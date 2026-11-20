@@ -136,3 +136,25 @@ describe('isProgress', () => {
     expect(isProgress({ ...SAVED, bookmarks: {} })).toBe(false);
   });
 });
+
+// Value: protects=보상 필드가 깨져도 푼 문제와 골드는 남는다(학습 progress-version-bump-wipes, 설계 R2-8); fails_when=새 필드를 isProgress에서 검사해 진행 전체를 버리거나, 나쁜 항목을 그대로 두면; why_new=선택 필드가 새로 생김; seam=none; no_claim=실제 브라우저 저장 용량
+describe('보상 필드 정리', () => {
+  it('지금 형식(보상 필드 없음)의 진행은 그대로 읽는다', () => {
+    const storage = memoryStorage({ [PROGRESS_KEY]: JSON.stringify(SAVED) });
+    expect(createProgressStore({ storage }).load()).toEqual(SAVED);
+  });
+
+  it('깨진 항목·모르는 id·중복만 버리고 푼 문제와 골드는 그대로', () => {
+    const storage = memoryStorage({
+      [PROGRESS_KEY]: JSON.stringify({
+        ...SAVED,
+        earnedRewards: ['hat-ribbon-pink', 7, 'hat-nope', 'hat-ribbon-pink'],
+        seenRewards: 'oops',
+      }),
+    });
+    expect(createProgressStore({ storage }).load()).toEqual({
+      ...SAVED,
+      earnedRewards: ['hat-ribbon-pink'],
+    });
+  });
+});

@@ -34,7 +34,8 @@ describe('QUIZ_TOPICS', () => {
         { type: 'text', paid: true },
       ],
       round: { byCategory: false, stageSize: 10 },
-      titles: true,
+      titles: expect.objectContaining({ master: '넌센스 정복자' }),
+      rewards: { byStage: expect.any(Array) },
       share: { prefix: 'q', card: 'question' },
     });
   });
@@ -50,7 +51,8 @@ describe('QUIZ_TOPICS', () => {
         { type: 'revealLetter', paid: true },
       ],
       round: { byCategory: true, size: 16 },
-      titles: false,
+      titles: expect.objectContaining({ master: 'MBTI 마스터' }),
+      rewards: { byCategory: expect.any(Object) },
       share: { prefix: 'm', card: 'topic' },
     });
   });

@@ -5,6 +5,8 @@ import {
   type ProgressStore,
 } from '../data/progressRepository.ts';
 import {
+  claimRewards as applyClaimRewards,
+  markRewardsSeen as applyMarkRewardsSeen,
   openHint as applyOpenHint,
   openedHintCount,
   recordCorrect as applyRecordCorrect,
@@ -67,8 +69,34 @@ export function useProgressState(
     [commit],
   );
 
+  const claimRewards = useCallback<ProgressContextValue['claimRewards']>(
+    ({ topic, rounds }) => {
+      const next = applyClaimRewards({
+        progress: latest.current,
+        topic,
+        rounds,
+      });
+      if (next !== latest.current) commit(next);
+    },
+    [commit],
+  );
+
+  const markRewardsSeen = useCallback<ProgressContextValue['markRewardsSeen']>(
+    (ids) => {
+      const next = applyMarkRewardsSeen({ progress: latest.current, ids });
+      if (next !== latest.current) commit(next);
+    },
+    [commit],
+  );
+
   return useMemo(
-    () => ({ progress, recordCorrect, openHint }),
-    [progress, recordCorrect, openHint],
+    () => ({
+      progress,
+      recordCorrect,
+      openHint,
+      claimRewards,
+      markRewardsSeen,
+    }),
+    [progress, recordCorrect, openHint, claimRewards, markRewardsSeen],
   );
 }

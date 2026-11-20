@@ -98,6 +98,8 @@ function StageSession({
     gold,
     replay,
     overall,
+    newReward,
+    newTitle: resultTitle,
     hasNextStage,
   } = useStageSession(target);
   const { state, item, hints } = play;
@@ -111,7 +113,7 @@ function StageSession({
   const newTitle = useTitleUp({
     topicId: target.topic.id,
     total: target.itemCount,
-    enabled: target.topic.titles,
+    table: target.topic.titles,
   });
   const { topic } = target;
   const axesMode = topic.play[0] === 'mbtiAxes';
@@ -142,6 +144,9 @@ function StageSession({
           played={play.playable}
           goldEarned={state.goldTotal}
           {...overall}
+          newReward={newReward}
+          newTitle={resultTitle}
+          stageLabel={target.stageLabel}
           hasNext={hasNextStage}
           onList={onList}
           onNext={onNextStage}

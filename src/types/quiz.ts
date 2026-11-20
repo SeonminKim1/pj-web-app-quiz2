@@ -23,6 +23,17 @@ type HintStep = {
 type QuizRound =
   { byCategory: false; stageSize: number } | { byCategory: true; size: number };
 
+/** 칭호 표: 맞힌 수가 min 이상이면 그 칭호, 전부 맞히면 master. */
+export type TitleTable = {
+  levels: readonly { name: string; min: number }[];
+  master: string;
+};
+
+/** 보상 표: 스테이지 번호 순서 목록(1번부터), 또는 카테고리 이름 → 보상 id. */
+type RewardTable =
+  | { byStage: readonly string[] }
+  | { byCategory: Readonly<Record<string, string>> };
+
 /** 주제 설정 한 덩어리. 풀이·힌트 방식은 공유 부품 중에서 고른다. */
 export type QuizTopic = {
   id: QuizTopicId;
@@ -33,8 +44,10 @@ export type QuizTopic = {
   /** 힌트 단계(0~3개). 앞에서부터 하나씩 연다. */
   hints: readonly HintStep[];
   round: QuizRound;
-  /** 맞힌 문제 수로 칭호를 주는지(src/lib/titles.ts). */
-  titles: boolean;
+  /** 맞힌 문제 수로 주는 칭호(src/lib/titles.ts). 없으면 칭호가 없다. */
+  titles: TitleTable | undefined;
+  /** 판을 다 풀면 주는 보상 표(src/lib/rewards.ts). 없으면 보상이 없다. */
+  rewards?: RewardTable;
   /** 공유 링크. 없으면 공유하지 않는다. */
   share?: ShareConfig;
 };

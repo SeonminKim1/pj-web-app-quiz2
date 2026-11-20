@@ -28,8 +28,10 @@ export function HomePage(): ReactElement {
   } = useHomePage();
   const { settings, choosePet } = useSettings();
   const [picking, setPicking] = useState(false);
-  // 칭호는 칭호를 주는 주제(넌센스)를 이어서 풀 때만.
-  const title = next?.titles ? titleFor(next) : undefined;
+  // 칭호는 칭호 표가 있는 주제를 이어서 풀 때만.
+  const title = next?.titles
+    ? titleFor({ solved: next.solved, total: next.total, table: next.titles })
+    : undefined;
   return (
     <main className={styles.page}>
       <header className={styles.hero}>

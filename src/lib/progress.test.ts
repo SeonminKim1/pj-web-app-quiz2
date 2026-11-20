@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import type { QuizTopic } from '../types/quiz.ts';
 import {
+  claimRewards,
   initialProgress,
+  markRewardsSeen,
   openHint,
   openableHints,
   openedHintCount,
   recordCorrect,
   solvedSet,
+  unseenRewards,
 } from './progress.ts';
 import { getQuizTopic } from './quizTopics.ts';
 
@@ -195,5 +198,84 @@ describe('openableHints', () => {
         item: { id: '1', question: 'q', answer: 'a', hints: ['문장'] },
       }),
     ).toEqual([{ text: '문장', paid: true, type: 'text' }]);
+  });
+});
+
+function round(no: number, ids: string[], name?: string) {
+  return {
+    no,
+    items: ids.map((id) => ({ id, question: '?', answer: '!' })),
+    ...(name === undefined ? {} : { name }),
+  };
+}
+
+function solved(topicId: string, ids: string[]) {
+  return {
+    ...initialProgress(),
+    topics: { [topicId]: { solved: ids, hintsOpened: {} } },
+  };
+}
+
+// Value: protects=다 푼 판의 보상만 받고, 받은 보상은 판이 다시 덜 풀린 상태가 돼도 남는다(설계 "다시는 빼앗지 않는다"); fails_when=claimRewards가 덜 푼 판에도 주거나 기록을 계산으로 덮어써 빼앗으면; why_new=보상 지급이 새로 생김; seam=none; no_claim=화면 표시
+describe('claimRewards', () => {
+  const rounds = [round(1, ['1', '2']), round(2, ['3', '4'])];
+
+  it('다 푼 판의 보상만 받은 순서대로 기록한다', () => {
+    const next = claimRewards({
+      progress: solved('nonsense', ['1', '2', '3']),
+      topic: NONSENSE,
+      rounds,
+    });
+    expect(next.earnedRewards).toEqual(['hat-ribbon-pink']);
+  });
+
+  it('새로 받을 것이 없으면 같은 객체(저장하지 않게)', () => {
+    const progress = {
+      ...solved('nonsense', ['1', '2']),
+      earnedRewards: ['hat-ribbon-pink'],
+    };
+    expect(claimRewards({ progress, topic: NONSENSE, rounds })).toBe(progress);
+    const empty = initialProgress();
+    expect(claimRewards({ progress: empty, topic: NONSENSE, rounds })).toBe(
+      empty,
+    );
+  });
+
+  it('문제가 늘어 판이 덜 풀린 상태가 돼도 받은 보상은 그대로', () => {
+    const progress = {
+      ...solved('nonsense', ['1', '2']),
+      earnedRewards: ['hat-ribbon-pink'],
+    };
+    const grown = [round(1, ['1', '2', '99']), round(2, ['3', '4'])];
+    const next = claimRewards({ progress, topic: NONSENSE, rounds: grown });
+    expect(next.earnedRewards).toEqual(['hat-ribbon-pink']);
+  });
+
+  it('MBTI는 카테고리 이름으로 보상을 찾는다', () => {
+    const next = claimRewards({
+      progress: solved('mbti', ['1']),
+      topic: getQuizTopic('mbti'),
+      rounds: [round(1, ['1'], '연애')],
+    });
+    expect(next.earnedRewards).toEqual(['hat-crown-sky']);
+  });
+});
+
+// Value: protects="그동안 모은 스티커" 시트는 아직 안 본 보상만, 한 번만 보인다(D8); fails_when=markRewardsSeen이 기록하지 않거나 unseenRewards가 본 것도 돌려주면(시트가 매번 뜸); why_new=새 동작; seam=none; no_claim=시트 화면
+describe('markRewardsSeen / unseenRewards', () => {
+  it('본 것을 빼고 받은 순서대로, 다 보면 같은 객체', () => {
+    const progress = {
+      ...initialProgress(),
+      earnedRewards: ['hat-ribbon-pink', 'item-yarn-pink'],
+    };
+    expect(unseenRewards(progress)).toEqual([
+      'hat-ribbon-pink',
+      'item-yarn-pink',
+    ]);
+    const seen = markRewardsSeen({ progress, ids: ['item-yarn-pink'] });
+    expect(unseenRewards(seen)).toEqual(['hat-ribbon-pink']);
+    expect(markRewardsSeen({ progress: seen, ids: ['item-yarn-pink'] })).toBe(
+      seen,
+    );
   });
 });

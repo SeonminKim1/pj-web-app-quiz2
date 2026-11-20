@@ -4,6 +4,7 @@ import { AppError, ErrorCode } from '../errors/AppError.ts';
 import { findStageTopic, type StageTopic } from '../lib/quizTopics.ts';
 import { buildStages, type Stage } from '../lib/stages.ts';
 import type { QuizItem } from '../types/quiz.ts';
+import { useClaimRewards } from './useClaimRewards.ts';
 import {
   useTopicFile,
   type LoadResult,
@@ -42,5 +43,14 @@ export function useTopicStages(
       },
     };
   }, [fileState, topic]);
+  useClaimRewards(
+    useMemo(
+      () =>
+        state.status === 'ready'
+          ? { topic: state.data.topic, rounds: state.data.stages }
+          : undefined,
+      [state],
+    ),
+  );
   return { state, retry, topic };
 }

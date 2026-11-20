@@ -475,7 +475,7 @@ describe('리뷰 반영', () => {
     await user.click(screen.getByRole('button', { name: '다시 풀어 보기' }));
     expect(
       await screen.findByRole('button', {
-        name: /^스테이지 1, 10문제 중 10문제 풂, 완료/,
+        name: /^스테이지 1, 10문제 중 10문제 풂, 분홍 리본 받음/,
       }),
     ).toBeInTheDocument();
   });
@@ -535,5 +535,81 @@ describe('방해꾼', () => {
     expect(
       screen.queryByRole('button', { name: '방해꾼 쫓아내기' }),
     ).not.toBeInTheDocument();
+  });
+});
+
+// Value: protects=판을 다 푼 순간 결과 화면 제목 아래에 "새 보상!" 카드가 한 번 뜨고(D6), 본 것으로 기록돼 목록에서 "모은 스티커" 시트가 다시 뜨지 않는다; fails_when=풀이 화면이 맞힐 때 보상을 먼저 기록해 카드가 사라지거나(OV2), 본 표시를 안 남기면; why_new=보상 카드가 새로 생김; seam=none; no_claim=붙는 움직임·효과음
+describe('스티커 보상', () => {
+  it('스테이지를 다 풀면 새 보상 카드, 목록 칸은 받은 스티커', async () => {
+    const user = renderAt('/topics/nonsense/stages/2');
+    await screen.findByText('지구가 제일 힘들었던 시기는?');
+    await typeAnswer(user, '고생대');
+    await clickAdvance(user, '다음 ›');
+    await typeAnswer(user, '참새');
+    await clickAdvance(user, '결과 보기 ›');
+    const result = screen.getByRole('region', { name: '스테이지 결과' });
+    expect(within(result).getByRole('status')).toHaveTextContent(
+      '새 보상!분홍 털실 공놀이터 물건스티커첩 스테이지 2 칸에 붙었어요',
+    );
+    expect(store.load()).toMatchObject({
+      earnedRewards: ['item-yarn-pink'],
+      seenRewards: ['item-yarn-pink'],
+    });
+
+    await user.click(within(result).getByRole('button', { name: '목록으로' }));
+    expect(
+      await screen.findByRole('button', {
+        name: /^스테이지 2, 2문제 중 2문제 풂, 분홍 털실 공 받음/,
+      }),
+    ).toHaveAttribute('data-flash', 'true');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('이미 받은 스테이지를 다시 풀면 보상 카드가 없다', async () => {
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: { nonsense: { solved: ['11', '12'], hintsOpened: {} } },
+      earnedRewards: ['item-yarn-pink'],
+      seenRewards: ['item-yarn-pink'],
+    });
+    const user = renderAt('/topics/nonsense/stages/2');
+    await screen.findByText('지구가 제일 힘들었던 시기는?');
+    await typeAnswer(user, '고생대');
+    await clickAdvance(user, '다음 ›');
+    await typeAnswer(user, '참새');
+    await clickAdvance(user, '결과 보기 ›');
+    const result = screen.getByRole('region', { name: '스테이지 결과' });
+    expect(result).toHaveTextContent('스테이지 완료!');
+    expect(within(result).queryByText('새 보상!')).not.toBeInTheDocument();
+  });
+
+  // Value: protects=업데이트 전부터 푼 사용자는 목록을 처음 열 때 "그동안 모은 스티커" 시트를 한 번 보고, 확인하면 다시 안 뜬다(D8); fails_when=보상을 기록하지 않거나(시트 없음) 확인을 본 것으로 남기지 않으면(매번 뜸); why_new=새 시트; seam=none; no_claim=시트 그림 줄 모양
+  it('예전에 푼 스테이지의 보상은 목록에서 한 번 모아 보여 준다', async () => {
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {
+        nonsense: {
+          solved: Array.from({ length: 10 }, (_, i) => String(i + 1)),
+          hintsOpened: {},
+        },
+      },
+    });
+    const user = renderAt('/topics/nonsense');
+    const sheet = await screen.findByRole('dialog', {
+      name: '그동안 모은 스티커 1장을 받았어요',
+    });
+    expect(within(sheet).getByRole('list')).toHaveAccessibleName('분홍 리본');
+    await user.click(within(sheet).getByRole('button', { name: '확인' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(store.load()).toMatchObject({
+      earnedRewards: ['hat-ribbon-pink'],
+      seenRewards: ['hat-ribbon-pink'],
+    });
+    expect(
+      screen.getByRole('button', { name: /^스테이지 1, .*분홍 리본 받음/ }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('스티커 1 / 2장')).toBeInTheDocument();
   });
 });

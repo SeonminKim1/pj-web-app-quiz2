@@ -60,3 +60,139 @@
 .next {
   composes: primary from '../styles/ui.module.css';
 }
+
+/* 새 보상 카드: 제목 바로 아래, 결과 화면의 주인공(D6). */
+.reward {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  border-bottom: var(--border);
+  background: var(--color-pink-soft);
+}
+
+.rewardLabel {
+  font-family: var(--font-display);
+  font-synthesis: none;
+  font-size: 1.125rem;
+}
+
+.rewardArt {
+  position: relative;
+  display: inline-flex;
+  margin: var(--space-1) 0;
+  line-height: 0;
+  animation: stick 0.3s ease-out both;
+}
+
+.rewardName {
+  font-family: var(--font-display);
+  font-synthesis: none;
+  font-size: 1.25rem;
+}
+
+.rewardKind,
+.rewardNote {
+  color: var(--color-ink-soft);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+/* 스티커가 카드 위로 커지며 붙는다(튀지 않는 ease-out, D7). */
+@keyframes stick {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(-8deg);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+/* 큰 물건(5스테이지마다)은 반짝임을 한 번 더한다. */
+.sparkles span {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--color-gold);
+  clip-path: polygon(
+    50% 0,
+    62% 38%,
+    100% 50%,
+    62% 62%,
+    50% 100%,
+    38% 62%,
+    0 50%,
+    38% 38%
+  );
+  opacity: 0;
+  animation: sparkle 0.8s ease-out 0.25s 1 both;
+}
+
+.sparkles span:nth-child(1) {
+  top: 0;
+  left: -10px;
+}
+
+.sparkles span:nth-child(2) {
+  top: 8px;
+  right: -12px;
+  animation-delay: 0.35s;
+}
+
+.sparkles span:nth-child(3) {
+  bottom: 6px;
+  left: -14px;
+  animation-delay: 0.45s;
+}
+
+.sparkles span:nth-child(4) {
+  right: -8px;
+  bottom: -4px;
+  animation-delay: 0.3s;
+}
+
+@keyframes sparkle {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+.title {
+  margin: 0;
+  padding: var(--space-2) var(--space-4) 0;
+}
+
+.title strong {
+  font-weight: 800;
+}
+
+/* 보상 카드가 있으면 맞힌 수·골드는 작게. */
+.body[data-compact='true'] {
+  color: var(--color-ink-soft);
+  font-size: 0.9375rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rewardArt,
+  .sparkles span {
+    animation: none;
+  }
+
+  .sparkles {
+    display: none;
+  }
+}

@@ -21,7 +21,7 @@ const TEXT_TOPIC: QuizTopic = {
     { type: 'text', paid: true },
   ],
   round: { byCategory: false, stageSize: 10 },
-  titles: true,
+  titles: undefined,
 };
 
 // 카테고리 단위 주제(가상): 문장 힌트 1단계, 카테고리당 2문제. 카테고리 검사 로직 확인용.
@@ -34,7 +34,7 @@ const MBTI_TOPIC: QuizTopic = {
     { type: 'text', paid: true },
   ],
   round: { byCategory: true, size: 2 },
-  titles: false,
+  titles: undefined,
 };
 
 function messages(problems: ReturnType<typeof checkTopicItems>): string[] {

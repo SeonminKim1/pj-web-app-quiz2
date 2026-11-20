@@ -3,6 +3,8 @@ import type { Progress, TopicProgress } from '../types/progress.ts';
 import type { HintType, QuizItem, QuizTopic } from '../types/quiz.ts';
 import { answerChars } from './answer.ts';
 import { revealAxisText } from './mbti.ts';
+import { rewardFor } from './rewards.ts';
+import { stageProgress, type Stage } from './stages.ts';
 
 export const PROGRESS_VERSION = 1;
 const START_GOLD = 30;
@@ -175,4 +177,58 @@ export function openHint({
       },
     },
   };
+}
+
+/**
+ * 다 푼 판의 보상을 받은 것으로 기록한다(설계 "받은 보상은 계산해서 주고, 준 것은 기록한다").
+ * 이미 받은 보상은 그대로 두고, 새로 받은 것이 없으면 같은 진행 객체를 돌려준다(저장하지 않게).
+ */
+export function claimRewards({
+  progress,
+  topic,
+  rounds,
+}: {
+  progress: Progress;
+  topic: QuizTopic;
+  rounds: readonly (Stage & { name?: string })[];
+}): Progress {
+  const solved = solvedSet({ progress, topicId: topic.id });
+  const earned = new Set(progress.earnedRewards ?? []);
+  const added: string[] = [];
+  for (const round of rounds) {
+    if (!stageProgress({ stage: round, solved }).completed) continue;
+    const reward = rewardFor({ topic, round });
+    if (reward && !earned.has(reward.id)) {
+      earned.add(reward.id);
+      added.push(reward.id);
+    }
+  }
+  if (added.length === 0) return progress;
+  return {
+    ...progress,
+    earnedRewards: [...(progress.earnedRewards ?? []), ...added],
+  };
+}
+
+/** 보상을 보여 준 것으로 기록한다. 새로 본 것이 없으면 같은 진행 객체를 돌려준다. */
+export function markRewardsSeen({
+  progress,
+  ids,
+}: {
+  progress: Progress;
+  ids: readonly string[];
+}): Progress {
+  const seen = new Set(progress.seenRewards ?? []);
+  const added = ids.filter((id) => !seen.has(id) && seen.add(id));
+  if (added.length === 0) return progress;
+  return {
+    ...progress,
+    seenRewards: [...(progress.seenRewards ?? []), ...added],
+  };
+}
+
+/** 받았지만 아직 보여 주지 않은 보상 id(받은 순서). */
+export function unseenRewards(progress: Progress): string[] {
+  const seen = new Set(progress.seenRewards ?? []);
+  return (progress.earnedRewards ?? []).filter((id) => !seen.has(id));
 }

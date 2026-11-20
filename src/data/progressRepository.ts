@@ -2,6 +2,7 @@
 // (spec "골드와 진행 저장"). 사용자에게 에러를 보이지 않고 콘솔에만 경고한다.
 import { PROGRESS_VERSION, initialProgress } from '../lib/progress.ts';
 import { isRecord } from '../lib/records.ts';
+import { getReward } from '../lib/rewards.ts';
 import {
   createLocalStore,
   type KeyValueStorage,
@@ -23,7 +24,7 @@ export type ProgressStore = LocalStore<Progress>;
 export function createProgressStore({
   storage,
 }: { storage?: KeyValueStorage | null } = {}): ProgressStore {
-  return createLocalStore({
+  const store = createLocalStore({
     key: PROGRESS_KEY,
     version: PROGRESS_VERSION,
     isValid: isProgress,
@@ -31,6 +32,44 @@ export function createProgressStore({
     label: '진행',
     storage,
   });
+  return { load: () => sanitizeProgress(store.load()), save: store.save };
+}
+
+/**
+ * 보상 선택 필드(earnedRewards, seenRewards)를 고친다: 문자열이 아니거나 모르는 id, 중복은 그 항목만 버린다.
+ * 이 필드가 깨져도 푼 문제와 골드는 그대로 둔다(isProgress는 이 필드를 보지 않는다). 고칠 것이 없으면 같은 객체.
+ */
+function sanitizeProgress(progress: Progress): Progress {
+  const earnedRewards = cleanRewardIds(progress.earnedRewards);
+  const seenRewards = cleanRewardIds(progress.seenRewards);
+  if (
+    earnedRewards === progress.earnedRewards &&
+    seenRewards === progress.seenRewards
+  ) {
+    return progress;
+  }
+  const next: Progress = { ...progress };
+  delete next.earnedRewards;
+  delete next.seenRewards;
+  if (earnedRewards) next.earnedRewards = earnedRewards;
+  if (seenRewards) next.seenRewards = seenRewards;
+  return next;
+}
+
+// 깨끗하면 그대로, 아니면 알맞은 항목만 남긴 새 배열(남은 게 없으면 undefined).
+function cleanRewardIds(value: unknown): string[] | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value)) return undefined;
+  const kept = [
+    ...new Set(
+      value.filter(
+        (id): id is string =>
+          typeof id === 'string' && getReward(id) !== undefined,
+      ),
+    ),
+  ];
+  if (kept.length === value.length) return value as string[];
+  return kept.length > 0 ? kept : undefined;
 }
 
 /** 저장값이 지금 형식(version 1)의 진행인지 확인한다. bookmarks는 선택 필드. */
