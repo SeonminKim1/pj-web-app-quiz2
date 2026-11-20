@@ -116,7 +116,8 @@
 
 /* 결과 화면에서 막 받은 칸을 한 번 반짝인다(D7). */
 .cell[data-flash='true'] {
-  animation: flash 0.9s ease-out 0.2s 1 both;
+  /* 끝나면 transform을 놓아 누를 때 내려앉는 움직임이 다시 동작한다. */
+  animation: flash 0.9s ease-out 0.2s 1 backwards;
 }
 
 @keyframes flash {
