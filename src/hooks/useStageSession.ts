@@ -2,7 +2,7 @@
 import { useEffect, useState, type RefObject } from 'react';
 import type { PestAnimal } from '../lib/pestAnimals.ts';
 import { solvedSet } from '../lib/progress.ts';
-import { flashOnAlbum } from '../lib/rewardFlash.ts';
+import { clearAlbumFlash, flashOnAlbum } from '../lib/rewardFlash.ts';
 import { rewardFor, type Reward } from '../lib/rewards.ts';
 import { stagePlayPlan, stageProgress } from '../lib/stages.ts';
 import { titleFor } from '../lib/titles.ts';
@@ -53,6 +53,8 @@ export function useStageSession({
     ? titleFor({ solved: solved.size, total: itemCount, table: topic.titles })
     : undefined;
   const [titleLevelBefore] = useState(() => titleNow?.level ?? 0);
+  // 새 판을 시작하면 지난 판의 반짝임은 버린다(목록을 거치지 않고 다음 스테이지로 온 경우, 나중에 엉뚱하게 반짝이지 않게).
+  useEffect(() => clearAlbumFlash(), []);
   // 풀면서 목록이 바뀌지 않게 처음 진행으로 한 번만 정한다.
   const [plan] = useState(() => stagePlayPlan({ stage, solved }));
   const play = useStagePlay({ topic, plan });

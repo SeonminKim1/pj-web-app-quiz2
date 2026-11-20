@@ -164,6 +164,15 @@ export function getReward(id: string): Reward | undefined {
   return REWARDS.get(id);
 }
 
+/** 주제의 보상 표에 있는 보상 id 전체(그 주제 스티커첩에 붙는 것만 고를 때). */
+export function rewardIdsOf(topic: QuizTopic): ReadonlySet<string> {
+  const table = topic.rewards;
+  if (!table) return new Set();
+  return new Set(
+    'byStage' in table ? table.byStage : Object.values(table.byCategory),
+  );
+}
+
 /** 주제의 한 판을 다 풀면 받는 보상. 보상 표가 없는 주제이거나 표 밖의 판이면 undefined. */
 export function rewardFor({
   topic,

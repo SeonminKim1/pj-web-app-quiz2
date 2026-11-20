@@ -144,7 +144,7 @@ describe('보상 필드 정리', () => {
     expect(createProgressStore({ storage }).load()).toEqual(SAVED);
   });
 
-  it('깨진 항목·모르는 id·중복만 버리고 푼 문제와 골드는 그대로', () => {
+  it('깨진 항목·중복만 버리고(모르는 id는 남김) 푼 문제와 골드는 그대로', () => {
     const storage = memoryStorage({
       [PROGRESS_KEY]: JSON.stringify({
         ...SAVED,
@@ -154,7 +154,8 @@ describe('보상 필드 정리', () => {
     });
     expect(createProgressStore({ storage }).load()).toEqual({
       ...SAVED,
-      earnedRewards: ['hat-ribbon-pink'],
+      // 더 새 버전이 더한 보상일 수 있어 남긴다(리뷰 지적 progressRepository.ts:67).
+      earnedRewards: ['hat-ribbon-pink', 'hat-nope'],
     });
   });
 });

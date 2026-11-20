@@ -2,7 +2,6 @@
 // (spec "골드와 진행 저장"). 사용자에게 에러를 보이지 않고 콘솔에만 경고한다.
 import { PROGRESS_VERSION, initialProgress } from '../lib/progress.ts';
 import { isRecord } from '../lib/records.ts';
-import { getReward } from '../lib/rewards.ts';
 import {
   createLocalStore,
   type KeyValueStorage,
@@ -36,7 +35,9 @@ export function createProgressStore({
 }
 
 /**
- * 보상 선택 필드(earnedRewards, seenRewards)를 고친다: 문자열이 아니거나 모르는 id, 중복은 그 항목만 버린다.
+ * 보상 선택 필드(earnedRewards, seenRewards)를 고친다: 문자열이 아니거나 중복인 항목만 버린다.
+ * 모르는 id(더 새 버전이 더한 보상)는 남긴다: 오래된 탭이 저장하면서 지우면 "받은 보상은 빼앗지 않는다"가 깨진다.
+ * 화면은 아는 id(getReward)만 그린다.
  * 이 필드가 깨져도 푼 문제와 골드는 그대로 둔다(isProgress는 이 필드를 보지 않는다). 고칠 것이 없으면 같은 객체.
  */
 function sanitizeProgress(progress: Progress): Progress {
@@ -61,12 +62,7 @@ function cleanRewardIds(value: unknown): string[] | undefined {
   if (value === undefined) return undefined;
   if (!Array.isArray(value)) return undefined;
   const kept = [
-    ...new Set(
-      value.filter(
-        (id): id is string =>
-          typeof id === 'string' && getReward(id) !== undefined,
-      ),
-    ),
+    ...new Set(value.filter((id): id is string => typeof id === 'string')),
   ];
   if (kept.length === value.length) return value as string[];
   return kept.length > 0 ? kept : undefined;

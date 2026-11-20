@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { buildAlbum, type Album } from '../lib/album.ts';
 import { unseenRewards } from '../lib/progress.ts';
+import { rewardIdsOf } from '../lib/rewards.ts';
 import { useProgress } from './useProgress.ts';
 import type { LoadState } from './useQuizData.ts';
 import { useTopicStages } from './useTopicStages.ts';
@@ -27,7 +28,12 @@ export function useStageList(): StageListView {
   const { topicId } = useParams();
   const { state: loaded, retry, topic } = useTopicStages(topicId);
   const { progress, markRewardsSeen } = useProgress();
-  const unseen = useMemo(() => unseenRewards(progress), [progress]);
+  // 이 주제 스티커첩에 붙는 것만(다른 주제 스티커는 그 주제 목록에서 보여 준다).
+  const unseen = useMemo(() => {
+    if (!topic) return [];
+    const own = rewardIdsOf(topic);
+    return unseenRewards(progress).filter((id) => own.has(id));
+  }, [progress, topic]);
 
   const state = useMemo<LoadState<Album>>(() => {
     if (loaded.status !== 'ready') return loaded;
