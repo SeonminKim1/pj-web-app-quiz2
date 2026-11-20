@@ -101,11 +101,12 @@
   background: var(--color-gold-soft);
 }
 
-/* 지금 차례: 분홍 테두리 + "여기부터". */
+/* 지금 차례: 진한 분홍 테두리 + "여기부터". 포커스 테두리(outline)와 헷갈리지 않게 그림자 고리로 그린다. */
 .cell[data-current='true'] {
   background: var(--color-pink-soft);
-  outline: 3px solid var(--color-pink);
-  outline-offset: 2px;
+  box-shadow:
+    0 0 0 3px var(--color-pink-strong),
+    var(--shadow-pop);
 }
 
 .cell:focus-visible {
