@@ -143,7 +143,7 @@ SITE_ORIGIN=http://localhost:4173 npm run build:og -- --only 23,41,m12
 
 ### 새 주제 추가하기
 
-1. `src/types/quiz.ts`의 `QuizTopicId`에 id를 더하고, `src/lib/quizTopics.ts`의 `QUIZ_TOPICS`에 설정 한 덩어리를 넣습니다: 풀이 방식(`play`), 힌트 단계(`hints`), 한 판 단위(`round`: 스테이지 크기 또는 카테고리), 칭호(`titles`), 공유(`share`: 주소 앞부분과 카드 종류). 화면은 주제 id가 아니라 이 설정으로 갈라집니다.
+1. `src/types/quiz.ts`의 `QuizTopicId`에 id를 더하고, `src/lib/quizTopics.ts`의 `QUIZ_TOPICS`에 설정 한 덩어리를 넣습니다: 풀이 방식(`play`), 힌트 단계(`hints`), 한 판 단위(`round`: 스테이지 크기 또는 카테고리), 칭호 표(`titles`: 칭호 이름과 필요한 맞힌 수, 다 맞힌 칭호), 보상 표(`rewards`: 스테이지 번호 순서 또는 카테고리 이름 → `src/lib/rewards.ts`의 보상 id), 공유(`share`: 주소 앞부분과 카드 종류). 화면은 주제 id가 아니라 이 설정으로 갈라집니다.
 2. `data/<id>.json`을 만듭니다. 형식은 위 "문제 데이터"와 같고, 카테고리 단위 주제는 `category`가 필수입니다.
 3. 공유하려면 겹치지 않는 주소 앞부분(`q`, `m` 말고)을 정하고 위 레시피대로 `register-ids`를 돌립니다. 등록부는 `data/share/<id>-published-ids.json`에 생깁니다.
 4. 새 풀이 방식이 필요하면 `PlayMode`에 더하고, `quizTopics.ts`의 `IMPLEMENTED_PLAY_MODES`, 데이터 검사(`scripts/quiz-data/check.ts`의 정답 규칙), 풀이 부품(예: `MbtiAxesPicker`)을 함께 만듭니다.

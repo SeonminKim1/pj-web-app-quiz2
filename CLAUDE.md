@@ -28,8 +28,9 @@ npm run build          # 데이터 → 글꼴 → 앱 → OG 페이지 → 서�
 - `data/nonsense.json`: 문제 데이터의 기준. `scripts/quiz-data/`가 검사하고 `public/data/quiz/`(생성물, 커밋 안 함)를 만든다.
 - `data/share/published-ids.json`(넌센스), `data/share/mbti-published-ids.json`(MBTI): 주제별 공개 id 등록부(`scripts/share/topics.ts`). 추가만 하고 손으로 고치지 않는다(`npm run register-ids`). 공개한 문제의 정답은 바꿀 수 없다.
 - `scripts/og/`, `scripts/og-pages.ts`: 공유 문제마다 `dist/<q|m>/<id>/index.html`과 카드 PNG(satori + resvg, Jua TTF 동봉). 넌센스는 문제 문장 카드, MBTI는 공통 카드 한 장(문제는 미리보기 설명 줄). 주제 설정 `share.card`.
-- `src/lib/quizTopics.ts`: 주제 설정(풀이 방식, 힌트 단계, 한 판 단위, 칭호, 공유 주소). 주제마다 화면 코드를 따로 만들지 않고 공유 부품을 골라 쓴다. 화면은 주제 id가 아니라 설정으로 분기한다.
+- `src/lib/quizTopics.ts`: 주제 설정(풀이 방식, 힌트 단계, 한 판 단위, 칭호 표, 보상 표, 공유 주소). 주제마다 화면 코드를 따로 만들지 않고 공유 부품을 골라 쓴다. 화면은 주제 id가 아니라 설정으로 분기한다.
 - MBTI(`data/mbti.json`): 풀이 방식 `mbtiAxes`(`src/lib/mbti.ts`, `MbtiAxesPicker`), 카테고리 하나(16유형 한 번씩) = 스테이지 하나(`/topics/mbti/categories/<번호>`), ⓘ 설명 `MbtiGuide`.
+- 스티커첩 보상(설계 `docs/designs/rewards-playground.md`): 판(스테이지·카테고리)을 다 풀면 받는 보상. 보상 목록 `src/lib/rewards.ts`(보상 id는 진행 `earnedRewards`에 남으므로 이름을 바꾸거나 지우지 않는다), 칸 계산 `src/lib/album.ts`, 받기 기록 `src/hooks/useClaimRewards.ts`, 그림 `src/components/RewardArt.tsx`. 넌센스 스테이지 목록과 MBTI 카테고리 목록은 같은 `StickerAlbum`을 쓰고, 새 보상은 결과 카드 `StageResult`, 결과로 못 본 보상은 `CollectedSheet`가 보여 준다.
 - 방해꾼: 규칙·대사 `src/lib/pest.ts`, 동물 `src/lib/pestAnimals.ts`, 움직임 계산(순수 함수) `src/lib/pestMotion.ts`, 상태 `src/hooks/usePest.ts`(reducer), 프레임 루프 `src/hooks/usePestMotion.ts`, 그리기 `src/components/PestLayer.tsx`.
 - PWA: `public/manifest.webmanifest`, 아이콘 `scripts/app-icon.ts` → `public/icons/`, 서비스 워커 본문 `scripts/sw/worker.js` → 빌드가 `dist/sw.js`로(`scripts/sw.ts`).
 - 안드로이드(TWA, 패키지 `com.quiznoriteo.app`): `android/` (Bubblewrap 설정·스토어 자료, 절차는 `android/README.md`). 개인정보처리방침 `/privacy`(`src/pages/PrivacyPage.tsx`)는 저장·통계·공유·광고를 바꿀 때 같이 고친다.
