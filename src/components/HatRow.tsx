@@ -29,7 +29,12 @@ export function HatRow({ animal }: { animal: PetId }): ReactElement {
   const { progress, equipHat } = useProgress();
   const earned = new Set(progress.earnedRewards ?? []);
   const wearing = hatOf({ progress, pet: animal })?.id;
-  const hasAny = HATS.some((hat) => earned.has(hat.id));
+  // 받은 모자를 앞에(표 순서 그대로), 그다음 잠긴 모자. 가진 모자를 찾으려고 스크롤하지 않게.
+  const hats = [
+    ...HATS.filter((hat) => earned.has(hat.id)),
+    ...HATS.filter((hat) => !earned.has(hat.id)),
+  ];
+  const hasAny = hats.some((hat) => earned.has(hat.id));
   // 잠긴 모자를 누르면 어디서 받는지 한 줄로 알려 준다.
   const [notice, setNotice] = useState('');
   return (
@@ -53,7 +58,7 @@ export function HatRow({ animal }: { animal: PetId }): ReactElement {
         >
           <span className={styles.none}>없음</span>
         </button>
-        {HATS.map((hat) => {
+        {hats.map((hat) => {
           if (earned.has(hat.id)) {
             return (
               <button
