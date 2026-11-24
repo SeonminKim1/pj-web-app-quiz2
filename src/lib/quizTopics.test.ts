@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { QuizTopicId } from '../types/quiz.ts';
+import { MBTI_REWARDS, NONSENSE_REWARDS, REWARDS } from './rewards.ts';
 import {
   QUIZ_TOPICS,
   SHARE_TOPICS,
@@ -10,6 +11,7 @@ import {
   getQuizTopic,
   getQuizTopicFileName,
   isQuizTopicId,
+  rewardSourceLabel,
   textHintCount,
 } from './quizTopics.ts';
 
@@ -112,5 +114,24 @@ describe('findCategoryTopic', () => {
     expect(findCategoryTopic('nonsense')).toBeUndefined();
     expect(findCategoryTopic('movie')).toBeUndefined();
     expect(findCategoryTopic(undefined)).toBeUndefined();
+  });
+});
+
+describe('rewardSourceLabel', () => {
+  it('모자마다 그 모자를 주는 판 하나를 이름으로 찾는다', () => {
+    expect(rewardSourceLabel('hat-ribbon-pink')).toBe('1스테이지');
+    expect(rewardSourceLabel(NONSENSE_REWARDS[2]!)).toBe('3스테이지');
+    expect(rewardSourceLabel(MBTI_REWARDS['일상']!)).toBe('MBTI 일상');
+    expect(rewardSourceLabel('hat-from-the-future')).toBeUndefined();
+  });
+
+  it('모자 30개가 모두 판 이름을 하나씩 가진다(표가 바뀌어 빠지거나 겹치면 실패)', () => {
+    const hats = [...REWARDS.values()].filter(
+      (reward) => reward.kind === 'hat',
+    );
+    expect(hats).toHaveLength(30);
+    const labels = hats.map((hat) => rewardSourceLabel(hat.id));
+    expect(labels.every((label) => label !== undefined)).toBe(true);
+    expect(new Set(labels).size).toBe(30);
   });
 });

@@ -2,7 +2,7 @@
 // 보상 그림(인라인 SVG, 직접 그림). 스티커첩 칸, 결과 카드, 모은 스티커 시트가 같이 쓴다.
 // 모자는 PetPortrait의 머리 좌표(머리 꼭대기 64, 40)에 맞춰 그려 두어, 동물에게 씌울 때도 같은 그림을 쓴다(T1).
 // 색은 src/index.css의 토큰과 같은 값이다(SVG 속성은 CSS 변수를 읽지 못해 값을 적는다).
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import type { Reward, RewardColor } from '../lib/rewards.ts';
 
 const LINE = '#6b4f4a';
@@ -507,6 +507,38 @@ function big(shape: string): ReactElement | null {
   }
 }
 
+function paintOf(reward: Reward): Paint {
+  const color = reward.color ?? 'pink';
+  return { main: COLORS[color][0], dark: COLORS[color][1], color };
+}
+
+// 보상 그림의 선(색·굵기·이음). 모자 경로 대부분은 선을 이 묶음에서 받는다.
+function Outlined({ children }: { children: ReactNode }): ReactElement {
+  return (
+    <g
+      stroke={LINE}
+      strokeWidth={W}
+      strokeLinejoin="round"
+      strokeLinecap="round"
+    >
+      {children}
+    </g>
+  );
+}
+
+/**
+ * 동물에게 씌우는 모자(PetPortrait의 머리 좌표, 설계 T1). 모자가 아닌 보상이면 아무것도 그리지 않는다.
+ * PetPortrait는 이것만 쓰고 색·선은 여기서 정한다.
+ */
+export function HatShape({ reward }: { reward: Reward }): ReactElement | null {
+  if (reward.kind !== 'hat') return null;
+  return (
+    <g data-part="hat" data-reward={reward.id}>
+      <Outlined>{hat(reward.shape, paintOf(reward))}</Outlined>
+    </g>
+  );
+}
+
 /** 보상 그림. 장식이라 보조 기술에는 숨긴다(이름은 쓰는 쪽이 글자로 준다). */
 export function RewardArt({
   reward,
@@ -515,12 +547,7 @@ export function RewardArt({
   reward: Reward;
   size?: number;
 }): ReactElement {
-  const color = reward.color ?? 'pink';
-  const paint: Paint = {
-    main: COLORS[color][0],
-    dark: COLORS[color][1],
-    color,
-  };
+  const paint = paintOf(reward);
   const drawing =
     reward.kind === 'hat'
       ? hat(reward.shape, paint)
@@ -540,14 +567,7 @@ export function RewardArt({
       focusable="false"
       data-reward={reward.id}
     >
-      <g
-        stroke={LINE}
-        strokeWidth={W}
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      >
-        {drawing}
-      </g>
+      <Outlined>{drawing}</Outlined>
     </svg>
   );
 }

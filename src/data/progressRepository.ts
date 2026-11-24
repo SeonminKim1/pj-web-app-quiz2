@@ -1,5 +1,6 @@
 // 진행 저장(localStorage 'quiz-progress'). 저장값이 깨졌거나 저장소를 쓸 수 없어도 플레이는 계속된다
 // (spec "골드와 진행 저장"). 사용자에게 에러를 보이지 않고 콘솔에만 경고한다.
+import { isPetId } from '../lib/pestAnimals.ts';
 import { PROGRESS_VERSION, initialProgress } from '../lib/progress.ts';
 import { isRecord } from '../lib/records.ts';
 import {
@@ -35,7 +36,8 @@ export function createProgressStore({
 }
 
 /**
- * 보상 선택 필드(earnedRewards, seenRewards)를 고친다: 문자열이 아니거나 중복인 항목만 버린다.
+ * 보상 선택 필드(earnedRewards, seenRewards, equipped)를 고친다: 문자열이 아니거나 중복인 항목,
+ * 모르는 동물 칸만 버린다.
  * 모르는 id(더 새 버전이 더한 보상)는 남긴다: 오래된 탭이 저장하면서 지우면 "받은 보상은 빼앗지 않는다"가 깨진다.
  * 화면은 아는 id(getReward)만 그린다.
  * 이 필드가 깨져도 푼 문제와 골드는 그대로 둔다(isProgress는 이 필드를 보지 않는다). 고칠 것이 없으면 같은 객체.
@@ -43,18 +45,34 @@ export function createProgressStore({
 function sanitizeProgress(progress: Progress): Progress {
   const earnedRewards = cleanRewardIds(progress.earnedRewards);
   const seenRewards = cleanRewardIds(progress.seenRewards);
+  const equipped = cleanEquipped(progress.equipped);
   if (
     earnedRewards === progress.earnedRewards &&
-    seenRewards === progress.seenRewards
+    seenRewards === progress.seenRewards &&
+    equipped === progress.equipped
   ) {
     return progress;
   }
   const next: Progress = { ...progress };
   delete next.earnedRewards;
   delete next.seenRewards;
+  delete next.equipped;
   if (earnedRewards) next.earnedRewards = earnedRewards;
   if (seenRewards) next.seenRewards = seenRewards;
+  if (equipped) next.equipped = equipped;
   return next;
+}
+
+// 쓰고 있는 모자: 아는 동물 칸의 문자열 값만 남긴다. 모르는 모자 id는 남긴다(그릴 때 hatOf가 거른다).
+function cleanEquipped(value: unknown): Progress['equipped'] {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) return undefined;
+  const entries = Object.entries(value);
+  const kept = entries.filter(
+    ([pet, hat]) => isPetId(pet) && typeof hat === 'string',
+  );
+  if (kept.length === entries.length) return value as Progress['equipped'];
+  return kept.length > 0 ? Object.fromEntries(kept) : undefined;
 }
 
 // 깨끗하면 그대로, 아니면 알맞은 항목만 남긴 새 배열(남은 게 없으면 undefined).

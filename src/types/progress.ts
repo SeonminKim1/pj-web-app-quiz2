@@ -1,4 +1,5 @@
 // 사용자 진행 상황(localStorage 'quiz-progress').
+import type { PetId } from './settings.ts';
 
 /** 주제 하나의 진행. */
 export type TopicProgress = {
@@ -26,4 +27,9 @@ export type Progress = {
   earnedRewards?: string[];
   /** 사용자에게 보여 준 보상 id(선택 필드). 결과 카드나 "그동안 모은 스티커" 시트로 본 것. */
   seenRewards?: string[];
+  /**
+   * 동물마다 쓰고 있는 모자 id(선택 필드). 받은 모자만 씌울 수 있다(equipHat).
+   * 모르는 모자나 받지 않은 모자를 가리키면 그리지 않는다(hatOf). 저장에서는 지우지 않는다(설계 D30).
+   */
+  equipped?: Partial<Record<PetId, string>>;
 };

@@ -6,6 +6,7 @@ import {
 } from '../data/progressRepository.ts';
 import {
   claimRewards as applyClaimRewards,
+  equipHat as applyEquipHat,
   markRewardsSeen as applyMarkRewardsSeen,
   openHint as applyOpenHint,
   openedHintCount,
@@ -89,6 +90,14 @@ export function useProgressState(
     [commit],
   );
 
+  const equipHat = useCallback<ProgressContextValue['equipHat']>(
+    (pet, hatId) => {
+      const next = applyEquipHat({ progress: latest.current, pet, hatId });
+      if (next !== latest.current) commit(next);
+    },
+    [commit],
+  );
+
   return useMemo(
     () => ({
       progress,
@@ -96,7 +105,15 @@ export function useProgressState(
       openHint,
       claimRewards,
       markRewardsSeen,
+      equipHat,
     }),
-    [progress, recordCorrect, openHint, claimRewards, markRewardsSeen],
+    [
+      progress,
+      recordCorrect,
+      openHint,
+      claimRewards,
+      markRewardsSeen,
+      equipHat,
+    ],
   );
 }

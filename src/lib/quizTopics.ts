@@ -159,3 +159,24 @@ export function findCategoryTopic(
   if (!isEnterableTopic(topic) || !topic.round.byCategory) return undefined;
   return topic as CategoryTopic;
 }
+
+/**
+ * 보상을 주는 판의 이름(잠긴 모자 안내, 설계 D10·D23). 보상 표에서 거꾸로 찾는다.
+ * 스테이지 주제는 "3스테이지", 카테고리 주제는 "MBTI 일상". 어느 표에도 없으면 없음.
+ */
+export function rewardSourceLabel(id: string): string | undefined {
+  for (const topic of QUIZ_TOPICS) {
+    const table = topic.rewards;
+    if (!table) continue;
+    if ('byStage' in table) {
+      const index = table.byStage.indexOf(id);
+      if (index >= 0) return `${index + 1}스테이지`;
+    } else {
+      const name = Object.keys(table.byCategory).find(
+        (category) => table.byCategory[category] === id,
+      );
+      if (name !== undefined) return `${topic.label} ${name}`;
+    }
+  }
+  return undefined;
+}

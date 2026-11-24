@@ -158,4 +158,32 @@ describe('보상 필드 정리', () => {
       earnedRewards: ['hat-ribbon-pink', 'hat-nope'],
     });
   });
+
+  it('쓰고 있는 모자: 모르는 동물 칸과 문자열이 아닌 값만 버리고, 모르는 모자 id는 남긴다(설계 D30)', () => {
+    const storage = memoryStorage({
+      [PROGRESS_KEY]: JSON.stringify({
+        ...SAVED,
+        equipped: {
+          cat: 'hat-ribbon-pink',
+          dog: 7,
+          dragon: 'hat-straw-sky',
+          rabbit: 'hat-from-the-future',
+        },
+      }),
+    });
+    expect(createProgressStore({ storage }).load()).toEqual({
+      ...SAVED,
+      equipped: { cat: 'hat-ribbon-pink', rabbit: 'hat-from-the-future' },
+    });
+  });
+
+  it('쓰고 있는 모자가 객체가 아니면 그 필드만 버린다(푼 문제와 골드는 그대로)', () => {
+    const storage = memoryStorage({
+      [PROGRESS_KEY]: JSON.stringify({
+        ...SAVED,
+        equipped: ['hat-ribbon-pink'],
+      }),
+    });
+    expect(createProgressStore({ storage }).load()).toEqual(SAVED);
+  });
 });

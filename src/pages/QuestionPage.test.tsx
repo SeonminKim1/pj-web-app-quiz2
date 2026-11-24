@@ -270,3 +270,57 @@ describe('/q/:id 문제 하나 모드', () => {
     expect(screen.queryByText(/낸 문제/)).not.toBeInTheDocument();
   });
 });
+
+describe('/q/:id 모자', () => {
+  function renderWithStore(
+    path: string,
+    store: ReturnType<typeof createProgressStore>,
+  ) {
+    window.history.replaceState(null, '', path);
+    render(
+      <ProgressProvider store={store}>
+        <SettingsProvider store={createSettingsStore({ storage: null })}>
+          <MemoryRouter initialEntries={[path]}>
+            <AppRoutes />
+          </MemoryRouter>
+        </SettingsProvider>
+      </ProgressProvider>,
+    );
+  }
+
+  // Value: protects=공유 링크로만 들어온 사용자도 문제 하나 화면에서 다 푼 판의 모자가 기록된다(D29, OV2-13); fails_when=QuestionPage가 useTopicRounds를 거치지 않거나 useTopicRounds가 기록을 빼면; why_new=기록은 첫 화면·시트에서만 테스트됨; seam=none; no_claim=다른 주제 기록
+  it('문제 하나 화면만 열어도 다 푼 판의 보상을 기록한다', async () => {
+    const store = createProgressStore({ storage: null });
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {
+        nonsense: {
+          solved: Array.from({ length: 10 }, (_, i) => String(i + 1)),
+          hintsOpened: {},
+        },
+      },
+    });
+    renderWithStore('/q/11/', store);
+    await waitFor(() =>
+      expect(store.load().earnedRewards).toEqual(['hat-ribbon-pink']),
+    );
+  });
+
+  // Value: protects=문제 하나 화면의 방해꾼도 씌운 모자를 쓴다(OV2-11); fails_when=QuestionPage Session이 PestLayer에 hat을 넘기지 않으면; why_new=문제 하나 화면 모자를 보는 테스트가 없음; seam=none; no_claim=쉬는 중·결과 화면 그림
+  it('문제 하나 화면의 방해꾼이 씌운 모자를 쓴다', async () => {
+    const store = createProgressStore({ storage: null });
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {},
+      earnedRewards: ['hat-crown-sky'],
+      equipped: { rabbit: 'hat-crown-sky' },
+    });
+    renderWithStore('/q/11/', store);
+    const pest = await screen.findByTestId('pest-2d');
+    expect(
+      pest.querySelector('[data-part="hat"][data-reward="hat-crown-sky"]'),
+    ).not.toBeNull();
+  });
+});

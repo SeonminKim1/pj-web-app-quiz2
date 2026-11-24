@@ -1,9 +1,11 @@
-// 주제 파일 → 한 판 목록(주제 설정의 한 판 단위대로: 스테이지 또는 카테고리). 첫 화면·문제 하나 화면이 같이 쓴다.
+// 주제 파일 → 한 판 목록(주제 설정의 한 판 단위대로: 스테이지 또는 카테고리). 첫 화면·문제 하나 화면·모자 시트가 같이 쓴다.
+// 판 목록이 준비되면 다 푼 판의 보상을 기록한다(설계 D29, OV2-13: 목록을 안 열어도 모자가 풀리게).
 import { useMemo } from 'react';
 import { AppError, ErrorCode } from '../errors/AppError.ts';
 import { buildCategories } from '../lib/categories.ts';
 import { buildStages, type Stage } from '../lib/stages.ts';
 import type { QuizItem, QuizTopic } from '../types/quiz.ts';
+import { useClaimRewards } from './useClaimRewards.ts';
 import { useTopicFile, type LoadState } from './useQuizData.ts';
 
 /** 주제 파일과 한 판 목록. 카테고리 단위 주제면 카테고리가 한 판(이름 있음). */
@@ -32,6 +34,15 @@ export function useTopicRounds(topic: QuizTopic | undefined): {
       : buildStages({ items, stageSize: topic.round.stageSize });
     return { status: 'ready', data: { items, rounds } };
   }, [fileState, topic]);
+  useClaimRewards(
+    useMemo(
+      () =>
+        state.status === 'ready' && topic
+          ? { topic, rounds: state.data.rounds }
+          : undefined,
+      [state, topic],
+    ),
+  );
   return { state, retry };
 }
 

@@ -1,5 +1,8 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import type { Reward } from '../lib/rewards.ts';
+import { josa } from '../lib/shareLink.ts';
+import type { PetId } from '../types/settings.ts';
+import { PetPortrait } from './PetPortrait.tsx';
 import { RewardArt } from './RewardArt.tsx';
 import styles from './StageResult.module.css';
 
@@ -19,8 +22,19 @@ type StageResultProps = {
   newTitle?: string | undefined;
   /** 보상이 붙은 스티커첩 칸 이름("3번", "연애"). */
   stickerSpot?: string;
+  /** 새 보상이 모자면 방금 같이 푼 방해꾼에게 씌우는 버튼(설계 D28·D32). */
+  wear?: HatWear | undefined;
   onList: () => void;
   onNext: () => void;
+};
+
+/** 결과 카드의 "씌우기": 누가 쓰는지, 지금 쓰고 있는지, 누를 때. */
+export type HatWear = {
+  animal: PetId;
+  /** 동물 이름("토끼"). */
+  animalName: string;
+  wearing: boolean;
+  onToggle: () => void;
 };
 
 const KIND_LABEL: Record<Reward['kind'], string> = {
@@ -41,6 +55,7 @@ export function StageResult({
   newReward,
   newTitle,
   stickerSpot = '',
+  wear,
   onList,
   onNext,
 }: StageResultProps): ReactElement {
@@ -77,7 +92,16 @@ export function StageResult({
                 <span />
               </span>
             )}
-            <RewardArt reward={newReward} size={104} />
+            {wear?.wearing ? (
+              <PetPortrait
+                animal={wear.animal}
+                hat={newReward}
+                mood="smug"
+                size={104}
+              />
+            ) : (
+              <RewardArt reward={newReward} size={104} />
+            )}
           </span>
           <span className={styles.rewardName}>{newReward.name}</span>
           <span className={styles.rewardKind}>
@@ -86,6 +110,24 @@ export function StageResult({
           <span className={styles.rewardNote}>
             스티커첩 {stickerSpot} 칸에 붙었어요
           </span>
+          {wear && newReward.kind === 'hat' && (
+            <>
+              {/* 이름은 그대로 두고 눌림 상태로 알린다(다시 누르면 전에 쓰던 모자로, 설계 D32). */}
+              <button
+                type="button"
+                className={styles.wear}
+                aria-pressed={wear.wearing}
+                onClick={wear.onToggle}
+              >
+                씌우기
+              </button>
+              {wear.wearing && (
+                <span className={styles.rewardNote}>
+                  {josa(wear.animalName, '이', '가')} 쓰고 있어요
+                </span>
+              )}
+            </>
+          )}
         </div>
       )}
       {newTitle && (

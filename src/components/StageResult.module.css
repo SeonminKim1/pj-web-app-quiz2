@@ -91,6 +91,17 @@
   font-size: 1.25rem;
 }
 
+.wear {
+  composes: secondary from '../styles/ui.module.css';
+  min-height: 44px;
+  margin-top: var(--space-2);
+  padding: 0 var(--space-5);
+}
+
+.wear[aria-pressed='true'] {
+  background: var(--color-mint);
+}
+
 .rewardKind,
 .rewardNote {
   color: var(--color-ink-soft);

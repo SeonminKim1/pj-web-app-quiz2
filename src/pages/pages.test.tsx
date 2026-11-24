@@ -512,6 +512,41 @@ describe('방해꾼', () => {
   const oneOf = (lines: readonly string[]) => (text: string) =>
     lines.includes(text);
 
+  // 받은 모자를 토끼에게 씌워 둔 진행(설계 OV2-11).
+  function saveWornHat() {
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {},
+      earnedRewards: ['hat-crown-sky'],
+      equipped: { rabbit: 'hat-crown-sky' },
+    });
+  }
+
+  // Value: protects=씌운 모자가 첫 화면 방해꾼 버튼 얼굴에 보인다(OV2-11); fails_when=HomePage가 PetPortrait에 hat을 넘기지 않으면; why_new=시트 테스트는 벗긴 뒤 모자가 없음만 보고, 쓴 모자가 보이는지는 안 봄; seam=none; no_claim=모자 위치·크기
+  it('씌운 모자가 첫 화면 방해꾼 버튼에 보인다', async () => {
+    saveWornHat();
+    renderAt('/');
+    const button = await screen.findByRole('button', {
+      name: '방해꾼 바꾸기, 지금 토끼',
+    });
+    expect(
+      button.querySelector('[data-part="hat"][data-reward="hat-crown-sky"]'),
+    ).not.toBeNull();
+  });
+
+  // Value: protects=스테이지 풀이 중 방해꾼이 씌운 모자를 쓰고 논다(OV2-11); fails_when=StagePlayPage가 PestLayer에 hat을 넘기지 않거나 hatOf를 다른 동물로 부르면; why_new=풀이 화면 모자를 보는 테스트가 없음; seam=none; no_claim=움직일 때 모자가 따라가는 모양
+  it('스테이지 풀이 화면의 방해꾼이 씌운 모자를 쓴다', async () => {
+    saveWornHat();
+    renderAt('/topics/nonsense/stages/2');
+    await screen.findByText('지구가 제일 힘들었던 시기는?');
+    expect(
+      screen
+        .getByTestId('pest-2d')
+        .querySelector('[data-part="hat"][data-reward="hat-crown-sky"]'),
+    ).not.toBeNull();
+  });
+
   it('풀이 중에 있고, 오답에 비웃고, 누르면 잡힘 문구. 그동안 풀이는 그대로 되고 결과 화면에는 없다', async () => {
     const user = renderAt('/topics/nonsense/stages/2');
     await screen.findByText('지구가 제일 힘들었던 시기는?');
@@ -540,6 +575,73 @@ describe('방해꾼', () => {
 
 // Value: protects=판을 다 푼 순간 결과 화면 제목 아래에 "새 보상!" 카드가 한 번 뜨고(D6), 본 것으로 기록돼 목록에서 "모은 스티커" 시트가 다시 뜨지 않는다; fails_when=풀이 화면이 맞힐 때 보상을 먼저 기록해 카드가 사라지거나(OV2), 본 표시를 안 남기면; why_new=보상 카드가 새로 생김; seam=none; no_claim=붙는 움직임·효과음
 describe('스티커 보상', () => {
+  // Value: protects=모자 카드의 "씌우기"는 같이 푼 방해꾼에게 바로 씌우고, 이름은 그대로 눌림으로 알리며, 다시 누르면 전에 쓰던 모자로 돌린다(D28·D32); fails_when=다른 동물에게 씌우거나, 다시 누를 때 맨머리가 되거나, 저장하지 않으면; why_new=씌우기 버튼이 새로 생김; seam=none; no_claim=카드 속 동물 그림 모양
+  it('모자 카드의 씌우기: 바로 씌우고, 다시 누르면 전에 쓰던 모자로', async () => {
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {
+        nonsense: {
+          solved: Array.from({ length: 9 }, (_, i) => String(i + 1)),
+          hintsOpened: {},
+        },
+      },
+      earnedRewards: ['hat-crown-sky'],
+      equipped: { rabbit: 'hat-crown-sky' },
+    });
+    const user = renderAt('/topics/nonsense/stages/1');
+    await screen.findByText('문제 10');
+    await typeAnswer(user, '정답10');
+    await clickAdvance(user, '결과 보기 ›');
+    const result = screen.getByRole('region', { name: '스테이지 결과' });
+    const wear = within(result).getByRole('button', { name: '씌우기' });
+    expect(wear).toHaveAttribute('aria-pressed', 'false');
+    await user.click(wear);
+    expect(wear).toHaveAttribute('aria-pressed', 'true');
+    expect(result).toHaveTextContent('토끼가 쓰고 있어요');
+    expect(
+      result.querySelector(
+        '[data-animal="rabbit"] [data-reward="hat-ribbon-pink"]',
+      ),
+    ).not.toBeNull();
+    expect(store.load().equipped).toEqual({ rabbit: 'hat-ribbon-pink' });
+    await user.click(wear);
+    expect(wear).toHaveAttribute('aria-pressed', 'false');
+    expect(store.load().equipped).toEqual({ rabbit: 'hat-crown-sky' });
+  });
+
+  it('놀이터 물건 카드에는 씌우기가 없다', async () => {
+    const user = renderAt('/topics/nonsense/stages/2');
+    await screen.findByText('지구가 제일 힘들었던 시기는?');
+    await typeAnswer(user, '고생대');
+    await clickAdvance(user, '다음 ›');
+    await typeAnswer(user, '참새');
+    await clickAdvance(user, '결과 보기 ›');
+    const result = screen.getByRole('region', { name: '스테이지 결과' });
+    expect(result).toHaveTextContent('분홍 털실 공');
+    expect(
+      within(result).queryByRole('button', { name: '씌우기' }),
+    ).not.toBeInTheDocument();
+  });
+
+  // Value: protects=첫 화면은 이어 풀 주제의 다 푼 판 보상을 기록한다(D29, 목록을 안 열어도); fails_when=useTopicRounds가 기록하지 않으면; why_new=첫 화면 기록이 새로 생김; seam=none; no_claim=다른 주제 기록(시트가 함, PetPicker.test)
+  it('첫 화면만 열어도 이어 풀 주제의 다 푼 판 보상을 기록한다', async () => {
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {
+        nonsense: {
+          solved: Array.from({ length: 10 }, (_, i) => String(i + 1)),
+          hintsOpened: {},
+        },
+      },
+    });
+    renderAt('/');
+    await waitFor(() =>
+      expect(store.load().earnedRewards).toEqual(['hat-ribbon-pink']),
+    );
+  });
+
   it('스테이지를 다 풀면 새 보상 카드, 목록 칸은 받은 스티커', async () => {
     const user = renderAt('/topics/nonsense/stages/2');
     await screen.findByText('지구가 제일 힘들었던 시기는?');

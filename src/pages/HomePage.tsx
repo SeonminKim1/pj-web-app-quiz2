@@ -1,10 +1,12 @@
-import { useState, type ReactElement } from 'react';
+import { useRef, useState, type ReactElement } from 'react';
 import { Link } from 'react-router';
 import { AppIcon } from '../components/AppIcon.tsx';
 import { PetPicker } from '../components/PetPicker.tsx';
 import { PetPortrait } from '../components/PetPortrait.tsx';
 import { SettingsButton } from '../components/SettingsButton.tsx';
+import { useProgress } from '../hooks/useProgress.ts';
 import { useSettings } from '../hooks/useSettings.ts';
+import { hatOf } from '../lib/progress.ts';
 import { PEST_ANIMALS, getPestAnimal } from '../lib/pestAnimals.ts';
 import { DataErrorView } from '../components/DataErrorView.tsx';
 import { GoldBadge, LoadingView } from '../components/StatusViews.tsx';
@@ -27,7 +29,10 @@ export function HomePage(): ReactElement {
     retryNext,
   } = useHomePage();
   const { settings, choosePet } = useSettings();
+  const { progress } = useProgress();
   const [picking, setPicking] = useState(false);
+  // 시트를 닫으면 포커스를 방해꾼 버튼으로 되돌린다(useModalSheet: 되돌리기는 여는 쪽이 한다).
+  const petButtonRef = useRef<HTMLButtonElement>(null);
   // 칭호는 칭호 표가 있는 주제를 이어서 풀 때만.
   const title = next?.titles
     ? titleFor({ solved: next.solved, total: next.total, table: next.titles })
@@ -36,12 +41,18 @@ export function HomePage(): ReactElement {
     <main className={styles.page}>
       <header className={styles.hero}>
         <button
+          ref={petButtonRef}
           type="button"
           className={styles.heroPet}
           aria-label={`방해꾼 바꾸기, 지금 ${getPestAnimal(settings.pet).label}`}
           onClick={() => setPicking(true)}
         >
-          <PetPortrait animal={settings.pet} headOnly size={28} />
+          <PetPortrait
+            animal={settings.pet}
+            hat={hatOf({ progress, pet: settings.pet })}
+            headOnly
+            size={28}
+          />
           방해꾼
         </button>
         <span className={styles.heroGold}>
@@ -65,6 +76,7 @@ export function HomePage(): ReactElement {
                 <span key={animal.id} style={{ zIndex: 4 - i }}>
                   <PetPortrait
                     animal={animal.id}
+                    hat={hatOf({ progress, pet: animal.id })}
                     mood={i === 0 ? 'smug' : 'idle'}
                     size={i === 0 ? 60 : 46}
                   />
@@ -154,7 +166,10 @@ export function HomePage(): ReactElement {
         <PetPicker
           current={settings.pet}
           onChoose={choosePet}
-          onClose={() => setPicking(false)}
+          onClose={() => {
+            setPicking(false);
+            petButtonRef.current?.focus();
+          }}
         />
       )}
     </main>
