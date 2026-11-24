@@ -3,15 +3,19 @@ import { playCue } from '../lib/sound.ts';
 import { TitleToast } from '../components/TitleToast.tsx';
 import { useTitleUp } from '../hooks/useTitleUp.ts';
 import { usePhaseSound } from '../hooks/usePhaseSound.ts';
-import { useEffect, type ReactElement } from 'react';
+import { useState, useEffect, type ReactElement } from 'react';
+import { useProgress } from '../hooks/useProgress.ts';
 import { useSettings } from '../hooks/useSettings.ts';
+import { hatOf } from '../lib/progress.ts';
 import { AnswerInput } from '../components/AnswerInput.tsx';
 import { DataErrorView } from '../components/DataErrorView.tsx';
 import { HintPanel } from '../components/HintPanel.tsx';
 import { PestLayer } from '../components/PestLayer.tsx';
 import { QuestionNav } from '../components/QuestionNav.tsx';
 import { Playground } from '../components/Playground.tsx';
-import { StageResult } from '../components/StageResult.tsx';
+import { StageResult, type HatWear } from '../components/StageResult.tsx';
+import type { PestAnimal } from '../lib/pestAnimals.ts';
+import type { Reward } from '../lib/rewards.ts';
 import { GoldBadge, LoadingView } from '../components/StatusViews.tsx';
 import {
   useCategoryPlayPage,
@@ -106,6 +110,8 @@ function StageSession({
   usePhaseSound({ phase: state.phase, fresh: state.fresh });
   // 첫 화면 "이어서 풀기"가 이 주제로 오도록 기억한다.
   const { setLastTopic } = useSettings();
+  const { progress } = useProgress();
+  const hatWear = useHatWear({ reward: newReward, animal });
   useEffect(
     () => setLastTopic(target.topic.id),
     [setLastTopic, target.topic.id],
@@ -146,6 +152,7 @@ function StageSession({
           {...overall}
           newReward={newReward}
           newTitle={resultTitle}
+          wear={hatWear}
           stickerSpot={
             target.topic.round.byCategory
               ? target.stageLabel
@@ -205,6 +212,7 @@ function StageSession({
         line={pest.line}
         motion={pest.motion}
         animal={animal.id}
+        hat={hatOf({ progress, pet: animal.id })}
         fedId={pest.fedId}
         inviting={pest.inviting}
         avoidRef={questionRef}
@@ -285,4 +293,32 @@ function StageSession({
       <TitleToast name={newTitle} />
     </main>
   );
+}
+
+// 결과 카드 "씌우기"(설계 D28·D32): 방금 같이 푼 방해꾼에게 바로 씌우고, 다시 누르면 전에 쓰던 모자로 되돌린다.
+function useHatWear({
+  reward,
+  animal,
+}: {
+  reward: Reward | undefined;
+  animal: PestAnimal;
+}): HatWear | undefined {
+  const { progress, equipHat } = useProgress();
+  // 처음 씌우기 전에 쓰던 모자(없으면 맨머리).
+  const [before, setBefore] = useState<string | undefined>(undefined);
+  if (reward?.kind !== 'hat') return undefined;
+  const wearing = hatOf({ progress, pet: animal.id })?.id === reward.id;
+  return {
+    animal: animal.id,
+    animalName: animal.label,
+    wearing,
+    onToggle: () => {
+      if (wearing) {
+        equipHat(animal.id, before);
+        return;
+      }
+      setBefore(hatOf({ progress, pet: animal.id })?.id);
+      equipHat(animal.id, reward.id);
+    },
+  };
 }

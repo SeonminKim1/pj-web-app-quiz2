@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import type { QuizTopic } from '../types/quiz.ts';
 import {
   claimRewards,
+  equipHat,
+  hatOf,
   initialProgress,
   markRewardsSeen,
   openHint,
@@ -277,5 +279,84 @@ describe('markRewardsSeen / unseenRewards', () => {
     expect(markRewardsSeen({ progress: seen, ids: ['item-yarn-pink'] })).toBe(
       seen,
     );
+  });
+});
+
+describe('hatOf / equipHat', () => {
+  const earned = {
+    ...initialProgress(),
+    earnedRewards: ['hat-ribbon-pink', 'item-yarn-pink', 'hat-straw-sky'],
+  };
+
+  it('받은 모자만 씌우고, 동물마다 따로 쓴다', () => {
+    const worn = equipHat({
+      progress: earned,
+      pet: 'cat',
+      hatId: 'hat-ribbon-pink',
+    });
+    expect(hatOf({ progress: worn, pet: 'cat' })?.id).toBe('hat-ribbon-pink');
+    expect(hatOf({ progress: worn, pet: 'dog' })).toBeUndefined();
+    // 같은 모자를 다른 동물도 쓸 수 있다(설계 D9).
+    const both = equipHat({
+      progress: worn,
+      pet: 'dog',
+      hatId: 'hat-ribbon-pink',
+    });
+    expect(both.equipped).toEqual({
+      cat: 'hat-ribbon-pink',
+      dog: 'hat-ribbon-pink',
+    });
+  });
+
+  it('받지 않은 모자, 모자가 아닌 보상, 이미 같은 상태면 같은 객체(저장 안 함)', () => {
+    expect(
+      equipHat({ progress: earned, pet: 'cat', hatId: 'hat-crown-pink' }),
+    ).toBe(earned);
+    expect(
+      equipHat({ progress: earned, pet: 'cat', hatId: 'item-yarn-pink' }),
+    ).toBe(earned);
+    expect(equipHat({ progress: earned, pet: 'cat', hatId: undefined })).toBe(
+      earned,
+    );
+    const worn = equipHat({
+      progress: earned,
+      pet: 'cat',
+      hatId: 'hat-straw-sky',
+    });
+    expect(
+      equipHat({ progress: worn, pet: 'cat', hatId: 'hat-straw-sky' }),
+    ).toBe(worn);
+  });
+
+  it('벗기면 그 칸이 빠지고, 다 벗으면 필드가 없어진다', () => {
+    const worn = equipHat({
+      progress: earned,
+      pet: 'cat',
+      hatId: 'hat-straw-sky',
+    });
+    const bare = equipHat({ progress: worn, pet: 'cat', hatId: undefined });
+    expect(hatOf({ progress: bare, pet: 'cat' })).toBeUndefined();
+    expect(bare).not.toHaveProperty('equipped');
+  });
+
+  it('저장된 값이 모르는 모자·받지 않은 모자·모자가 아닌 보상이면 그리지 않는다(설계 D30)', () => {
+    const odd = {
+      ...earned,
+      equipped: {
+        cat: 'hat-from-the-future',
+        dog: 'hat-crown-pink',
+        rabbit: 'item-yarn-pink',
+      },
+    };
+    expect(hatOf({ progress: odd, pet: 'cat' })).toBeUndefined();
+    expect(hatOf({ progress: odd, pet: 'dog' })).toBeUndefined();
+    expect(hatOf({ progress: odd, pet: 'rabbit' })).toBeUndefined();
+    // 모르는 모자를 쓴 칸도 벗길 수는 있다.
+    expect(
+      equipHat({ progress: odd, pet: 'cat', hatId: undefined }).equipped,
+    ).toEqual({
+      dog: 'hat-crown-pink',
+      rabbit: 'item-yarn-pink',
+    });
   });
 });

@@ -9,17 +9,51 @@
 }
 
 .sheet {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: 480px;
   max-height: 92dvh;
-  overflow-y: auto;
-  gap: var(--space-4);
+  gap: var(--space-3);
   padding: var(--space-5) var(--space-4)
     calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
   border-radius: var(--radius-card) var(--radius-card) 0 0;
   background: var(--color-bg);
   animation: rise 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sheet:focus {
+  outline: none;
+}
+
+/* 위쪽(제목·미리보기·동물 줄)은 고정, 모자 칸만 스크롤한다(설계 D31). */
+.top {
+  display: grid;
+  flex: none;
+  gap: var(--space-2);
+}
+
+.preview {
+  display: flex;
+  justify-content: center;
+}
+
+.preview svg {
+  display: block;
+}
+
+.hats {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.hatsTitle {
+  margin: var(--space-1) 0 0;
+  color: var(--color-ink-soft);
+  font-size: 0.9375rem;
+  font-weight: 700;
 }
 
 .title {
@@ -31,10 +65,10 @@
   text-align: center;
 }
 
-.grid {
+.animals {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
 }
 
 .option {
@@ -42,7 +76,8 @@
   display: grid;
   justify-items: center;
   gap: 2px;
-  padding: var(--space-3) var(--space-2);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-1);
   border-radius: var(--radius-card);
   background: var(--color-surface);
   color: var(--color-ink);
@@ -72,13 +107,16 @@
 }
 
 .desc {
+  margin: 0;
   color: var(--color-ink-soft);
   font-size: 0.8125rem;
+  text-align: center;
   word-break: keep-all;
 }
 
 .done {
   composes: primary from '../styles/ui.module.css';
+  flex: none;
 }
 
 @keyframes rise {
@@ -89,8 +127,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sheet,
-  .munch {
+  .sheet {
     animation: none;
   }
 }

@@ -1,9 +1,10 @@
 // 골드·진행 규칙(spec "골드와 진행 저장", CLAUDE.md 골드). 진행 객체를 바꾸지 않고 새 객체를 돌려준다.
 import type { Progress, TopicProgress } from '../types/progress.ts';
+import type { PetId } from '../types/settings.ts';
 import type { HintType, QuizItem, QuizTopic } from '../types/quiz.ts';
 import { answerChars } from './answer.ts';
 import { revealAxisText } from './mbti.ts';
-import { rewardFor } from './rewards.ts';
+import { getReward, rewardFor, type Reward } from './rewards.ts';
 import { stageProgress, type Stage } from './stages.ts';
 
 export const PROGRESS_VERSION = 1;
@@ -231,4 +232,51 @@ export function markRewardsSeen({
 export function unseenRewards(progress: Progress): string[] {
   const seen = new Set(progress.seenRewards ?? []);
   return (progress.earnedRewards ?? []).filter((id) => !seen.has(id));
+}
+
+/** 받은 보상인지(기록된 것). */
+function isEarned(progress: Progress, id: string): boolean {
+  return (progress.earnedRewards ?? []).includes(id);
+}
+
+/** 이 동물이 쓰고 있는 모자. 모르는 id, 모자가 아닌 보상, 받지 않은 모자면 없음(설계 D30). */
+export function hatOf({
+  progress,
+  pet,
+}: {
+  progress: Progress;
+  pet: PetId;
+}): Reward | undefined {
+  const id = progress.equipped?.[pet];
+  if (id === undefined || !isEarned(progress, id)) return undefined;
+  const reward = getReward(id);
+  return reward?.kind === 'hat' ? reward : undefined;
+}
+
+/**
+ * 동물에게 모자를 씌운다(hatId가 없으면 벗긴다). 받은 모자만 씌울 수 있고,
+ * 받지 않았거나 모자가 아니거나 이미 그 상태면 같은 진행 객체를 돌려준다(저장하지 않게).
+ */
+export function equipHat({
+  progress,
+  pet,
+  hatId,
+}: {
+  progress: Progress;
+  pet: PetId;
+  hatId: string | undefined;
+}): Progress {
+  if (
+    hatId !== undefined &&
+    (getReward(hatId)?.kind !== 'hat' || !isEarned(progress, hatId))
+  ) {
+    return progress;
+  }
+  if (progress.equipped?.[pet] === hatId) return progress;
+  const equipped = { ...progress.equipped };
+  if (hatId === undefined) delete equipped[pet];
+  else equipped[pet] = hatId;
+  const next: Progress = { ...progress, equipped };
+  if (Object.keys(equipped).length === 0) delete next.equipped;
+  return next;
 }

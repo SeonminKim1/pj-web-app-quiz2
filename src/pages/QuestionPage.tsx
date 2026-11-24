@@ -30,7 +30,7 @@ import { useStagePlay } from '../hooks/useStagePlay.ts';
 import { EVENTS } from '../lib/analytics.ts';
 import { isCorrectAnswer } from '../lib/answer.ts';
 import { analytics } from '../lib/analyticsInstance.ts';
-import { solvedSet } from '../lib/progress.ts';
+import { hatOf, solvedSet } from '../lib/progress.ts';
 import {
   NICKNAME_MAX,
   bannerLines,
@@ -106,12 +106,17 @@ function RestingView({
   onStage: () => void;
 }): ReactElement {
   const { settings } = useSettings();
+  const { progress } = useProgress();
   return (
     <main className={pageStyles.page}>
       <div className={styles.resting}>
         {info.from && <Banner info={{ from: info.from }} />}
         <div className={styles.restingPest} aria-hidden="true">
-          <PetPortrait animal={settings.pet} mood="sulky" />
+          <PetPortrait
+            animal={settings.pet}
+            hat={hatOf({ progress, pet: settings.pet })}
+            mood="sulky"
+          />
           <span className={styles.restingZ}>z z</span>
         </div>
         <h1 className={styles.title}>
@@ -245,7 +250,11 @@ function Session({
         <section className={styles.result} aria-live="polite">
           <div className={styles.resultPet} aria-hidden="true">
             {/* 방해꾼은 내가 맞히면 삐지고, 포기하면 으쓱한다. */}
-            <PetPortrait animal={animal.id} mood={solved ? 'sulky' : 'smug'} />
+            <PetPortrait
+              animal={animal.id}
+              hat={hatOf({ progress, pet: animal.id })}
+              mood={solved ? 'sulky' : 'smug'}
+            />
             {/* 맞혔을 때만 반짝(한 번). */}
             {solved &&
               [0, 1, 2, 3].map((i) => (
@@ -315,6 +324,7 @@ function Session({
           line={pest.line}
           motion={pest.motion}
           animal={animal.id}
+          hat={hatOf({ progress, pet: animal.id })}
           fedId={pest.fedId}
           inviting={pest.inviting}
           avoidRef={questionRef}

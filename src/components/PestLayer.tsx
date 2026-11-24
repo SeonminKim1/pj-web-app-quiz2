@@ -1,3 +1,4 @@
+import type { Reward } from '../lib/rewards.ts';
 import {
   useEffect,
   useLayoutEffect,
@@ -26,6 +27,8 @@ type PestLayerProps = {
   children: ReactNode;
   /** 고른 방해꾼 동물. 기본 토끼. */
   animal?: PetId;
+  /** 그 동물이 쓰고 있는 모자(화면이 진행에서 골라 넘긴다, 설계 OV2-11). */
+  hat?: Reward | undefined;
   /** 간식을 먹은 횟수(바뀔 때마다 먹는 연출). */
   fedId?: number;
   /** "날 잡아서 끌어 봐" 중이면 끄는 손 모양을 보여 준다. */
@@ -57,6 +60,7 @@ export function PestLayer({
   motion,
   children,
   animal = 'rabbit',
+  hat,
   fedId = 0,
   inviting = false,
   avoidRef,
@@ -175,7 +179,7 @@ export function PestLayer({
             key={`${mood}-${fedId}`}
             className={mood === 'happy' ? styles.munch : styles.pop}
           >
-            <PetPortrait animal={animal} mood={mood} />
+            <PetPortrait animal={animal} mood={mood} hat={hat} />
           </div>
         </div>
         {fedId > 0 && <FeedEffect key={fedId} animal={animal} />}

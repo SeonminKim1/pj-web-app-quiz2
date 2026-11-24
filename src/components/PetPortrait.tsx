@@ -9,12 +9,16 @@
 // - 한쪽을 살짝 다르게(접힌 귀, 기운 꼬리) 해서 손으로 그린 느낌을 낸다.
 // 움직임(깜빡임·숨쉬기·착지)은 PestLayer의 CSS가 data-part를 보고 붙인다.
 import { useId, type ReactElement } from 'react';
+import { HatShape } from './RewardArt.tsx';
 import type { PestMood } from '../lib/pest.ts';
+import type { Reward } from '../lib/rewards.ts';
 import type { PetId } from '../types/settings.ts';
 
 type PetPortraitProps = {
   animal: PetId;
   mood?: PestMood;
+  /** 쓰고 있는 모자(설계 OV7). 내 동물 그림만 넘기고, 앱 아이콘·공유 카드는 넘기지 않는다. */
+  hat?: Reward | undefined;
   /** 얼굴만(앱 아이콘). 몸 아래쪽을 잘라 머리를 크게 보인다. */
   headOnly?: boolean;
   /** 다른 SVG 안에 넣을 때의 자리와 크기(앱 아이콘). */
@@ -324,6 +328,7 @@ function Front({ animal }: { animal: PetId }): ReactElement | null {
 export function PetPortrait({
   animal,
   mood = 'idle',
+  hat,
   headOnly = false,
   x,
   y,
@@ -394,6 +399,8 @@ export function PetPortrait({
         <Eyes mood={mood} />
         <Nose animal={animal} />
         <Mouth mood={mood} />
+        {/* 모자는 맨 나중에(귀·얼굴 위), 숨쉬기 묶음 안에 그려 같이 움직인다(설계 T1, OV2-1). */}
+        {hat && <HatShape reward={hat} />}
       </g>
     </svg>
   );

@@ -1,0 +1,70 @@
+.row {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.empty,
+.notice {
+  margin: 0;
+  color: var(--color-ink-soft);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.notice:empty {
+  display: none;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.tile {
+  composes: pressable from '../styles/ui.module.css';
+  display: grid;
+  min-height: 56px;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  padding: var(--space-1);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+}
+
+.tile[aria-checked='true'] {
+  background: var(--color-pink-soft);
+  outline: 3px solid var(--color-pink-strong);
+  outline-offset: -4px;
+}
+
+.tile:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.tile svg {
+  display: block;
+}
+
+.none {
+  font-family: var(--font-display);
+  font-synthesis: none;
+  font-weight: 800;
+}
+
+/* 받지 않은 모자: 스티커첩과 같은 흐린 모습(설계 D10). */
+.faded {
+  filter: var(--reward-faded);
+}
+
+.source {
+  color: var(--color-ink-soft);
+  font-size: 0.75rem;
+  font-weight: 700;
+  word-break: keep-all;
+}

@@ -2,6 +2,7 @@
 import { createContext } from 'react';
 import type { Stage } from '../lib/stages.ts';
 import type { Progress } from '../types/progress.ts';
+import type { PetId } from '../types/settings.ts';
 import type { QuizTopic } from '../types/quiz.ts';
 
 /** 진행 Context 값: 현재 진행과 바꾸는 동작. 동작은 바로 저장까지 한다. */
@@ -26,6 +27,8 @@ export type ProgressContextValue = {
   }) => void;
   /** 보상을 보여 준 것으로 기록. */
   markRewardsSeen: (ids: readonly string[]) => void;
+  /** 동물에게 받은 모자를 씌운다(hatId가 없으면 벗김). 받지 않은 모자는 무시한다. */
+  equipHat: (pet: PetId, hatId: string | undefined) => void;
 };
 
 export const ProgressContext = createContext<ProgressContextValue | undefined>(
