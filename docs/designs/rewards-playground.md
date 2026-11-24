@@ -757,7 +757,7 @@ Synthesized from this review's decisions. Each task derives from a decision abov
   +====================================================================+
 ```
 
-Unresolved design decisions: none. Still to do before PR ③: the yard redraw (D21, DT6).
+Unresolved design decisions: none. Still to do before PR ③: the yard redraw (D21, DT6) — done 2026-11-24, variant C approved (see "PR ③ yard mockup").
 
 ## T1 result: hats × animals (2026-11-20)
 
@@ -1204,6 +1204,21 @@ Synthesized from this review's findings. Each task derives from a specific findi
 - Outside voice: codex not installed; native Claude Plan subagent completed with 13 findings (7 corrections applied, 4 choices D29–D32 answered). This does not count as outside coverage.
 - Parallelization: 0 lanes, sequential
 - Lake Score: 1/1 (D27 was the only answer with completeness scores; the 10/10 option was picked, later superseded by D29)
+
+## PR ③ yard mockup (D21, 2026-11-24, branch feat/sticker-yard)
+
+`/design-shotgun` drew three layouts as HTML mockups, because there is no image API key. They use the app's real `PetPortrait` and `RewardArt` art at 360 × 780, and the files are in `~/.gstack/projects/web-app-quiz2/designs/yard-20261124/` (`variant-A/B/C.png`, `html/`, `approved.json`). The user approved **C** (2026-11-24).
+
+- A: the yard on top with tabs and a 2-column list below, all in one scrolling page.
+- B: the yard fixed on top with a half-open bottom drawer for the tabs. The mockup shows placing mode.
+- **C (approved):** a large yard (full width, about 300 px tall) with a tab bar fixed at the bottom of the screen ("내 물건 / 상점 / 모자", in thumb reach). The current tab's content is a row of cards above the bar that scrolls sideways. The mockup shows the shop tab: buyable, short of gold, owned (가짐 · 놓기) and placed (놓임), plus the "텐트를 샀어요 · 바로 놓기" notice above the bar.
+
+Amendments to D13 and D18 (D33, the user's answer to the design-shotgun confirmation, 2026-11-24):
+
+- D13: the three tabs stay, but they move to a fixed bottom bar, and each tab shows its items as a sideways-scrolling row of cards instead of a list under the yard.
+- D18: the yard is about 300 px tall at 360 px, larger than 3/4 of its width. The 3 × 2 cells, sky band and animals are unchanged.
+- D17 placing mode uses B's look on top of C. "어느 칸에 놓을까요?" + 취소 sits on the yard, empty cells show a dashed "+", and filled cells show "바꾸기".
+- The starter item (D14 "모래 놀이통") still needs a drawing (the mockup uses a placeholder). Shop items and prices in the mockup are examples only; the shop list and prices are still open.
 
 ## GSTACK REVIEW REPORT
 
