@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from 'react';
+import { useRef, useState, type ReactElement } from 'react';
 import { Link } from 'react-router';
 import { AppIcon } from '../components/AppIcon.tsx';
 import { PetPicker } from '../components/PetPicker.tsx';
@@ -31,6 +31,8 @@ export function HomePage(): ReactElement {
   const { settings, choosePet } = useSettings();
   const { progress } = useProgress();
   const [picking, setPicking] = useState(false);
+  // 시트를 닫으면 포커스를 방해꾼 버튼으로 되돌린다(useModalSheet: 되돌리기는 여는 쪽이 한다).
+  const petButtonRef = useRef<HTMLButtonElement>(null);
   // 칭호는 칭호 표가 있는 주제를 이어서 풀 때만.
   const title = next?.titles
     ? titleFor({ solved: next.solved, total: next.total, table: next.titles })
@@ -39,6 +41,7 @@ export function HomePage(): ReactElement {
     <main className={styles.page}>
       <header className={styles.hero}>
         <button
+          ref={petButtonRef}
           type="button"
           className={styles.heroPet}
           aria-label={`방해꾼 바꾸기, 지금 ${getPestAnimal(settings.pet).label}`}
@@ -163,7 +166,10 @@ export function HomePage(): ReactElement {
         <PetPicker
           current={settings.pet}
           onChoose={choosePet}
-          onClose={() => setPicking(false)}
+          onClose={() => {
+            setPicking(false);
+            petButtonRef.current?.focus();
+          }}
         />
       )}
     </main>

@@ -269,3 +269,14 @@ it('Tab은 시트 안에서만 돈다', async () => {
     within(sheet).getByRole('button', { name: '다 골랐어요' }),
   );
 });
+
+// Value: protects=시트를 닫으면 포커스가 첫 화면 방해꾼 버튼으로 돌아온다(useModalSheet 계약, red-team p1#1); fails_when=HomePage가 닫을 때 포커스를 되돌리지 않아 body로 떨어지면; why_new=닫은 뒤 포커스를 보는 테스트가 없음; seam=none; no_claim=스크린 리더 가상 커서
+it('시트를 닫으면 포커스가 방해꾼 버튼으로 돌아온다', async () => {
+  mockTopicFiles();
+  const user = renderHome();
+  await openSheet(user);
+  await user.keyboard('{Escape}');
+  expect(
+    screen.getByRole('button', { name: '방해꾼 바꾸기, 지금 토끼' }),
+  ).toHaveFocus();
+});
