@@ -8,7 +8,7 @@ import {
   findStageTopic,
   isEnterableTopicId,
 } from '../lib/quizTopics.ts';
-import type { QuizTopic } from '../types/quiz.ts';
+import type { QuizTopic, TitleTable } from '../types/quiz.ts';
 import { useProgress } from './useProgress.ts';
 import { useManifest, type LoadState } from './useQuizData.ts';
 import { useSettings } from './useSettings.ts';
@@ -40,9 +40,9 @@ export type HomePageView = {
 
 /** 첫 화면의 "이어서 풀기". */
 type ContinueView = {
-  /** 이어서 풀 주제(이름, 칭호를 주는지). */
+  /** 이어서 풀 주제(이름, 칭호 표: 없으면 칭호 없음). */
   topicLabel: string;
-  titles: boolean;
+  titles: TitleTable | undefined;
   /** 못 푼 문제가 남은 첫 판(스테이지·카테고리) 번호와 이름. 다 풀었으면 undefined. */
   stageNo: number | undefined;
   stageName: string | undefined;

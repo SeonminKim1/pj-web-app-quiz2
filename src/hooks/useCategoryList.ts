@@ -1,20 +1,12 @@
-// 카테고리 목록 hook: 주제 파일 + 진행 → 카테고리 칸 표시값.
+// 카테고리 목록 hook: 주제 파일 + 진행 → 스티커첩(칭호 카드 + 카테고리 칸).
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { solvedSet } from '../lib/progress.ts';
-import { stageProgress } from '../lib/stages.ts';
+import { buildAlbum, type Album } from '../lib/album.ts';
+import { unseenRewards } from '../lib/progress.ts';
+import { rewardIdsOf } from '../lib/rewards.ts';
 import { useProgress } from './useProgress.ts';
 import type { LoadState } from './useQuizData.ts';
 import { useTopicCategories } from './useTopicCategories.ts';
-
-/** 카테고리 칸 하나의 표시값. */
-export type CategoryCellView = {
-  no: number;
-  name: string;
-  solvedCount: number;
-  total: number;
-  completed: boolean;
-};
 
 /** 카테고리 목록 상태와 동작. */
 export type CategoryListView = {
@@ -22,8 +14,12 @@ export type CategoryListView = {
   /** 4축 고르기 주제면 ⓘ MBTI 설명을 보여 준다. */
   showMbtiGuide: boolean;
   gold: number;
-  state: LoadState<CategoryCellView[]>;
+  state: LoadState<Album>;
   retry: () => void;
+  /** 받았지만 아직 보여 주지 않은 보상("그동안 모은 스티커" 시트, D8). */
+  unseen: string[];
+  /** 시트를 닫으면 본 것으로 기록. */
+  closeUnseen: () => void;
   openCategory: (no: number) => void;
   goHome: () => void;
 };
@@ -33,18 +29,23 @@ export function useCategoryList(): CategoryListView {
   const navigate = useNavigate();
   const { topicId } = useParams();
   const { state: loaded, retry, topic } = useTopicCategories(topicId);
-  const { progress } = useProgress();
+  const { progress, markRewardsSeen } = useProgress();
+  // 이 주제 스티커첩에 붙는 것만(다른 주제 스티커는 그 주제 목록에서 보여 준다).
+  const unseen = useMemo(() => {
+    if (!topic) return [];
+    const own = rewardIdsOf(topic);
+    return unseenRewards(progress).filter((id) => own.has(id));
+  }, [progress, topic]);
 
-  const state = useMemo<LoadState<CategoryCellView[]>>(() => {
+  const state = useMemo<LoadState<Album>>(() => {
     if (loaded.status !== 'ready') return loaded;
-    const solved = solvedSet({ progress, topicId: loaded.data.topic.id });
     return {
       status: 'ready',
-      data: loaded.data.categories.map((category) => ({
-        no: category.no,
-        name: category.name,
-        ...stageProgress({ stage: category, solved }),
-      })),
+      data: buildAlbum({
+        topic: loaded.data.topic,
+        rounds: loaded.data.categories,
+        progress,
+      }),
     };
   }, [loaded, progress]);
 
@@ -54,6 +55,9 @@ export function useCategoryList(): CategoryListView {
     gold: progress.gold,
     state,
     retry,
+    // 목록이 다 읽힌 뒤에만(보상을 막 기록한 뒤) 보여 준다.
+    unseen: state.status === 'ready' ? unseen : [],
+    closeUnseen: () => markRewardsSeen(unseen),
     // 목록에서 들어간 보드는 "← 목록"을 누르면 뒤로 돌아온다(기록이 쌓이지 않게).
     openCategory: (no) =>
       void navigate(`/topics/${topic?.id ?? ''}/categories/${no}`, {

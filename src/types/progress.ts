@@ -22,4 +22,8 @@ export type Progress = {
   topics: Record<string, TopicProgress>;
   /** 북마크(선택 필드). 주제를 섞은 하나의 목록, 북마크한 순서(뒤가 최근). 없으면 빈 목록. */
   bookmarks?: Bookmark[];
+  /** 받은 보상 id(선택 필드, src/lib/rewards.ts). 한 번 받으면 빼앗지 않는다. 받은 순서. */
+  earnedRewards?: string[];
+  /** 사용자에게 보여 준 보상 id(선택 필드). 결과 카드나 "그동안 모은 스티커" 시트로 본 것. */
+  seenRewards?: string[];
 };

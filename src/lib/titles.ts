@@ -1,21 +1,8 @@
-// 칭호: 넌센스에서 맞힌 문제 수로 정한다. 마지막 칭호는 전부 맞혔을 때.
-
-type Title = { name: string; min: number };
-
-const TITLES: readonly Title[] = [
-  { name: '넌센스 새싹', min: 0 },
-  { name: '말장난 꿈나무', min: 10 },
-  { name: '웃음 사냥꾼', min: 30 },
-  { name: '센스 장인', min: 60 },
-  { name: '아재개그 박사', min: 120 },
-  { name: '넌센스 달인', min: 250 },
-  { name: '넌센스 전설', min: 400 },
-];
-
-export const MASTER_TITLE = '넌센스 정복자';
+// 칭호: 맞힌 문제 수로 정한다. 칭호 표는 주제 설정(quizTopics.ts의 titles)에 있다. 마지막 칭호는 전부 맞혔을 때.
+import type { TitleTable } from '../types/quiz.ts';
 
 export type TitleView = {
-  /** 0부터. 전부 맞히면 TITLES.length(정복자). */
+  /** 0부터. 전부 맞히면 levels.length(마스터). */
   level: number;
   name: string;
   /** 다음 칭호 이름과 거기까지 남은 문제 수(마지막이면 없음). */
@@ -25,20 +12,23 @@ export type TitleView = {
 export function titleFor({
   solved,
   total,
+  table,
 }: {
   solved: number;
   total: number;
+  table: TitleTable;
 }): TitleView {
+  const { levels, master } = table;
   if (total > 0 && solved >= total) {
-    return { level: TITLES.length, name: MASTER_TITLE, next: undefined };
+    return { level: levels.length, name: master, next: undefined };
   }
   let level = 0;
-  TITLES.forEach((title, i) => {
+  levels.forEach((title, i) => {
     if (solved >= title.min) level = i;
   });
-  const following = TITLES[level + 1];
+  const following = levels[level + 1];
   const next = following
     ? { name: following.name, remaining: following.min - solved }
-    : { name: MASTER_TITLE, remaining: Math.max(0, total - solved) };
-  return { level, name: TITLES[level]!.name, next };
+    : { name: master, remaining: Math.max(0, total - solved) };
+  return { level, name: levels[level]!.name, next };
 }

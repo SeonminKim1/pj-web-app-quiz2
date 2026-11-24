@@ -29,7 +29,7 @@ export function PrivacyPage(): ReactElement {
 
         <h2>기기에만 저장하는 정보</h2>
         <ul>
-          <li>푼 문제, 골드, 연 힌트 같은 진행 상황</li>
+          <li>푼 문제, 골드, 연 힌트, 받은 스티커 같은 진행 상황</li>
           <li>고른 방해꾼, 소리·음악·움직임 줄이기 같은 설정</li>
           <li>친구한테 문제를 낼 때 적은 닉네임</li>
         </ul>

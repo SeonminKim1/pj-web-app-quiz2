@@ -475,7 +475,7 @@ describe('리뷰 반영', () => {
     await user.click(screen.getByRole('button', { name: '다시 풀어 보기' }));
     expect(
       await screen.findByRole('button', {
-        name: /^스테이지 1, 10문제 중 10문제 풂, 완료/,
+        name: /^스테이지 1, 10문제 중 10문제 풂, 분홍 리본 받음/,
       }),
     ).toBeInTheDocument();
   });
@@ -535,5 +535,202 @@ describe('방해꾼', () => {
     expect(
       screen.queryByRole('button', { name: '방해꾼 쫓아내기' }),
     ).not.toBeInTheDocument();
+  });
+});
+
+// Value: protects=판을 다 푼 순간 결과 화면 제목 아래에 "새 보상!" 카드가 한 번 뜨고(D6), 본 것으로 기록돼 목록에서 "모은 스티커" 시트가 다시 뜨지 않는다; fails_when=풀이 화면이 맞힐 때 보상을 먼저 기록해 카드가 사라지거나(OV2), 본 표시를 안 남기면; why_new=보상 카드가 새로 생김; seam=none; no_claim=붙는 움직임·효과음
+describe('스티커 보상', () => {
+  it('스테이지를 다 풀면 새 보상 카드, 목록 칸은 받은 스티커', async () => {
+    const user = renderAt('/topics/nonsense/stages/2');
+    await screen.findByText('지구가 제일 힘들었던 시기는?');
+    await typeAnswer(user, '고생대');
+    await clickAdvance(user, '다음 ›');
+    await typeAnswer(user, '참새');
+    await clickAdvance(user, '결과 보기 ›');
+    const result = screen.getByRole('region', { name: '스테이지 결과' });
+    expect(result).toHaveTextContent(
+      '새 보상!분홍 털실 공놀이터 물건스티커첩 2번 칸에 붙었어요',
+    );
+    // 처음엔 빈 읽기 칸에 다음 차례에 글을 넣어야 화면 읽기 프로그램이 읽는다.
+    await waitFor(() =>
+      expect(within(result).getByRole('status')).toHaveTextContent(
+        '새 보상 분홍 털실 공',
+      ),
+    );
+    expect(store.load()).toMatchObject({
+      earnedRewards: ['item-yarn-pink'],
+      seenRewards: ['item-yarn-pink'],
+    });
+
+    await user.click(within(result).getByRole('button', { name: '목록으로' }));
+    expect(
+      await screen.findByRole('button', {
+        name: /^스테이지 2, 2문제 중 2문제 풂, 분홍 털실 공 받음/,
+      }),
+    ).toHaveAttribute('data-flash', 'true');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('이미 받은 스테이지를 다시 풀면 보상 카드가 없다', async () => {
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: { nonsense: { solved: ['11', '12'], hintsOpened: {} } },
+      earnedRewards: ['item-yarn-pink'],
+      seenRewards: ['item-yarn-pink'],
+    });
+    const user = renderAt('/topics/nonsense/stages/2');
+    await screen.findByText('지구가 제일 힘들었던 시기는?');
+    await typeAnswer(user, '고생대');
+    await clickAdvance(user, '다음 ›');
+    await typeAnswer(user, '참새');
+    await clickAdvance(user, '결과 보기 ›');
+    const result = screen.getByRole('region', { name: '스테이지 결과' });
+    expect(result).toHaveTextContent('스테이지 완료!');
+    expect(within(result).queryByText('새 보상!')).not.toBeInTheDocument();
+  });
+
+  // Value: protects=업데이트 전부터 푼 사용자는 목록을 처음 열 때 "그동안 모은 스티커" 시트를 한 번 보고, 확인하면 다시 안 뜬다(D8); fails_when=보상을 기록하지 않거나(시트 없음) 확인을 본 것으로 남기지 않으면(매번 뜸); why_new=새 시트; seam=none; no_claim=시트 그림 줄 모양
+  it('예전에 푼 스테이지의 보상은 목록에서 한 번 모아 보여 준다', async () => {
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {
+        nonsense: {
+          solved: Array.from({ length: 10 }, (_, i) => String(i + 1)),
+          hintsOpened: {},
+        },
+      },
+    });
+    const user = renderAt('/topics/nonsense');
+    const sheet = await screen.findByRole('dialog', {
+      name: '그동안 모은 스티커 1장을 받았어요',
+    });
+    expect(within(sheet).getByRole('img')).toHaveAccessibleName('분홍 리본');
+    await user.click(within(sheet).getByRole('button', { name: '확인' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(store.load()).toMatchObject({
+      earnedRewards: ['hat-ribbon-pink'],
+      seenRewards: ['hat-ribbon-pink'],
+    });
+    expect(
+      screen.getByRole('button', { name: /^스테이지 1, .*분홍 리본 받음/ }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('스티커 1 / 2장')).toBeInTheDocument();
+  });
+
+  // Value: protects=판을 끝낸 순간 칭호가 올랐으면 결과 화면에 "새 칭호: 말장난 꿈나무" 줄이 보인다; fails_when=StageResult에 newTitle을 넘기지 않거나 칭호 비교를 풀이 전후가 아닌 값으로 하면; why_new=칭호 테스트는 풀이 화면 알림(TitleToast)만 봄; seam=none; no_claim=칭호가 안 바뀐 판에서 줄이 없는지
+  it('판을 끝내며 칭호가 오르면 결과 화면에 새 칭호 줄', async () => {
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {
+        nonsense: {
+          solved: Array.from({ length: 9 }, (_, i) => String(i + 1)),
+          hintsOpened: {},
+        },
+      },
+    });
+    const user = renderAt('/topics/nonsense/stages/1');
+    await screen.findByText('문제 10');
+    await typeAnswer(user, '정답10');
+    await clickAdvance(user, '결과 보기 ›');
+    const result = screen.getByRole('region', { name: '스테이지 결과' });
+    expect(result).toHaveTextContent('새 칭호: 말장난 꿈나무');
+  });
+
+  // Value: protects=보상을 받은 판에 문제가 늘어 덜 푼 상태가 되면 목록 칸이 받은 스티커를 유지하며 "새 문제 N개"를 보이고 읽어 준다(D4); fails_when=earned를 지금 다 풀었는지만으로 계산하거나(스티커가 사라짐) 늘어난 문제 수 표시를 빠뜨리면; why_new=목록 칸 테스트는 다 푼 칸·처음 칸만 봄; seam=none; no_claim=칸 배치·색
+  it('받은 판에 문제가 늘면 칸에 받은 스티커와 "새 문제 1개"', async () => {
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {
+        nonsense: {
+          solved: Array.from({ length: 9 }, (_, i) => String(i + 1)),
+          hintsOpened: {},
+        },
+      },
+      earnedRewards: ['hat-ribbon-pink'],
+      seenRewards: ['hat-ribbon-pink'],
+    });
+    renderAt('/topics/nonsense');
+    const cell = await screen.findByRole('button', { name: /^스테이지 1,/ });
+    expect(cell).toHaveAccessibleName(
+      expect.stringContaining('분홍 리본 받음'),
+    );
+    expect(cell).toHaveAccessibleName(expect.stringContaining('새 문제 1개'));
+    expect(within(cell).getByText('새 문제 1개')).toBeInTheDocument();
+  });
+
+  // Value: protects=새 보상 칸 반짝임은 결과 화면에서 돌아온 첫 목록에서만 나고, 다시 목록에 오면 나지 않는다(D7); fails_when=StickerAlbum이 반짝임 값을 쓰고 지우지 않으면(목록에 올 때마다 반짝임); why_new=기존 테스트는 첫 반짝임만 봄; seam=none; no_claim=반짝임 애니메이션 모양
+  it('새 보상 칸 반짝임은 한 번만', async () => {
+    const user = renderAt('/topics/nonsense/stages/2');
+    await screen.findByText('지구가 제일 힘들었던 시기는?');
+    await typeAnswer(user, '고생대');
+    await clickAdvance(user, '다음 ›');
+    await typeAnswer(user, '참새');
+    await clickAdvance(user, '결과 보기 ›');
+    const result = screen.getByRole('region', { name: '스테이지 결과' });
+    await user.click(within(result).getByRole('button', { name: '목록으로' }));
+    const cellName = /^스테이지 2, 2문제 중 2문제 풂, 분홍 털실 공 받음/;
+    expect(
+      await screen.findByRole('button', { name: cellName }),
+    ).toHaveAttribute('data-flash', 'true');
+
+    await user.click(screen.getByRole('button', { name: /^스테이지 1,/ }));
+    await screen.findByText('문제 1');
+    await user.click(screen.getByRole('button', { name: /목록/ }));
+    expect(
+      await screen.findByRole('button', { name: cellName }),
+    ).toHaveAttribute('data-flash', 'false');
+  });
+});
+
+// Value: protects=목록을 거치지 않고 다음 스테이지로 가면 지난 판의 반짝임이 나중 목록에서 다시 나오지 않는다(D7, 리뷰 지적 rewardFlash.ts:3); fails_when=새 세션이 남은 반짝임을 지우지 않으면(다음 판을 하다 목록에 가면 지난 칸이 반짝임); why_new=기존 반짝임 테스트는 바로 목록으로 가는 길만 봄; seam=none; no_claim=CSS 애니메이션
+describe('반짝임 정리', () => {
+  it('다음 스테이지로 바로 가면 지난 판 칸은 반짝이지 않는다', async () => {
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {
+        nonsense: {
+          solved: Array.from({ length: 9 }, (_, i) => String(i + 1)),
+          hintsOpened: {},
+        },
+      },
+      earnedRewards: [],
+      seenRewards: [],
+    });
+    const user = renderAt('/topics/nonsense/stages/1');
+    await screen.findByText('문제 10');
+    await typeAnswer(user, '정답10');
+    await clickAdvance(user, '결과 보기 ›');
+    const result = screen.getByRole('region', { name: '스테이지 결과' });
+    expect(result).toHaveTextContent('분홍 리본');
+    await user.click(
+      within(result).getByRole('button', { name: '다음 스테이지' }),
+    );
+    await screen.findByText('지구가 제일 힘들었던 시기는?');
+    await user.click(screen.getByRole('button', { name: '스테이지 목록' }));
+    expect(
+      await screen.findByRole('button', { name: /^스테이지 1,/ }),
+    ).toHaveAttribute('data-flash', 'false');
+  });
+});
+
+// Value: protects=넌센스 목록의 "모은 스티커" 시트는 넌센스 스티커만 보이고 다른 주제 스티커를 본 것으로 처리하지 않는다(리뷰 지적 useStageList.ts:30); fails_when=시트가 주제 구분 없이 안 본 보상을 모두 보이면; why_new=시트 테스트는 한 주제만 씀; seam=none; no_claim=MBTI 목록 쪽 시트(같은 필터)
+describe('모은 스티커 시트의 주제', () => {
+  it('다른 주제(MBTI) 스티커만 남았으면 넌센스 목록에 시트가 뜨지 않는다', async () => {
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {},
+      earnedRewards: ['hat-straw-sky'],
+      seenRewards: [],
+    });
+    renderAt('/topics/nonsense');
+    await screen.findByRole('button', { name: /^스테이지 1,/ });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(store.load().seenRewards).toEqual([]);
   });
 });

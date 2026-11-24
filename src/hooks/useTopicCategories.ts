@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { AppError, ErrorCode } from '../errors/AppError.ts';
 import { buildCategories, type Category } from '../lib/categories.ts';
 import { findCategoryTopic, type CategoryTopic } from '../lib/quizTopics.ts';
+import { useClaimRewards } from './useClaimRewards.ts';
 import {
   useTopicFile,
   type LoadResult,
@@ -37,5 +38,14 @@ export function useTopicCategories(
       },
     };
   }, [fileState, topic]);
+  useClaimRewards(
+    useMemo(
+      () =>
+        state.status === 'ready'
+          ? { topic: state.data.topic, rounds: state.data.categories }
+          : undefined,
+      [state],
+    ),
+  );
   return { state, retry, topic };
 }

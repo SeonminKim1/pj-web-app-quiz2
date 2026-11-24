@@ -3,21 +3,25 @@ import { useEffect, useRef, useState } from 'react';
 import { solvedSet } from '../lib/progress.ts';
 import { playCue } from '../lib/sound.ts';
 import { titleFor } from '../lib/titles.ts';
+import type { TitleTable } from '../types/quiz.ts';
 import { useProgress } from './useProgress.ts';
 
 export function useTitleUp({
   topicId,
   total,
-  enabled = true,
+  table,
 }: {
   topicId: string;
   total: number;
-  /** 칭호가 없는 주제면 false(아무것도 보이지 않음). */
-  enabled?: boolean;
+  /** 주제의 칭호 표. 없으면 아무것도 보이지 않는다. */
+  table: TitleTable | undefined;
 }): string | undefined {
   const { progress } = useProgress();
   const solved = solvedSet({ progress, topicId }).size;
-  const title = titleFor({ solved, total });
+  const enabled = table !== undefined;
+  const title = table
+    ? titleFor({ solved, total, table })
+    : { level: 0, name: '' };
   const previous = useRef(title.level);
   const [shown, setShown] = useState<string>();
   useEffect(() => {

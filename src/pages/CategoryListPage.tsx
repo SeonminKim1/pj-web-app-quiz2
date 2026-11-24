@@ -1,16 +1,26 @@
 import { SettingsButton } from '../components/SettingsButton.tsx';
 import type { ReactElement } from 'react';
-import { CategoryGrid } from '../components/CategoryGrid.tsx';
 import { DataErrorView } from '../components/DataErrorView.tsx';
 import { MbtiGuideButton } from '../components/MbtiGuide.tsx';
 import { GoldBadge, LoadingView } from '../components/StatusViews.tsx';
+import { StickerAlbum } from '../components/StickerAlbum.tsx';
+import { CollectedSheet } from '../components/CollectedSheet.tsx';
 import { useCategoryList } from '../hooks/useCategoryList.ts';
 import styles from './Page.module.css';
 
 /** 카테고리 목록: 카테고리마다 진행률·완료, 잠금 없이 아무 카테고리나 고른다. */
 export function CategoryListPage(): ReactElement {
-  const { label, showMbtiGuide, gold, state, retry, openCategory, goHome } =
-    useCategoryList();
+  const {
+    label,
+    showMbtiGuide,
+    gold,
+    state,
+    retry,
+    unseen,
+    closeUnseen,
+    openCategory,
+    goHome,
+  } = useCategoryList();
   return (
     <main className={styles.page}>
       <header className={styles.header}>
@@ -33,7 +43,15 @@ export function CategoryListPage(): ReactElement {
         <DataErrorView error={state.error} onRetry={retry} onHome={goHome} />
       )}
       {state.status === 'ready' && (
-        <CategoryGrid categories={state.data} onSelect={openCategory} />
+        <StickerAlbum
+          album={state.data}
+          size="large"
+          verb="맞힘"
+          onSelect={openCategory}
+        />
+      )}
+      {unseen.length > 0 && (
+        <CollectedSheet rewardIds={unseen} onClose={closeUnseen} />
       )}
     </main>
   );

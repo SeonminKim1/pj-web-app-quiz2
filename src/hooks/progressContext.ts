@@ -1,6 +1,8 @@
 // 진행 Context 정의(Provider는 src/App.tsx, 상태는 useProgressState.ts).
 import { createContext } from 'react';
+import type { Stage } from '../lib/stages.ts';
 import type { Progress } from '../types/progress.ts';
+import type { QuizTopic } from '../types/quiz.ts';
 
 /** 진행 Context 값: 현재 진행과 바꾸는 동작. 동작은 바로 저장까지 한다. */
 export type ProgressContextValue = {
@@ -17,6 +19,13 @@ export type ProgressContextValue = {
     step: number;
     paid: boolean;
   }) => boolean;
+  /** 다 푼 판의 보상을 받은 것으로 기록(새로 받은 게 없으면 저장하지 않음). */
+  claimRewards: (args: {
+    topic: QuizTopic;
+    rounds: readonly (Stage & { name?: string })[];
+  }) => void;
+  /** 보상을 보여 준 것으로 기록. */
+  markRewardsSeen: (ids: readonly string[]) => void;
 };
 
 export const ProgressContext = createContext<ProgressContextValue | undefined>(

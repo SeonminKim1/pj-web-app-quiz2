@@ -1,4 +1,5 @@
 import type { PlayMode, QuizTopic, QuizTopicId } from '../types/quiz.ts';
+import { MBTI_REWARDS, NONSENSE_REWARDS } from './rewards.ts';
 
 /** 퀴즈 데이터 JSON 형식 버전. 필드 의미가 바뀌면 올리고, 앱은 다른 버전이면 에러 화면을 보여 준다. */
 export const QUIZ_DATA_VERSION = 1;
@@ -21,7 +22,19 @@ export const QUIZ_TOPICS: readonly QuizTopic[] = [
       { type: 'text', paid: true },
     ],
     round: { byCategory: false, stageSize: 10 },
-    titles: true,
+    titles: {
+      levels: [
+        { name: '넌센스 새싹', min: 0 },
+        { name: '말장난 꿈나무', min: 10 },
+        { name: '웃음 사냥꾼', min: 30 },
+        { name: '센스 장인', min: 60 },
+        { name: '아재개그 박사', min: 120 },
+        { name: '넌센스 달인', min: 250 },
+        { name: '넌센스 전설', min: 400 },
+      ],
+      master: '넌센스 정복자',
+    },
+    rewards: { byStage: NONSENSE_REWARDS },
     share: { prefix: 'q', card: 'question' },
   },
   {
@@ -36,7 +49,18 @@ export const QUIZ_TOPICS: readonly QuizTopic[] = [
     ],
     // 카테고리 하나(16유형이 한 번씩)가 한 스테이지.
     round: { byCategory: true, size: 16 },
-    titles: false,
+    titles: {
+      levels: [
+        { name: '성향 구경꾼', min: 0 },
+        { name: '눈치 새내기', min: 10 },
+        { name: '성향 탐정', min: 25 },
+        { name: '유형 감별사', min: 45 },
+        { name: '마음 읽기 고수', min: 70 },
+        { name: '성격 박사', min: 95 },
+      ],
+      master: 'MBTI 마스터',
+    },
+    rewards: { byCategory: MBTI_REWARDS },
     // 문제 문장이 길어(69~90자) 카드에 들어가지 않으므로 MBTI 공통 카드를 쓴다.
     share: { prefix: 'm', card: 'topic' },
   },

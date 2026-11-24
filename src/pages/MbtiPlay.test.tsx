@@ -117,7 +117,7 @@ describe('MBTI 카테고리 목록', () => {
   it('카테고리마다 진행률을 보이고, ⓘ로 MBTI 설명을 연다', async () => {
     const user = renderAt('/topics/mbti');
     const daily = await screen.findByRole('button', {
-      name: '일상, 16문제 중 0문제 맞힘',
+      name: '일상, 16문제 중 0문제 맞힘, 받을 보상 하늘 밀짚모자, 지금 차례',
     });
     expect(daily).toBeInTheDocument();
 
@@ -334,9 +334,10 @@ describe('MBTI 풀이(카테고리 = 스테이지)', () => {
       name: '이어서 풀기 · 연애',
     });
     expect(screen.getByText('MBTI · 연애 차례예요')).toBeInTheDocument();
-    // Value: protects=MBTI(titles: false)를 이어서 풀 때 첫 화면 카드에 넌센스 칭호가 나오지 않는다; fails_when=HomePage가 next?.titles 확인 없이 아무 주제에나 titleFor를 그리면(16문제면 말장난 꿈나무); why_new=칭호 숨김을 보는 테스트가 없음; seam=none; no_claim=풀이 중 칭호 알림(MBTI 칭호 테스트가 봄)
+    // Value: protects=MBTI를 이어서 풀 때 첫 화면 카드에 넌센스가 아닌 MBTI 칭호 표의 칭호가 나온다; fails_when=HomePage가 주제의 칭호 표 대신 넌센스 표를 쓰면(16문제면 말장난 꿈나무); why_new=칭호 표가 주제 설정으로 옮겨짐; seam=none; no_claim=풀이 중 칭호 알림(MBTI 칭호 테스트가 봄)
+    expect(screen.getByText('눈치 새내기')).toBeInTheDocument();
+    expect(screen.getByText('성향 탐정까지 9문제')).toBeInTheDocument();
     expect(screen.queryByText('말장난 꿈나무')).not.toBeInTheDocument();
-    expect(screen.queryByText(/까지 \d+문제$/)).not.toBeInTheDocument();
     await user.click(go);
     expect(await screen.findByText(/연애 · 1 \/ 16/)).toBeInTheDocument();
   });
@@ -377,11 +378,35 @@ describe('MBTI 카테고리 끝까지', () => {
     );
     expect(await screen.findByText(/연애 · 1 \/ 16/)).toBeInTheDocument();
   });
+
+  // Value: protects=MBTI 카테고리(일상)를 다 풀면 결과 화면에 카테고리 이름으로 정한 보상(하늘 밀짚모자) 카드가 뜨고 "일상 칸"에 붙으며 earnedRewards에 기록된다; fails_when=MBTI 보상 표를 카테고리 이름이 아닌 번호로 찾거나(보상 없음·엇갈림) stickerSpot에 번호를 넘기거나 기록을 빠뜨리면; why_new=보상 카드 테스트는 넌센스 스테이지만 봄; seam=none; no_claim=연애 등 다른 카테고리 보상, 붙는 움직임
+  it('일상을 다 풀면 하늘 밀짚모자 보상 카드가 뜨고 기록된다', async () => {
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {
+        mbti: {
+          solved: Array.from({ length: 15 }, (_, i) => String(i + 1)),
+          hintsOpened: {},
+        },
+      },
+    });
+    const user = renderAt('/topics/mbti/categories/1');
+    expect(await screen.findByText(/일상 · 16 \/ 16/)).toBeInTheDocument();
+    await pick(user, 'ENTJ');
+    await user.click(screen.getByRole('button', { name: '확인' }));
+    expect(await screen.findByText(/정답! ENTJ/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '결과 보기' }));
+    const result = await screen.findByRole('region', { name: '스테이지 결과' });
+    expect(result).toHaveTextContent('하늘 밀짚모자');
+    expect(result).toHaveTextContent('스티커첩 일상 칸에 붙었어요');
+    expect(store.load().earnedRewards).toContain('hat-straw-sky');
+  });
 });
 
-// Value: protects=칭호가 없는 주제(titles:false)는 맞혀도 칭호 알림이 안 뜬다; fails_when=StagePlayPage가 useTitleUp에 enabled를 넘기지 않거나 useTitleUp이 enabled를 무시하면("새 칭호! 말장난 꿈나무"가 MBTI에 뜸); why_new=기존 MBTI 테스트는 10문제 문턱을 넘지 않음; seam=none; no_claim=넌센스 칭호 표시
+// Value: protects=MBTI는 자기 칭호 표로 칭호가 오른다(10문제째 "눈치 새내기"); fails_when=StagePlayPage가 useTitleUp에 주제의 칭호 표를 넘기지 않거나 넌센스 표를 쓰면; why_new=MBTI 칭호가 새로 생김(D25); seam=none; no_claim=넌센스 칭호 표시
 describe('MBTI 칭호', () => {
-  it('10문제째를 맞혀도 넌센스 칭호 알림을 띄우지 않는다', async () => {
+  it('10문제째를 맞히면 MBTI 칭호 알림(눈치 새내기)을 띄운다', async () => {
     store.save({
       version: 1,
       gold: 30,
@@ -398,7 +423,9 @@ describe('MBTI 칭호', () => {
     await user.click(screen.getByRole('button', { name: '확인' }));
     expect(await screen.findByText(/정답! ESFP/)).toBeInTheDocument();
     expect(store.load().topics.mbti?.solved).toHaveLength(10);
-    expect(screen.queryByText('새 칭호!')).not.toBeInTheDocument();
+    expect(await screen.findByText('새 칭호!')).toBeInTheDocument();
+    expect(screen.getByText('눈치 새내기')).toBeInTheDocument();
+    expect(screen.queryByText('말장난 꿈나무')).not.toBeInTheDocument();
   });
 });
 
