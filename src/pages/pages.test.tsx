@@ -610,6 +610,33 @@ describe('스티커 보상', () => {
     expect(store.load().equipped).toEqual({ rabbit: 'hat-crown-sky' });
   });
 
+  // Value: protects=물건 보상 카드의 "놀이터에 놓기"가 그 물건을 놓는 놀이터로 간다(D6, F7); fails_when=버튼이 없거나 놀이터가 놓기 모드로 열리지 않으면; why_new=놀이터 입구가 새로 생김; seam=none; no_claim=뒤로 가기 동작
+  it('물건 카드의 놀이터에 놓기는 그 물건을 놓는 놀이터로 간다', async () => {
+    const user = renderAt('/topics/nonsense/stages/2');
+    await screen.findByText('지구가 제일 힘들었던 시기는?');
+    await typeAnswer(user, '고생대');
+    await clickAdvance(user, '다음 ›');
+    await typeAnswer(user, '참새');
+    await clickAdvance(user, '결과 보기 ›');
+    const result = screen.getByRole('region', { name: '스테이지 결과' });
+    await user.click(
+      within(result).getByRole('button', { name: '놀이터에 놓기' }),
+    );
+    const yard = await screen.findByRole('region', { name: '놀이터 마당' });
+    expect(within(yard).getByRole('status')).toHaveTextContent(
+      '어느 칸에 놓을까요?',
+    );
+    await user.click(
+      within(yard).getByRole('button', {
+        name: '칸 3, 비어 있음, 여기에 놓기',
+      }),
+    );
+    expect(store.load().placed).toEqual({
+      '0': 'big-sandbox',
+      '2': 'item-yarn-pink',
+    });
+  });
+
   it('놀이터 물건 카드에는 씌우기가 없다', async () => {
     const user = renderAt('/topics/nonsense/stages/2');
     await screen.findByText('지구가 제일 힘들었던 시기는?');

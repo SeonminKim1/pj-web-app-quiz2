@@ -6,7 +6,9 @@ import { PetPortrait } from '../components/PetPortrait.tsx';
 import { SettingsButton } from '../components/SettingsButton.tsx';
 import { useProgress } from '../hooks/useProgress.ts';
 import { useSettings } from '../hooks/useSettings.ts';
-import { hatOf } from '../lib/progress.ts';
+import { hatOf, unseenYardItems } from '../lib/progress.ts';
+import { getReward } from '../lib/rewards.ts';
+import { RewardArt } from '../components/RewardArt.tsx';
 import { PEST_ANIMALS, getPestAnimal } from '../lib/pestAnimals.ts';
 import { DataErrorView } from '../components/DataErrorView.tsx';
 import { GoldBadge, LoadingView } from '../components/StatusViews.tsx';
@@ -16,6 +18,8 @@ import { titleFor } from '../lib/titles.ts';
 import styles from './Page.module.css';
 
 /** 첫 화면: 앱 아이콘·로고, 보유 골드, 주제 카드(들어갈 수 없는 주제는 "준비 중"). */
+const SLIDE = getReward('big-slide')!;
+
 export function HomePage(): ReactElement {
   const {
     gold,
@@ -30,6 +34,7 @@ export function HomePage(): ReactElement {
   } = useHomePage();
   const { settings, choosePet } = useSettings();
   const { progress } = useProgress();
+  const newYardItems = unseenYardItems(progress).length > 0;
   const [picking, setPicking] = useState(false);
   // 시트를 닫으면 포커스를 방해꾼 버튼으로 되돌린다(useModalSheet: 되돌리기는 여는 쪽이 한다).
   const petButtonRef = useRef<HTMLButtonElement>(null);
@@ -55,6 +60,16 @@ export function HomePage(): ReactElement {
           />
           방해꾼
         </button>
+        {/* 놀이터 입구(설계 D20): 방해꾼 버튼 바로 아래. 아직 안 본 물건 보상이 있으면 분홍 점(D38). */}
+        <Link
+          to="/playground"
+          className={styles.heroYard}
+          aria-label={newYardItems ? '놀이터, 새 물건 있음' : '놀이터'}
+        >
+          <RewardArt reward={SLIDE} size={24} />
+          놀이터
+          {newYardItems && <span className={styles.dot} aria-hidden="true" />}
+        </Link>
         <span className={styles.heroGold}>
           <GoldBadge gold={gold} />
           <SettingsButton />

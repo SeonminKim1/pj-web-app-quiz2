@@ -1,0 +1,166 @@
+/* 마당: 폭 가득, 높이는 화면이 낮으면 줄인다(설계 D33, F9). 위 20%는 하늘. */
+.yard {
+  position: relative;
+  height: min(300px, 42dvh);
+  min-height: 220px;
+  overflow: hidden;
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: linear-gradient(var(--color-sky) 0 20%, var(--color-grass) 20%);
+  box-shadow: var(--shadow-pop);
+}
+
+.cloud {
+  position: absolute;
+  top: 10px;
+  left: 12%;
+  width: 46px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  box-shadow:
+    16px -6px 0 -2px var(--color-surface),
+    30px 2px 0 -3px var(--color-surface);
+}
+
+/* 칸: 풀밭 위 3열 × 2줄. 동물보다 위에 있어 "+"·"바꾸기"가 가려지지 않는다(F9). */
+.cells {
+  position: absolute;
+  z-index: 2;
+  inset: 22% 2% 3%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: 1fr 1.15fr;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cellItem {
+  display: grid;
+}
+
+.cell {
+  position: relative;
+  display: grid;
+  min-width: 44px;
+  min-height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-tile);
+  background: transparent;
+  color: var(--color-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.cell:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -3px;
+}
+
+.cell::before {
+  position: absolute;
+  bottom: 14%;
+  width: 62%;
+  height: 16%;
+  border-radius: 50%;
+  background: rgb(58 46 46 / 10%);
+  content: '';
+}
+
+.art {
+  position: relative;
+  display: block;
+  line-height: 0;
+}
+
+.yard[data-placing='true'] .cell {
+  background: rgb(255 255 255 / 30%);
+  box-shadow: inset 0 0 0 3px var(--color-pink);
+}
+
+.plus {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 3px dashed var(--color-pink-strong);
+  border-radius: 50%;
+  background: rgb(255 225 234 / 80%);
+  color: var(--color-pink-strong);
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.swap {
+  position: absolute;
+  bottom: 4px;
+  padding: 1px 8px;
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* 서 있는 동물: 칸 격자와 같은 좌표로 놓는다. 누를 수 없다. */
+.animals {
+  position: absolute;
+  z-index: 1;
+  inset: 22% 2% 3%;
+  pointer-events: none;
+}
+
+.animal {
+  position: absolute;
+  top: calc(var(--row) * 50% + 2%);
+  left: calc((var(--col) + 0.55) / 3 * 100%);
+  line-height: 0;
+}
+
+/* 좋아하는 물건이 없으면 아래쪽 가장자리에 한 줄로 선다. */
+.animal[data-by-item='false'] {
+  top: auto;
+  bottom: 0;
+  left: calc(4% + var(--col) * 23%);
+}
+
+.animal[data-front='true'] {
+  z-index: 1;
+}
+
+.banner {
+  position: absolute;
+  z-index: 3;
+  top: 8px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px 4px 4px 14px;
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-pressed);
+  font-weight: 700;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.cancel {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yard * {
+    animation: none;
+  }
+}

@@ -7,6 +7,7 @@ import { useProgress } from '../hooks/useProgress.ts';
 import { PEST_ANIMALS, getPestAnimal } from '../lib/pestAnimals.ts';
 import { hatOf } from '../lib/progress.ts';
 import type { PetId } from '../types/settings.ts';
+import { ClaimTopics } from './ClaimTopics.tsx';
 import { HatRow } from './HatRow.tsx';
 import { PetPortrait } from './PetPortrait.tsx';
 import styles from './PetPicker.module.css';
@@ -79,6 +80,8 @@ export function PetPicker({
           <h3 className={styles.hatsTitle}>{chosen.label} 모자</h3>
         </div>
         <div className={styles.hats}>
+          {/* 열려 있는 동안 모든 주제의 다 푼 판 보상을 기록한다(설계 D29: 목록을 안 연 사용자도 모자가 풀린다). */}
+          <ClaimTopics />
           <HatRow animal={current} />
         </div>
         <button type="button" className={styles.done} onClick={onClose}>
