@@ -1220,6 +1220,178 @@ Amendments to D13 and D18 (D33, the user's answer to the design-shotgun confirma
 - D17 placing mode uses B's look on top of C. "어느 칸에 놓을까요?" + 취소 sits on the yard, empty cells show a dashed "+", and filled cells show "바꾸기".
 - The starter item (D14 "모래 놀이통") still needs a drawing (the mockup uses a placeholder). Shop items and prices in the mockup are examples only; the shop list and prices are still open.
 
+## PR ③ eng review (2026-11-24, branch feat/sticker-yard)
+
+Target: this document, PR ③ scope only. PR ② merged as #27 (`a7097a1`).
+
+Approved PR ③ scope (carried; no new approval needed):
+
+- D2: PR ③ = 놀이터 화면 (YardPage, 상점, 칸 놓기, 움직임, 첫 화면 버튼, 개인정보처리방침).
+- Line 67: optional progress fields `ownedItems` (bought items) and `placed` (yard cell → item). Unknown ids, or items the user does not own, are ignored on load.
+- Line 73–74: one item per cell, and the same item in only one cell. Shop rule `buyItem` (like `openHint`): `insufficientGold`, `owned`, and a successful buy subtracts gold and adds to `ownedItems`.
+- Line 76 animal reaction: each item has `likedBy`. Each of the 4 animals likes one item it can earn: 토끼 당근 밭, 다람쥐 도토리 나무, 고양이 털실 공, 강아지 뼈다귀 장난감. When it is placed, that animal goes there.
+- Line 77: the yard needs its own light frame loop built on `pestMotion.ts` pure functions.
+- Design decisions:
+  - D6: an item card gets "놀이터에 놓기".
+  - D13–D20 as amended by D33: the approved variant C layout and the bottom tab bar.
+  - D14: the starter item, which needs one new drawing.
+  - D15: render first and claim in the background.
+  - D16: the shop tile states.
+  - D17: placing mode.
+  - D19: liked-by faces.
+  - D20: the home "놀이터" pill.
+  - D22: `--color-grass`.
+- Deferred from PR ① (P1 TODO): `likedBy`, the "one liked item per animal" test, and `--color-grass`.
+- Reuse from PR ②: `HatRow` for the 모자 tab (D13). `rewardSourceLabel` gives the locked-item source. `useTopicRounds` already claims rewards.
+
+Still open in the plan:
+
+- The shop list (line 82–83: "상점 물건 8개 … 구체적인 목록") and its prices (OV10: "first-version prices are set in PR ③ against real balances (max 6,610)").
+- The starter item drawing (D14).
+
+### Scope Challenge A: assessment (PR ③)
+
+What already exists:
+
+- **`rewards.ts`**: 21 small items, 7 shapes × pink, mint and sky [measured: `grep item- src/lib/rewards.ts`], plus 11 big items, all with drawings in `RewardArt`. Yellow, the fourth reward colour (D22), is unused for small items. So 7 yellow small items could be sold with no new art.
+- **Liked items**: they are already rewards. The carrot patch and acorn tree are big rewards; yarn and bone are small rewards in three colours.
+- **Motion**: `src/lib/pestMotion.ts` (260 lines of pure functions such as `pickRoamTarget` and `clampToArea`). `usePestMotion.ts` (606 lines) is the play-screen loop for one pest and cannot be reused as is (line 77).
+- **Progress pattern**: optional fields, sanitize on load, read-time filtering (D30), and context actions that commit only on change.
+- **Hats**: `HatRow` reads progress itself (D26 design-twice shape 2), so the 모자 tab needs only one line.
+- **Routes**: `App.tsx` has no `/playground` yet (line 57–76). The service worker app shell already covers SPA routes (Distribution Plan).
+
+Complexity: about 22 changed source files plus tests, with about 5 new modules (YardPage, the yard scene, the bottom tab bar with its card row, the buy sheet, and the yard motion hook) [estimated from D13–D20 and T9]. That crosses the 8-file gate.
+
+REALITY: premise-table pass unverified=0 (21 small items in 3 colours with yellow unused, liked items are rewards, no /playground route) src/lib/rewards.ts:63
+REALITY: already-done pass origin/main has no yard/shop code (grep YardPage, buyItem: none) src/App.tsx:57
+REALITY: surface-check pass no CLI or route beyond the new /playground; Netlify SPA fallback covers it docs/designs/rewards-playground.md:96
+REALITY: binding-decisions pass D2, D13–D20, D33 and line 67/73–77 carried; D29/D30 patterns reused docs/designs/rewards-playground.md:1214
+REALITY: numbers pass max gold 6,610 [measured: 30 + 546×10 + 112×10]; file count estimated docs/designs/rewards-playground.md:448
+REALITY: deferred-asks pass PR ① P1 TODO (likedBy, test, --color-grass) is in scope TODOS.md:1
+REALITY: pr-count pass PR ③ is the last of 3 approved PRs (D2); a further split would be a new PR (asked below) docs/designs/rewards-playground.md:308
+
+### Scope record (PR ③)
+
+feature answers: D34 B — the yard motion loop (`useYardMotion`: roaming, walking to liked items, pausing in hidden tabs) moves to a new PR ④. PR ③ shows every animal standing still, using D18's reduced-motion layout: beside its liked item when one is placed, otherwise along the bottom edge.
+structure: D35 B Smaller arrangement — 3 new components: `YardPage` (route `/playground`), `YardScene` (the yard, cells, standing animals and placing mode; PR ④ adds motion here) and `ItemShelf` (the bottom tab bar, card row and buy sheet; the 모자 tab is `HatRow`).
+
+- `buyItem` / `placeItem` / `unplaceItem` live in `src/lib/progress.ts`.
+- The shop catalog, `likedBy` and the starter item live in `src/lib/rewards.ts`.
+- `ownedItems` / `placed` are optional fields with shape-only sanitize and read-time filtering (D30 pattern).
+- About 19 source files.
+  accepted scope: D36 A — the shop sells the 7 yellow small items (털실 공, 뼈다귀 장난감, 비치볼, 꽃 화분, 버섯 의자, 풍선, 연). They reuse existing drawings and do not overlap the rewards. D37 A — each costs 100 gold.
+  pending remedies: none.
+
+Scope Challenge result: scope reduced per recommendation (D34: motion loop to PR ④).
+
+## Decision ledger (PR ③)
+
+Approval readiness: PASS. Checked D34 B, D35 B, D36 A, D37 A, D38 A and D39 A (AskUserQuestion answers 2026-11-24). Everything else is carried from D2, D6, D13–D20, D22, D33, line 67/73–77 and the PR ① P1 TODO.
+
+- D34 (feature cut): answer B — motion loop to PR ④, animals stand still in PR ③.
+- D35 (structure): answer B — Smaller arrangement, as above.
+- D36 (shop catalog): answer A — 7 yellow small items, no new art, no overlap with rewards.
+- D37 (prices): answer A — 100 gold each (700 for all 7). Gold surplus stays an open question for a later version (OV10).
+
+### Section 1 (PR ③): Architecture
+
+```
+progress (localStorage v1)
+  earnedRewards ─┐  ownedItems? [shopId]   placed? {cell 0-5: itemId}
+                 │       ▲ buyItem (gold -100; insufficientGold | owned)
+                 │       │                      ▲ placeItem / unplaceItem
+  lib/progress.ts: ownedYardItems(progress) = starter ∪ earned items ∪ bought
+                   placedItems(progress): filters unknown / unowned / duplicate (read time, D30)
+                   starter sits in cell 0 while `placed` was never saved (D14)
+                 │
+  /playground  YardPage
+     ├─ YardScene   yard 360×~300 (D33), 6 cells, standing animals (liked item cell
+     │              or bottom edge; hats via hatOf), placing mode (D17)
+     ├─ ItemShelf   bottom tab bar 내 물건 / 상점 / 모자, card row, buy sheet
+     │              (useModalSheet), "텐트를 샀어요 · 바로 놓기" notice (D16)
+     │              모자 tab = <HatRow animal={settings.pet} />
+     └─ ClaimTopic per enterable topic (reuse HatRow's) → background claim (D15)
+home: "놀이터" pill under "방해꾼" (D20), dot = unplaced owned item or unseen reward
+result card: item reward → "놀이터에 놓기" → /playground with that item in placing mode (D6)
+```
+
+Design-twice (`ItemShelf`): shape 1 is three tab components that the page switches between. Shape 2 (chosen, D35) is one shelf that owns the tab state and the buy sheet. Shape 2 hides tab, sheet and notice state behind `{onPlace}` and keeps one owner for the "바로 놓기 → placing mode" hand-off.
+
+Red flags:
+
+- **Hand-synced list.** The shop list is derived from shapes × yellow, not typed out item by item.
+- **Two ways to own an item.** `ownedYardItems` is the single answer used by both the yard and the shelf.
+- **Split ownership.** `placed` is the only owner of positions; YardScene keeps only the transient placing mode.
+
+Production failures:
+
+- A stale `placed` value points to an unknown or unowned item. It is filtered at read time and the cell shows empty. Test.
+- A buy is tapped twice fast. `buyItem` returns the same object when the item is already owned, so gold is not taken twice. Test.
+- The claim fails offline (D15). Show one line, "새 보상을 확인하지 못했어요 · 다시", and keep the yard usable. Test.
+
+Findings: none beyond the scope decisions.
+
+### Section 2 (PR ③): Code quality
+
+1. [INFORMATIONAL] (confidence 7/10) `src/components/HatRow.tsx:119`. The yard needs the same background claim as the hat sheet. Move `ClaimTopic` to one shared place (the yard page and HatRow both render it), not a copy. Carried as necessary work with no question.
+2. [INFORMATIONAL] (confidence 7/10) The likedBy hint (D19) uses `PetPortrait headOnly`, like PR ①'s album faces. There is no new drawing except the starter item (D14).
+
+Dispositions: both carried.
+
+### Section 3 (PR ③): Tests
+
+```
+lib/progress: buyItem [ok | insufficientGold | owned → same obj] · placeItem [empty cell | swap returns old item | same item moves cells | not owned → same obj] · unplaceItem · ownedYardItems [starter + earned + bought] · placedItems [unknown/unowned/duplicate filtered; starter default when never saved]
+data/progressRepository: ownedItems/placed sanitize (shape only; unknown ids kept)
+lib/rewards: shop = 7 yellow items, each likedBy matches line 76 (one liked item per animal; P1 TODO test), starter not in rewards
+YardPage (pages test): opens on 내 물건 if an owned item is unplaced else 상점 (D13); buy flow with gold change and 바로 놓기; short of gold shows "골드 N 모자라요" + disabled 사기; placing mode + / 바꾸기 / 취소 (D17); empty-cell tap with nothing to place shows "스테이지를 깨면 물건이 생겨요" (D14); claim failure line (D15)
+StageResult: item card has "놀이터에 놓기" and opens placing mode
+HomePage: 놀이터 pill + dot (D20)
+```
+
+All of these are required proof of approved behaviour; no new test policy.
+
+### Section 4 (PR ③): Performance
+
+The yard renders at most 6 items and 4 animals, all static in PR ③. The background claim reuses `useTopicRounds` (one request per topic file on yard open, the same as the hat sheet). No issues found.
+
+### NOT in scope (PR ③)
+
+- The yard motion loop and walking toward liked items (D34 → PR ④).
+- New shop drawings, and selling reward items early (D36).
+- Gold sinks beyond 7 × 100 (OV10, later version).
+- Yard sharing (Approach C).
+
+### Implementation Tasks (PR ③)
+
+- [ ] **P3-1 (P1, human: ~3h / CC: ~15min)** — rewards: shop catalog (yellow × 7 shapes, 100 gold), `likedBy`, starter item + its drawing in RewardArt
+- [ ] **P3-2 (P1, human: ~4h / CC: ~20min)** — progress: `ownedItems` / `placed` + sanitize, `buyItem` / `placeItem` / `unplaceItem`, `ownedYardItems` / `placedItems`, context actions
+- [ ] **P3-3 (P1, human: ~1d / CC: ~45min)** — YardPage + YardScene + ItemShelf on route `/playground` (D13–D19, D33), `--color-grass` token
+- [ ] **P3-4 (P1, human: ~2h / CC: ~10min)** — shared ClaimTopic, plus the D15 failure line
+- [ ] **P3-5 (P1, human: ~2h / CC: ~10min)** — home 놀이터 pill + dot (D20); result card "놀이터에 놓기" (D6)
+- [ ] **P3-6 (P1, human: ~15min / CC: ~2min)** — privacy: "산 물건과 놀이터에 놓은 자리"
+
+### Outside Voice (PR ③, Claude Plan subagent; Codex not installed, so this is not outside coverage)
+
+There were 12 findings. Two needed a decision from the user; the other ten were corrections to the plan.
+
+Decisions:
+
+- **D38** (F1, F2), answer A: the home dot shows when there is an unseen yard item reward (`seenRewards`). Opening the yard marks owned yard item ids as seen, and a bought item counts as seen when it is bought. The first tab is 내 물건 when there are new items, otherwise 상점. This replaces the "unplaced" rule in D20 and D13.
+- **D39** (F3), answer A: `likedBy` is keyed by shape. The cat likes 털실 공 in every colour, the dog likes 뼈다귀 in every colour, the rabbit likes 당근 밭 and the squirrel likes 도토리 나무. When several liked items are placed, the animal stands by the lowest cell index. The test checks one liked shape per animal.
+
+Corrections (necessary implementation of approved contracts, applied without a question):
+
+- **F4.** `placeItem` and `unplaceItem` first copy the implied `{0: starter}` when `placed` was never saved. An emptied yard keeps `placed: {}`, so the starter does not come back.
+- **F5.** One `getYardItem(id)` covers rewards, shop items and the starter. The starter is a colourless `big` with its own drawing. A test checks that no shop id appears in a reward table.
+- **F6.** Claiming moves out of `HatRow` into its callers (PetPicker and YardPage), so the files are not fetched twice. `ClaimTopic` reports `{error, retry}` for the D15 line, and "다시" retries every failed topic.
+- **F7.** "놀이터에 놓기" appears for `item` and `big` rewards. The item id goes to `/playground` in router state. On refresh or Back the yard simply opens; an item that is already placed opens placing mode to move it.
+- **F8.** `buyItem` returns a union like `openHint`: `{ok, progress} | {reason: 'insufficientGold' | 'owned'}`. The context action returns it to the sheet.
+- **F9.** Yard height is `min(300px, 42dvh)`. The tab bar uses `env(safe-area-inset-bottom)`. Animals stand behind the cell labels, which sit above the animals.
+- **F10.** The home pill gets its own position in `Page.module.css` and is checked at 360px.
+- **F11.** Copy and tests use shop item names, for example "노랑 풍선을 샀어요".
+- **F12.** Sanitize for `placed` keeps only keys "0"–"5" with string values. `placeItem` removes every stored copy of the item.
+
 ## GSTACK REVIEW REPORT
 
 | Review         | Trigger                                           | Why                             | Runs                               | Status                                  | Findings                                        |
