@@ -512,6 +512,41 @@ describe('방해꾼', () => {
   const oneOf = (lines: readonly string[]) => (text: string) =>
     lines.includes(text);
 
+  // 받은 모자를 토끼에게 씌워 둔 진행(설계 OV2-11).
+  function saveWornHat() {
+    store.save({
+      version: 1,
+      gold: 30,
+      topics: {},
+      earnedRewards: ['hat-crown-sky'],
+      equipped: { rabbit: 'hat-crown-sky' },
+    });
+  }
+
+  // Value: protects=씌운 모자가 첫 화면 방해꾼 버튼 얼굴에 보인다(OV2-11); fails_when=HomePage가 PetPortrait에 hat을 넘기지 않으면; why_new=시트 테스트는 벗긴 뒤 모자가 없음만 보고, 쓴 모자가 보이는지는 안 봄; seam=none; no_claim=모자 위치·크기
+  it('씌운 모자가 첫 화면 방해꾼 버튼에 보인다', async () => {
+    saveWornHat();
+    renderAt('/');
+    const button = await screen.findByRole('button', {
+      name: '방해꾼 바꾸기, 지금 토끼',
+    });
+    expect(
+      button.querySelector('[data-part="hat"][data-reward="hat-crown-sky"]'),
+    ).not.toBeNull();
+  });
+
+  // Value: protects=스테이지 풀이 중 방해꾼이 씌운 모자를 쓰고 논다(OV2-11); fails_when=StagePlayPage가 PestLayer에 hat을 넘기지 않거나 hatOf를 다른 동물로 부르면; why_new=풀이 화면 모자를 보는 테스트가 없음; seam=none; no_claim=움직일 때 모자가 따라가는 모양
+  it('스테이지 풀이 화면의 방해꾼이 씌운 모자를 쓴다', async () => {
+    saveWornHat();
+    renderAt('/topics/nonsense/stages/2');
+    await screen.findByText('지구가 제일 힘들었던 시기는?');
+    expect(
+      screen
+        .getByTestId('pest-2d')
+        .querySelector('[data-part="hat"][data-reward="hat-crown-sky"]'),
+    ).not.toBeNull();
+  });
+
   it('풀이 중에 있고, 오답에 비웃고, 누르면 잡힘 문구. 그동안 풀이는 그대로 되고 결과 화면에는 없다', async () => {
     const user = renderAt('/topics/nonsense/stages/2');
     await screen.findByText('지구가 제일 힘들었던 시기는?');
