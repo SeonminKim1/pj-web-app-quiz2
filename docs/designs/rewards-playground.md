@@ -1310,9 +1310,9 @@ progress (localStorage v1)
      ├─ ItemShelf   bottom tab bar 내 물건 / 상점 / 모자, card row, buy sheet
      │              (useModalSheet), "텐트를 샀어요 · 바로 놓기" notice (D16)
      │              모자 tab = <HatRow animal={settings.pet} />
-     └─ ClaimTopic per enterable topic (reuse HatRow's) → background claim (D15)
-home: "놀이터" pill under "방해꾼" (D20), dot = unplaced owned item or unseen reward
-result card: item reward → "놀이터에 놓기" → /playground with that item in placing mode (D6)
+     └─ ClaimTopic per enterable topic, lifted out of HatRow (F6) → background claim + {error, retry} (D15)
+home: "놀이터" pill under "방해꾼" (D20), dot = unseen yard item reward (D38)
+result card: item/big reward → "놀이터에 놓기" → /playground, item id in router state, placing mode (D6, F7)
 ```
 
 Design-twice (`ItemShelf`): shape 1 is three tab components that the page switches between. Shape 2 (chosen, D35) is one shelf that owns the tab state and the buy sheet. Shape 2 hides tab, sheet and notice state behind `{onPlace}` and keeps one owner for the "바로 놓기 → placing mode" hand-off.
@@ -1344,7 +1344,7 @@ Dispositions: both carried.
 lib/progress: buyItem [ok | insufficientGold | owned → same obj] · placeItem [empty cell | swap returns old item | same item moves cells | not owned → same obj] · unplaceItem · ownedYardItems [starter + earned + bought] · placedItems [unknown/unowned/duplicate filtered; starter default when never saved]
 data/progressRepository: ownedItems/placed sanitize (shape only; unknown ids kept)
 lib/rewards: shop = 7 yellow items, each likedBy matches line 76 (one liked item per animal; P1 TODO test), starter not in rewards
-YardPage (pages test): opens on 내 물건 if an owned item is unplaced else 상점 (D13); buy flow with gold change and 바로 놓기; short of gold shows "골드 N 모자라요" + disabled 사기; placing mode + / 바꾸기 / 취소 (D17); empty-cell tap with nothing to place shows "스테이지를 깨면 물건이 생겨요" (D14); claim failure line (D15)
+YardPage (pages test): opens on 내 물건 when there is an unseen yard item else 상점 (D13 as amended by D38); buy flow with gold change and 바로 놓기; short of gold shows "골드 N 모자라요" + disabled 사기; placing mode + / 바꾸기 / 취소 (D17); empty-cell tap with nothing to place shows "스테이지를 깨면 물건이 생겨요" (D14); claim failure line (D15)
 StageResult: item card has "놀이터에 놓기" and opens placing mode
 HomePage: 놀이터 pill + dot (D20)
 ```
@@ -1364,11 +1364,11 @@ The yard renders at most 6 items and 4 animals, all static in PR ③. The backgr
 
 ### Implementation Tasks (PR ③)
 
-- [ ] **P3-1 (P1, human: ~3h / CC: ~15min)** — rewards: shop catalog (yellow × 7 shapes, 100 gold), `likedBy`, starter item + its drawing in RewardArt
-- [ ] **P3-2 (P1, human: ~4h / CC: ~20min)** — progress: `ownedItems` / `placed` + sanitize, `buyItem` / `placeItem` / `unplaceItem`, `ownedYardItems` / `placedItems`, context actions
+- [ ] **P3-1 (P1, human: ~3h / CC: ~15min)** — rewards: shop catalog (yellow × 7 shapes, 100 gold), `likedBy` by shape (D39), starter item (colourless big) + its drawing, `getYardItem` (F5)
+- [ ] **P3-2 (P1, human: ~4h / CC: ~20min)** — progress: `ownedItems` / `placed` + sanitize (keys 0–5, F12), `buyItem` (union result, F8) / `placeItem` / `unplaceItem` (starter copy-in, F4), `ownedYardItems` / `placedItems`, yard seen marking (D38), context actions
 - [ ] **P3-3 (P1, human: ~1d / CC: ~45min)** — YardPage + YardScene + ItemShelf on route `/playground` (D13–D19, D33), `--color-grass` token
-- [ ] **P3-4 (P1, human: ~2h / CC: ~10min)** — shared ClaimTopic, plus the D15 failure line
-- [ ] **P3-5 (P1, human: ~2h / CC: ~10min)** — home 놀이터 pill + dot (D20); result card "놀이터에 놓기" (D6)
+- [ ] **P3-4 (P1, human: ~2h / CC: ~10min)** — lift ClaimTopic out of HatRow into PetPicker and YardPage, reporting {error, retry} for the D15 failure line (F6)
+- [ ] **P3-5 (P1, human: ~2h / CC: ~10min)** — home 놀이터 pill + dot for unseen yard items (D20 as amended by D38, F10); result card "놀이터에 놓기" for item and big rewards (D6, F7)
 - [ ] **P3-6 (P1, human: ~15min / CC: ~2min)** — privacy: "산 물건과 놀이터에 놓은 자리"
 
 ### Outside Voice (PR ③, Claude Plan subagent; Codex not installed, so this is not outside coverage)
@@ -1392,17 +1392,34 @@ Corrections (necessary implementation of approved contracts, applied without a q
 - **F11.** Copy and tests use shop item names, for example "노랑 풍선을 샀어요".
 - **F12.** Sanitize for `placed` keeps only keys "0"–"5" with string values. `placeItem` removes every stored copy of the item.
 
+### Completion summary (PR ③)
+
+- Step 0: Scope Challenge — scope reduced per recommendation (D34: motion loop to PR ④); structure B (D35)
+- Reality rows: 7/7 tier-1 rows emitted, 0 unverified premises
+- Architecture Review: 0 issues found (scope decisions D34–D37)
+- Code Quality Review: 2 issues found (carried)
+- Test Review: diagram produced, 6 groups of required tests (all proof of approved behaviour)
+- Performance Review: 0 issues found
+- NOT in scope: written
+- What already exists: written
+- TODOS.md updates: 0 items proposed (the PR ① P1 TODO is in scope)
+- Failure modes: 0 critical gaps flagged
+- Unresolved decisions: 0 in this review
+- Outside voice: codex not installed; native Claude Plan subagent completed with 12 findings (2 decisions D38/D39, 10 corrections). This does not count as outside coverage.
+- Parallelization: sequential (rewards → progress → yard UI → home/result entry)
+- Lake Score: N/A (no completeness-scored answers)
+
 ## GSTACK REVIEW REPORT
 
-| Review         | Trigger                                           | Why                             | Runs                               | Status                                  | Findings                                        |
-| -------------- | ------------------------------------------------- | ------------------------------- | ---------------------------------- | --------------------------------------- | ----------------------------------------------- |
-| CEO Review     | `/plan-ceo-review`                                | Scope & strategy                | 0                                  | —                                       | —                                               |
-| Outside Review | native Claude Plan subagent (Codex not installed) | Independent 2nd opinion         | 1 (this branch)                    | unavailable (native fallback completed) | 13 findings, 7 corrections applied, 4 decisions |
-| Eng Review     | `/plan-eng-review`                                | Architecture & tests (required) | 1 (this branch)                    | issues_open (ISSUES OPEN)               | 25 issues, 0 critical gaps                      |
-| Design Review  | `/plan-design-review`                             | UI/UX gaps                      | 1 (feat/sticker-album, 2026-11-20) | clean (CLEAR)                           | score: 2/10 → 8/10, 22 decisions                |
-| DX Review      | `/plan-devex-review`                              | Developer experience gaps       | 0                                  | —                                       | —                                               |
+| Review         | Trigger                                           | Why                             | Runs                               | Status                                  | Findings                                                                |
+| -------------- | ------------------------------------------------- | ------------------------------- | ---------------------------------- | --------------------------------------- | ----------------------------------------------------------------------- |
+| CEO Review     | `/plan-ceo-review`                                | Scope & strategy                | 0                                  | —                                       | —                                                                       |
+| Outside Review | native Claude Plan subagent (Codex not installed) | Independent 2nd opinion         | 1 (this branch)                    | unavailable (native fallback completed) | 12 findings, 2 decisions, 10 corrections                                |
+| Eng Review     | `/plan-eng-review`                                | Architecture & tests (required) | 1 (this branch)                    | issues_open (ISSUES OPEN)               | 8 issues, 0 critical gaps                                               |
+| Design Review  | `/plan-design-review`                             | UI/UX gaps                      | 1 (feat/sticker-album, 2026-11-20) | clean (CLEAR)                           | score: 2/10 → 8/10, 22 decisions; yard mockup approved 2026-11-24 (D33) |
+| DX Review      | `/plan-devex-review`                              | Developer experience gaps       | 0                                  | —                                       | —                                                                       |
 
-- **OUTSIDE COVERAGE:** codex unavailable (not installed) for the PR ② eng plan review. An in-host Claude Plan subagent completed instead, which does not count as outside coverage.
-- **VERDICT:** DESIGN CLEARED (earlier branch). Eng review for PR ② is ISSUES OPEN: all 25 issues are mapped to tasks P2-1 to P2-8, with 0 unresolved and 0 critical gaps. eng review required
+- **OUTSIDE COVERAGE:** codex unavailable (not installed) for the PR ③ eng plan review. An in-host Claude Plan subagent completed instead, which does not count as outside coverage.
+- **VERDICT:** DESIGN CLEARED (earlier branch, plus the D33 yard mockup). Eng review for PR ③ is ISSUES OPEN: all issues are mapped to tasks P3-1 to P3-6, with 0 unresolved and 0 critical gaps. eng review required
 
 NO UNRESOLVED DECISIONS
