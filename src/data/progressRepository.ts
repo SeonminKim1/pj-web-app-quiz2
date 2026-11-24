@@ -46,10 +46,14 @@ function sanitizeProgress(progress: Progress): Progress {
   const earnedRewards = cleanRewardIds(progress.earnedRewards);
   const seenRewards = cleanRewardIds(progress.seenRewards);
   const equipped = cleanEquipped(progress.equipped);
+  const ownedItems = cleanRewardIds(progress.ownedItems);
+  const placed = cleanPlaced(progress.placed);
   if (
     earnedRewards === progress.earnedRewards &&
     seenRewards === progress.seenRewards &&
-    equipped === progress.equipped
+    equipped === progress.equipped &&
+    ownedItems === progress.ownedItems &&
+    placed === progress.placed
   ) {
     return progress;
   }
@@ -57,10 +61,27 @@ function sanitizeProgress(progress: Progress): Progress {
   delete next.earnedRewards;
   delete next.seenRewards;
   delete next.equipped;
+  delete next.ownedItems;
+  delete next.placed;
+  if (ownedItems) next.ownedItems = ownedItems;
+  if (placed) next.placed = placed;
   if (earnedRewards) next.earnedRewards = earnedRewards;
   if (seenRewards) next.seenRewards = seenRewards;
   if (equipped) next.equipped = equipped;
   return next;
+}
+
+// 놀이터 칸: "0"~"5" 칸의 문자열 값만 남긴다. 빈 객체(다 치움)는 그대로 둔다(설계 F4, F12).
+function cleanPlaced(value: unknown): Progress['placed'] {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) return undefined;
+  const entries = Object.entries(value);
+  const kept = entries.filter(
+    (entry): entry is [string, string] =>
+      /^[0-5]$/.test(entry[0]) && typeof entry[1] === 'string',
+  );
+  if (kept.length === entries.length) return value as Progress['placed'];
+  return Object.fromEntries(kept);
 }
 
 // 쓰고 있는 모자: 아는 동물 칸의 문자열 값만 남긴다. 모르는 모자 id는 남긴다(그릴 때 hatOf가 거른다).

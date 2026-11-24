@@ -4,7 +4,15 @@ import type { PetId } from '../types/settings.ts';
 import type { HintType, QuizItem, QuizTopic } from '../types/quiz.ts';
 import { answerChars } from './answer.ts';
 import { revealAxisText } from './mbti.ts';
-import { getReward, rewardFor, type Reward } from './rewards.ts';
+import {
+  SHOP_ITEM_IDS,
+  SHOP_PRICE,
+  STARTER_ITEM_ID,
+  getReward,
+  getYardItem,
+  rewardFor,
+  type Reward,
+} from './rewards.ts';
 import { stageProgress, type Stage } from './stages.ts';
 
 export const PROGRESS_VERSION = 1;
@@ -279,4 +287,121 @@ export function equipHat({
   const next: Progress = { ...progress, equipped };
   if (Object.keys(equipped).length === 0) delete next.equipped;
   return next;
+}
+
+// ── 놀이터(설계 PR ③: D14, D36–D38, F4, F8, F12) ──
+
+/** 놀이터 칸 수(3열 × 2줄). */
+export const YARD_CELLS = 6;
+
+/** 가진 놀이터 물건: 기본 물건 + 받은 물건 보상 + 산 물건(아는 id만, 중복 없음). */
+export function ownedYardItems(progress: Progress): Reward[] {
+  const ids = [
+    STARTER_ITEM_ID,
+    ...(progress.earnedRewards ?? []),
+    ...(progress.ownedItems ?? []),
+  ];
+  return [...new Set(ids)].flatMap((id) => getYardItem(id) ?? []);
+}
+
+function ownsYardItem(progress: Progress, id: string): boolean {
+  return ownedYardItems(progress).some((item) => item.id === id);
+}
+
+// 저장된 칸 배치. 한 번도 저장하지 않았으면 기본 물건이 0번 칸에 있는 것으로 본다(D14).
+function storedPlaced(progress: Progress): Record<string, string> {
+  return progress.placed ?? { '0': STARTER_ITEM_ID };
+}
+
+/**
+ * 칸마다 놓인 물건(길이 6). 모르는 물건, 가지지 않은 물건, 앞 칸에 이미 놓인 물건은 빈칸으로 본다
+ * (저장에서는 지우지 않는다, D30과 같은 방식).
+ */
+export function placedItems(progress: Progress): (Reward | undefined)[] {
+  const stored = storedPlaced(progress);
+  const seen = new Set<string>();
+  return Array.from({ length: YARD_CELLS }, (_, cell) => {
+    const id = stored[String(cell)];
+    if (id === undefined || seen.has(id) || !ownsYardItem(progress, id)) {
+      return undefined;
+    }
+    seen.add(id);
+    return getYardItem(id);
+  });
+}
+
+/** 상점에서 사기 결과(openHint처럼 이유를 돌려준다, F8). */
+export type BuyResult =
+  | { ok: true; progress: Progress }
+  | { ok: false; reason: 'unknown' | 'owned' | 'insufficientGold' };
+
+/** 상점 물건을 산다: 골드를 빼고 ownedItems에 넣는다. 이미 가졌거나 골드가 모자라면 이유만 돌려준다. */
+export function buyItem({
+  progress,
+  itemId,
+}: {
+  progress: Progress;
+  itemId: string;
+}): BuyResult {
+  if (!SHOP_ITEM_IDS.includes(itemId)) return { ok: false, reason: 'unknown' };
+  if (ownsYardItem(progress, itemId)) return { ok: false, reason: 'owned' };
+  if (progress.gold < SHOP_PRICE) {
+    return { ok: false, reason: 'insufficientGold' };
+  }
+  return {
+    ok: true,
+    progress: {
+      ...progress,
+      gold: progress.gold - SHOP_PRICE,
+      ownedItems: [...(progress.ownedItems ?? []), itemId],
+    },
+  };
+}
+
+/**
+ * 물건을 칸에 놓는다. 그 물건이 다른 칸에 있었으면 옮긴다(저장된 모든 칸에서 뺀다, F12).
+ * 그 칸에 있던 물건은 내 물건으로 돌아간다. 가지지 않은 물건이거나 이미 그 자리면 같은 진행 객체.
+ */
+export function placeItem({
+  progress,
+  itemId,
+  cell,
+}: {
+  progress: Progress;
+  itemId: string;
+  cell: number;
+}): Progress {
+  if (cell < 0 || cell >= YARD_CELLS || !ownsYardItem(progress, itemId)) {
+    return progress;
+  }
+  if (placedItems(progress)[cell]?.id === itemId) return progress;
+  // 처음 저장하면 기본 물건 자리를 함께 적어 둔다(F4).
+  const placed = Object.fromEntries(
+    Object.entries(storedPlaced(progress)).filter(([, id]) => id !== itemId),
+  );
+  placed[String(cell)] = itemId;
+  return { ...progress, placed };
+}
+
+/** 칸을 비운다. 다 비워도 빈 배치를 남겨 기본 물건이 돌아오지 않게 한다(F4). 이미 비었으면 같은 객체. */
+export function unplaceItem({
+  progress,
+  cell,
+}: {
+  progress: Progress;
+  cell: number;
+}): Progress {
+  const stored = storedPlaced(progress);
+  if (stored[String(cell)] === undefined) return progress;
+  const placed = { ...stored };
+  delete placed[String(cell)];
+  return { ...progress, placed };
+}
+
+/** 아직 보여 주지 않은 놀이터 물건 보상(첫 화면 점·처음 탭, 설계 D38). 산 물건은 산 순간 본 것이다. */
+export function unseenYardItems(progress: Progress): string[] {
+  const seen = new Set(progress.seenRewards ?? []);
+  return (progress.earnedRewards ?? []).filter(
+    (id) => getYardItem(id) !== undefined && !seen.has(id),
+  );
 }

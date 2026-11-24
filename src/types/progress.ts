@@ -32,4 +32,11 @@ export type Progress = {
    * 모르는 모자나 받지 않은 모자를 가리키면 그리지 않는다(hatOf). 저장에서는 지우지 않는다(설계 D30).
    */
   equipped?: Partial<Record<PetId, string>>;
+  /** 상점에서 산 놀이터 물건 id(선택 필드, 산 순서). */
+  ownedItems?: string[];
+  /**
+   * 놀이터 칸("0"~"5") → 놓은 물건 id(선택 필드). 한 번도 저장하지 않았으면 기본 물건이 0번 칸에 있다(설계 D14).
+   * 빈 객체는 "다 치웠다"는 뜻이라 지우지 않는다(F4).
+   */
+  placed?: Record<string, string>;
 };

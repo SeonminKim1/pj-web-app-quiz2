@@ -9,6 +9,11 @@ import {
   REWARDS,
   getReward,
   rewardFor,
+  SHOP_ITEM_IDS,
+  SHOP_PRICE,
+  STARTER_ITEM_ID,
+  getYardItem,
+  likedBy,
 } from './rewards.ts';
 
 const NONSENSE = getQuizTopic('nonsense');
@@ -145,5 +150,48 @@ describe('rewardFor', () => {
     expect(
       rewardFor({ topic: MBTI, round: stage(8, '새 카테고리') }),
     ).toBeUndefined();
+  });
+});
+
+describe('놀이터 물건(PR ③)', () => {
+  // Value: protects=상점은 노랑 작은 물건 7개이고 보상 표와 겹치지 않는다(D36, F5); fails_when=보상 표에 노랑 물건이 들어가 산 것과 받은 것이 겹치거나 상점 목록이 바뀌면; why_new=상점이 새로 생김; seam=none; no_claim=가격 균형
+  it('상점은 노랑 작은 물건 7개이고 어느 보상 표에도 없다', () => {
+    expect(SHOP_ITEM_IDS).toHaveLength(7);
+    expect(SHOP_ITEM_IDS.every((id) => /^item-[a-z]+-yellow$/.test(id))).toBe(
+      true,
+    );
+    for (const id of SHOP_ITEM_IDS) {
+      expect(REWARDS.has(id), id).toBe(false);
+      expect(getYardItem(id)?.name, id).toMatch(/^노랑 /);
+    }
+    expect(SHOP_PRICE).toBe(100);
+  });
+
+  it('기본 물건은 보상이 아니고 놀이터 물건으로 찾을 수 있다(D14)', () => {
+    expect(REWARDS.has(STARTER_ITEM_ID)).toBe(false);
+    expect(getYardItem(STARTER_ITEM_ID)?.name).toBe('모래 놀이통');
+    expect(getYardItem('hat-ribbon-pink')).toBeUndefined();
+  });
+
+  // Value: protects=동물마다 좋아하는 모양이 하나이고 그 모양은 모든 색에 적용된다(D39, PR ① P1 TODO); fails_when=LIKED_BY가 빠지거나 한 동물이 두 모양을 갖거나 색별로 달라지면; why_new=likedBy가 새로 생김; seam=none; no_claim=마당에서 서는 자리(YardScene 테스트)
+  it('동물마다 좋아하는 모양이 하나씩, 색과 상관없이', () => {
+    const shapesByPet = new Map<string, Set<string>>();
+    for (const id of [...REWARDS.keys(), ...SHOP_ITEM_IDS]) {
+      const item = getYardItem(id);
+      if (!item) continue;
+      const pet = likedBy(item);
+      if (!pet) continue;
+      shapesByPet.set(pet, (shapesByPet.get(pet) ?? new Set()).add(item.shape));
+    }
+    expect(
+      Object.fromEntries([...shapesByPet].map(([k, v]) => [k, [...v]])),
+    ).toEqual({
+      cat: ['yarn'],
+      dog: ['bone'],
+      rabbit: ['carrot-patch'],
+      squirrel: ['acorn-tree'],
+    });
+    expect(likedBy(getYardItem('item-yarn-yellow')!)).toBe('cat');
+    expect(likedBy(getYardItem('item-yarn-mint')!)).toBe('cat');
   });
 });

@@ -186,4 +186,26 @@ describe('보상 필드 정리', () => {
     });
     expect(createProgressStore({ storage }).load()).toEqual(SAVED);
   });
+
+  it('놀이터: 산 물건은 문자열만, 칸은 "0"~"5"의 문자열 값만 남기고 빈 배치는 그대로 둔다', () => {
+    const storage = memoryStorage({
+      [PROGRESS_KEY]: JSON.stringify({
+        ...SAVED,
+        ownedItems: ['item-kite-yellow', 3],
+        placed: { '0': 'big-sandbox', '7': 'big-slide', '2': 5 },
+      }),
+    });
+    expect(createProgressStore({ storage }).load()).toEqual({
+      ...SAVED,
+      ownedItems: ['item-kite-yellow'],
+      placed: { '0': 'big-sandbox' },
+    });
+    const empty = memoryStorage({
+      [PROGRESS_KEY]: JSON.stringify({ ...SAVED, placed: {} }),
+    });
+    expect(createProgressStore({ storage: empty }).load()).toEqual({
+      ...SAVED,
+      placed: {},
+    });
+  });
 });

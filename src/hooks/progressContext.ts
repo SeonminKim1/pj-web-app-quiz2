@@ -1,5 +1,6 @@
 // 진행 Context 정의(Provider는 src/App.tsx, 상태는 useProgressState.ts).
 import { createContext } from 'react';
+import type { BuyResult } from '../lib/progress.ts';
 import type { Stage } from '../lib/stages.ts';
 import type { Progress } from '../types/progress.ts';
 import type { PetId } from '../types/settings.ts';
@@ -29,6 +30,12 @@ export type ProgressContextValue = {
   markRewardsSeen: (ids: readonly string[]) => void;
   /** 동물에게 받은 모자를 씌운다(hatId가 없으면 벗김). 받지 않은 모자는 무시한다. */
   equipHat: (pet: PetId, hatId: string | undefined) => void;
+  /** 상점 물건 사기(설계 D16, F8). 못 사면 이유를 돌려준다. 사면 바로 저장한다. */
+  buyItem: (itemId: string) => BuyResult;
+  /** 놀이터 칸에 물건을 놓는다(있던 물건은 내 물건으로). */
+  placeItem: (itemId: string, cell: number) => void;
+  /** 놀이터 칸을 비운다. */
+  unplaceItem: (cell: number) => void;
 };
 
 export const ProgressContext = createContext<ProgressContextValue | undefined>(
