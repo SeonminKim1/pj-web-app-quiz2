@@ -770,16 +770,452 @@ Rendered 3 hats (ribbon, straw hat, crown) on all 4 animals at full size, head-o
 - Minor: at 28px the crown on the cat sits close to its ear color; pick a crown color with more contrast against cat fur if it reads poorly on device.
 - Render gotcha: rendering portraits separately with `renderToStaticMarkup` repeats `useId` ids, so all gradients collapse to one animal's colors; one React tree (the app) is unaffected, but any batch render (like the OG script) must keep one portrait per render.
 
+## PR ② eng review (2026-11-24, branch feat/sticker-hats)
+
+Target: this document, PR ② scope only. PR ① merged as #25 (`21026e1`).
+
+Approved PR ② scope (carried from earlier answers; no new approval needed):
+
+- D2 (R1): PR ② = 모자: PetPortrait hat, 씌우기. Branched from main after PR ① merged.
+- D3 (R2): hat picker in PR ②, reused by the PR ③ skin tab.
+- Line 67: an optional progress field `equipped` (per animal). Unknown ids, or hats the user does not own, are ignored on load.
+- Corrections / OV7: `PetPortrait` gets an optional `hat` prop, default none. Every portrait of the user's own pets passes its hat; `AppIcon` and the OG card never do.
+- OV6 / T7: update `/privacy` for hats.
+- Design decisions:
+  - D6: a hat card has "씌우기".
+  - D9: PetPicker gains a hat row, with a preview, the animal row, and hat tiles in 3 columns ("없음" first). A tap equips the hat at once, and one hat may be worn by several animals.
+  - D10: unearned hats are faded with a "3스테이지" label.
+  - D23: the hat row is a radiogroup, locked hats read "잠김, 3스테이지", and the sheet uses `useModalSheet`.
+- T1: one anchor at (64, 40) fits all 4 animals, and the hat draws last.
+
+### Scope Challenge A: assessment
+
+What already exists:
+
+- **`RewardArt.tsx`**: it already draws all 8 hat shapes at PetPortrait head coordinates (`hat(shape, paint)` at line 38, "머리 꼭대기 64, 40" at line 3). The portrait can reuse this hat drawing; no new art is needed.
+- **`rewards.ts`**: 30 hat ids, each used by exactly one stage or category [measured: `grep -oE "'hat-[a-z-]+'" src/lib/rewards.ts`, 30 unique, each once]. A reverse lookup from hat to "3스테이지" or "연애" is therefore unique.
+- **`progress.ts` + `progressRepository.ts`**: the pattern for optional fields (`earnedRewards`, `seenRewards`) and their sanitizing is already there. `equipped` follows the same pattern.
+- **`PetPicker.tsx`**: a sheet with an animal radiogroup. Today it has its own Escape handler (line 28) and no Tab trap, which D23 requires.
+
+Own-pet portrait call sites [measured: `grep -rn "<PetPortrait" src`]:
+
+- `HomePage.tsx:44` (hero button, headOnly 28px)
+- `HomePage.tsx:66` (parade, all 4 animals)
+- `PetPicker.tsx:49`
+- `PestLayer.tsx:178`
+- `QuestionPage.tsx:114` (resting) and `:248` (result)
+- `AppIcon.tsx:22` never gets a hat.
+
+Complexity: about 18 changed source files plus tests [estimated from the call sites and modules above]. That reaches the 8-file gate, so the structure question below is required.
+
+TODOS cross-reference: nothing in TODOS.md blocks PR ②. The P1 "likedBy / --color-grass" item stays in PR ③.
+
+Distribution: no new artifact. The OG build (`scripts/og/card.ts`) renders `PetPortrait` without a hat, so its output stays the same.
+
+REALITY: premise-table pass unverified=0 (30 unique hats, 6 own-pet call sites, hat art at head coords) src/components/RewardArt.tsx:3
+REALITY: already-done pass origin/main since 2026-11-20 touches PetPortrait/PetPicker/progress only via 779c9e1 (PR ①, no hat prop) src/components/PetPortrait.tsx:15
+REALITY: surface-check pass no CLI or route named; component props checked (PetPortrait has animal, mood, headOnly, x, y, size) src/components/PetPortrait.tsx:15
+REALITY: binding-decisions pass D2, D3, D6, D9, D10, D23 and OV7 honored; gstack-decision-search returned none for this branch docs/designs/rewards-playground.md:481
+REALITY: numbers pass 30 hats measured; file count estimated docs/designs/rewards-playground.md:604
+REALITY: deferred-asks pass no linked issue for PR ② docs/designs/rewards-playground.md:604
+REALITY: pr-count pass PR ② is the second of 3 approved PRs (D2), no extra split; no .gstack/ship-policy.json docs/designs/rewards-playground.md:308
+
+### Scope record (PR ②)
+
+feature answers: none proposed (PR ② scope as approved in D2, D3, D6, D9, D10, D23); structure: B Smaller arrangement (D26, user answer 2026-11-24); accepted scope: one new component `HatRow` (+ CSS, in PetPicker now, reused by the PR ③ skin tab); `hatOf` / `equipHat` in `src/lib/progress.ts`; hat source lookup ("3스테이지", "연애") in `src/lib/rewards.ts`; `equipped` optional field + sanitize; `PetPortrait` optional `hat` prop drawn with RewardArt's hat shapes; callers read `useProgress` and pass the hat (PestLayer takes a `hat` prop, OV2-11); `progressContext.ts` / `useProgressState.ts` gain `equipHat` (OV2-12); about 20 source files; pending remedies: F1 (resolved D27, superseded by D29).
+
+### Scope Challenge C: findings (PR ②)
+
+1. F1 [INFORMATIONAL] (confidence 8/10) `src/hooks/useClaimRewards.ts:9`. Rewards are recorded only where `useTopicStages` / `useTopicCategories` run, which is the list and play screens (`grep -rn useClaimRewards src`). The home page loads only the continue topic, through `useTopicRounds` (`useHomePage.ts`), and records nothing. The hat row (D9, D10) reads the recorded `earnedRewards`. So a user who finished stages before the update and has not opened a list since sees those hats as locked. The same happens to a user who finished MBTI categories while continuing nonsense. → R5 (D27).
+2. F2 [INFORMATIONAL] (confidence 7/10) D6 (line 657) says a hat card has "씌우기" but not which animal gets the hat, or what the button shows afterwards. The play screen's pest is `settings.pet`. → R6 (D28).
+3. F3 [INFORMATIONAL] (confidence 9/10) `src/components/PetPicker.tsx:28`. The sheet handles Escape itself and has no Tab trap. D23 already requires `useModalSheet` for every sheet, so this is carried as necessary work with no question.
+
+## Decision ledger (PR ②)
+
+Approval readiness: PASS. Checked: D26 (structure B), D27 superseded by D29 A, D28 amended by D32 A, D30 A, D31 A. OV2-1/2/6/9/11/12/13 and F3 are carried as necessary work of approved contracts (OV7, D10, D23, T7, PR ① claim rule).
+
+### R5: record rewards on the home page
+
+Finding: F1, INFORMATIONAL, 8/10, src/hooks/useClaimRewards.ts:9, plan-eng-review
+Plan baseline: no approval; PR ① records rewards on list and play screens only (Eng Section 1 finding 1, `useClaimRewards`).
+Runtime evidence: `useClaimRewards` is called from `useTopicStages.ts:46` and `useTopicCategories.ts:41` only. The home page calls `useTopicRounds(topic)` for the continue topic (`useHomePage.ts`). Topic files: nonsense 139 KB, MBTI 36 KB [measured: `ls -la public/data/quiz/`].
+Comparison grid:
+
+| Choice         | Current  | A                                                                                                                       | B                                                                              | C                                                        |
+| -------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| R5 home claim  | none     | the home page records every enterable topic (loads each topic file; +36 KB MBTI when continuing nonsense, cached after) | the home page records only the continue topic (already loaded, no extra fetch) | none; hats unlock after the user opens that topic's list |
+| R6 card 씌우기 | pending  | pending                                                                                                                 | pending                                                                        | pending                                                  |
+| D9/D10 hat row | approved | unchanged                                                                                                               | unchanged                                                                      | unchanged                                                |
+
+Question D27:
+D27 — 첫 화면에서도 받은 보상을 기록할까요?
+Project/branch/task: feat/sticker-hats, PR ② 모자.
+ELI10: 지금 보상은 스테이지 목록이나 풀이 화면을 열어야 "받음"으로 저장됩니다. PR ②의 모자 고르기는 첫 화면의 방해꾼 시트에 있어서, 업데이트 전에 스테이지를 깼지만 목록을 아직 안 연 사용자는 받은 모자가 잠겨 보입니다. 첫 화면에서 기록하면 시트를 열자마자 모자가 다 보입니다.
+Stakes if we pick wrong: 기존 사용자가 첫 화면에서 시트를 열었다가 "깬 스테이지 모자가 왜 잠겼지?" 하고 헷갈립니다.
+Recommendation: A because 시트가 첫 화면에 있으니 기록도 첫 화면에서 해야 기존 사용자의 모자가 처음부터 맞게 보이고, 추가 비용은 처음 한 번 받는 MBTI 파일 36 KB뿐입니다.
+Completeness: A=10/10, B=8/10, C=6/10
+Pros / cons:
+A) 모든 주제 기록 (recommended)
+✅ 넌센스와 MBTI 모자가 첫 화면 시트에서 처음부터 모두 맞게 보입니다
+✅ 이미 있는 useClaimRewards를 주제마다 한 번씩 부르기만 해 새 규칙이 없습니다
+❌ 넌센스를 이어 풀 때도 MBTI 파일(36 KB)을 한 번 더 받습니다(다음부터는 캐시)
+B) 이어 풀 주제만
+✅ 이미 받은 파일만 써서 요청이 하나도 늘지 않습니다
+✅ 대부분의 사용자(넌센스만 푼 사람)는 이것으로 충분합니다
+❌ 다른 주제의 모자는 그 목록을 열기 전까지 잠겨 보입니다
+C) 그대로 두기
+✅ 코드 변경이 전혀 없습니다
+✅ 목록을 한 번 열면 저절로 풀립니다
+❌ 기존 사용자가 첫 화면 시트에서 받은 모자를 잠긴 것으로 봅니다
+Net: 첫 화면에서 파일 하나를 더 받는 것 대 기존 사용자의 모자가 처음부터 맞게 보이는 것.
+Header: 첫 화면 기록
+Options:
+A) 모든 주제 기록 (recommended)
+첫 화면이 들어갈 수 있는 주제마다 파일을 받아 useClaimRewards로 기록. 이어 풀 주제가 아니면 파일 하나(MBTI 36 KB)를 더 받음. 테스트: 목록을 안 연 v1 진행으로 첫 화면을 열면 두 주제의 모자가 earnedRewards에 들어감(human: ~2h / CC: ~10min).
+B) 이어 풀 주제만
+첫 화면이 이미 받는 이어 풀 주제만 기록. 요청 수 그대로. 다른 주제 모자는 그 목록을 열 때 풀림(human: ~1h / CC: ~5min).
+C) 그대로 두기
+변경 없음. 모자는 목록이나 풀이 화면을 연 뒤 풀림.
+
+State: approved
+Actual answer: A) 모든 주제 기록 (D27, AskUserQuestion answer 2026-11-24); superseded by D29 A after Outside Voice OV2-3/4/5
+Accepted scope: the home page loads each enterable topic's file and records rewards with the existing `useClaimRewards`. A topic other than the continue topic adds one file request (MBTI is 36 KB; cached afterwards). Test: a v1 progress whose lists were never opened records both topics' hats in `earnedRewards` from the home page.
+History: none
+
+### R6: what "씌우기" on the result card does
+
+Finding: F2, INFORMATIONAL, 7/10, docs/designs/rewards-playground.md:657 (D6), plan-eng-review
+Plan baseline: D6 says that from PR ② a hat card has "씌우기", and D9 says a tap equips at once with no confirm. Neither names the animal or what the card shows after the tap.
+Runtime evidence: the result phase renders `StageResult` and returns before `PestLayer` (`StagePlayPage.tsx:139`), so no pet is on screen when the card shows. The play screen's pest is `settings.pet`.
+Comparison grid:
+
+| Choice         | Current              | A                                                                                                                                                                       | B                                                                                    |
+| -------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| R6 card 씌우기 | unspecified, pending | puts the hat on `settings.pet` at once; the card art changes to that pet wearing the hat, and the button turns into a pressed "쓰고 있어요" (a second tap takes it off) | opens the pest sheet (D9) with this hat highlighted; the user picks the animal there |
+| R5 home claim  | approved A (D27)     | unchanged                                                                                                                                                               | unchanged                                                                            |
+| D9 hat row     | approved             | unchanged                                                                                                                                                               | unchanged                                                                            |
+
+Question D28:
+D28 — 결과 카드의 "씌우기"는 누구에게, 어떻게 씌울까요?
+Project/branch/task: feat/sticker-hats, PR ② 모자.
+ELI10: 스테이지를 깨면 "새 보상!" 카드에 모자가 나오고 "씌우기" 버튼이 있습니다. 결과 화면에는 동물이 안 보여서, 누르면 무슨 일이 생기는지 정해야 합니다. 지금 방해꾼에게 바로 씌우고 카드 그림을 "모자 쓴 동물"로 바꾸거나, 방해꾼 시트를 열어 동물을 고르게 할 수 있습니다.
+Stakes if we pick wrong: 눌러도 화면이 그대로면 씌워졌는지 모르고, 시트를 열면 한 번에 끝날 일이 두세 번 눌러야 합니다.
+Recommendation: A because 방금 깬 판의 방해꾼이 바로 모자를 쓰는 모습이 가장 큰 보상이고, D9의 "누르면 바로 씌운다" 규칙과도 같습니다.
+Note: options differ in kind, not coverage — no completeness score.
+Pros / cons:
+A) 지금 방해꾼에게 바로 (recommended)
+✅ 한 번 누르면 끝나고, 카드 그림이 모자 쓴 동물로 바뀌어 결과를 바로 봅니다
+✅ 다시 누르면 벗겨져 실수해도 되돌리기 쉽습니다
+❌ 다른 동물에게 씌우려면 첫 화면 방해꾼 시트로 가야 합니다
+B) 방해꾼 시트 열기
+✅ 네 동물 중 누구에게 씌울지 그 자리에서 고릅니다
+✅ 모자 줄 부품(HatRow)을 그대로 써서 새 화면이 없습니다
+❌ 결과 화면 위에 시트가 하나 더 떠서 누를 일이 두세 번으로 늘어납니다
+Net: 한 번에 끝나는 것 대 동물을 고르는 자유.
+Header: 씌우기 동작
+Options:
+A) 지금 방해꾼에게 바로 (recommended)
+settings.pet에 바로 씌움. 카드 그림이 그 동물+모자로 바뀌고 버튼은 눌린 "쓰고 있어요"(다시 누르면 벗김). 테스트: 누르면 equipped[pet]이 그 모자, 다시 누르면 없음(human: ~2h / CC: ~10min).
+B) 방해꾼 시트 열기
+카드 버튼이 방해꾼 시트(D9)를 열고 이 모자를 강조. 동물은 시트에서 고름. 테스트: 시트가 열리고 모자 타일에 포커스(human: ~3h / CC: ~15min).
+
+State: approved
+Actual answer: A) 지금 방해꾼에게 바로 (D28, AskUserQuestion answer 2026-11-24)
+Accepted scope: "씌우기" on a hat card equips the hat on `settings.pet` at once. The card art becomes that pet wearing the hat, and the button turns into a pressed "쓰고 있어요"; a second tap takes the hat off. Test: a tap sets `equipped[pet]` to the hat, and a second tap clears it.
+History: none
+
+Scope Challenge result: scope accepted as-is (smaller arrangement D26; F1 and F2 resolved as additions D27 and D28; F3 carried under D23).
+
+### Section 1 (PR ②): Architecture
+
+```
+progress (localStorage, v1)                 settings
+  earnedRewards ──┐                            pet ─────────────┐
+  equipped? {petId: hatId}  ◄── sanitize on load (drop: not a   │
+       │                        hat, unknown pet, not earned)   │
+       │                                                        │
+  lib/progress.ts                                               │
+    hatOf(progress, pet) → Reward | undefined                   │
+    equipHat({progress, pet, hat|undefined}) → same object if   │
+       no change or hat not earned                              │
+       │                                                        │
+  useProgress().equipHat(pet, hatId|undefined)  ◄───────────────┤
+       │            ▲                 ▲                         │
+       │            │                 │                         │
+       │     HatRow (PetPicker, D9)   StageResult 씌우기 (D28) ◄─┘
+       ▼
+  PetPortrait hat={hatOf(progress, animal)}  (HomePage hero + parade, PetPicker,
+       │                                      PestLayer, QuestionPage ×2)
+       └── draws RewardArt's hat shape last, at head (64, 40)
+           AppIcon / scripts/og/card.ts: no hat prop → unchanged
+
+home: useHomePage → each enterable topic file → useClaimRewards (D27)
+rewards.ts: rewardSource(hatId) → "3스테이지" | "연애" (derived from the two tables)
+```
+
+Design-twice (new public component `HatRow`):
+
+- Shape 1 takes props `{animal, wearing, earned, onWear}`, and each caller (PetPicker now, the yard tab in PR ③) wires progress itself.
+- Shape 2 (chosen) is `<HatRow animal={pet} />`. It reads `useProgress` and calls `equipHat` itself.
+- Why shape 2: it hides more behind less. The earned check, the locked labels, and the write sit behind one prop, and the PR ③ tab is one line. Both callers already sit under `ProgressProvider`.
+
+Red flags screened:
+
+- **Hand-synced list.** The locked label must be derived from `NONSENSE_REWARDS` / `MBTI_REWARDS` (`rewardSource`), not written as a second table.
+- **Two ways to do one task.** Both the card and HatRow go through `equipHat`, with one owner in progress.ts.
+- **Split ownership.** None: `equipped` lives in progress and the pet choice in settings, and neither copies the other.
+- **Importable internals.** `PetPortrait` imports only the exported hat drawing from `RewardArt`, never its palette internals.
+- **Shallow module.** None.
+- **Information leakage.** None.
+- **Temporal decomposition.** None.
+- **Pass-through method.** None; `usePetHat` was dropped by D26.
+
+Production failure per new path:
+
+- A stored `equipped` points to a hat the user does not have (edited storage, or an id renamed by mistake). Load drops it and the pet shows no hat. Test: sanitize.
+- "씌우기" runs before the claim is saved. `equipHat` would reject a hat that is not yet earned. The claim runs in the play screen's `useClaimRewards` effect on the completing answer, before the result phase renders. Test: the D28 flow on a stage-finishing answer.
+- The home topic fetch fails (offline, first visit). No claim happens, and the hats stay as recorded. No error is shown for the extra topic; the home card's own retry covers the continue topic. Test: an MBTI file error on home leaves the home page usable.
+
+Security: no new data leaves the device. Distribution: none.
+
+Findings: No issues found beyond F1–F3 (resolved above).
+Dispositions: F1 accepted (D27 A), F2 accepted (D28 A), F3 carried (D23).
+
+### Section 2 (PR ②): Code quality
+
+1. [INFORMATIONAL] (confidence 7/10) `src/components/PetPicker.tsx:19`. `useEffect(() => selectedRef.current?.focus(), [])` focuses the selected animal. `useModalSheet` (line 9) focuses the sheet itself. When PetPicker moves to `useModalSheet` (D23), keep the focus on the selected animal by focusing it after the hook. Otherwise the radiogroup loses its starting point. This is the necessary implementation of D23, so there is no question.
+2. [INFORMATIONAL] (confidence 8/10) `src/data/progressRepository.ts` (`cleanRewardIds`). `equipped` needs its own cleaner, because it is an object and not a list. It keeps only keys that are a `PetId` and values that are a hat id in `earnedRewards`, and it runs after `earnedRewards` is cleaned. Unknown hat ids are dropped here, which differs from `earnedRewards`, which keeps unknown ids. The difference is intended by line 67, because a worn hat must be drawable. Carried from line 67 with no question.
+3. [INFORMATIONAL] (confidence 7/10) `src/pages/HomePage.tsx:66`. The parade renders all 4 animals, and each one gets `hatOf(progress, animal.id)`, not only the chosen pet. This follows from "every portrait of the user's own pets passes its hat" (OV7).
+
+No shared-code extraction proposed.
+Dispositions: 1–3 carried as necessary work of approved contracts (D23, line 67, OV7).
+
+### Section 3 (PR ②): Tests
+
+Framework: vitest + Testing Library (`npm test`, 53 files).
+
+```
+CODE PATHS                                         USER FLOWS
+[+] lib/progress.ts                                [+] Hat picker (home 방해꾼 sheet)
+  ├── hatOf                                          ├── [GAP] earned hat → tap → pet wears it (preview + home hero)
+  │   ├── [GAP] none → undefined                     ├── [GAP] "없음" takes it off
+  │   └── [GAP] equipped earned hat → Reward         ├── [GAP] locked hat → "3스테이지를 다 풀면 받아요", nothing saved
+  └── equipHat                                       ├── [GAP] no hats yet → "스테이지를 다 풀면 모자가 생겨요"
+      ├── [GAP] earned hat → saved                   └── [GAP] Esc closes; Tab stays in sheet (useModalSheet)
+      ├── [GAP] undefined → removed                [+] Result card (D28)
+      ├── [GAP] not earned / not a hat → same obj    ├── [GAP] 씌우기 → "쓰고 있어요", equipped[pet] set
+      └── [GAP] same hat again → same object         ├── [GAP] second tap → removed
+[+] data/progressRepository.ts sanitize               └── [GAP] item reward card has no 씌우기
+  ├── [GAP] v1 without equipped → unchanged        [+] Home claim (D27)
+  └── [GAP] bad keys / unearned / non-hat dropped,   └── [GAP] v1, lists never opened → both topics' hats
+      solved + gold kept                                  recorded from home
+[+] lib/rewards.ts rewardSource
+  └── [GAP] every hat → one stage no. or category
+[+] PetPortrait hat prop
+  ├── [GAP] no hat by default (AppIcon/OG unchanged)
+  └── [GAP] hat drawn after the face (last child)
+[+] callers pass hat
+  └── [GAP] PestLayer / QuestionPage show equipped hat
+
+COVERAGE: 0/22 paths tested (new code) | GAPS: 22 (0 E2E, 0 eval)
+```
+
+Required tests (proof of approved behavior: D9, D10, D23, D27, D28, line 67, OV7):
+
+- `src/lib/progress.test.ts` (extend): `hatOf` / `equipHat` rows.
+  Value: protects=only earned hats can be worn and a no-op keeps the same object; fails_when=equipHat accepts an unearned id or always returns a new object (save loop); why_new=no equip rule exists; seam=none; no_claim=none beyond protects
+- `src/data/progressRepository.test.ts` (extend): `equipped` sanitize rows.
+  Value: protects=a bad equipped value never wipes progress and never draws an unknown hat; fails_when=sanitize throws or keeps a non-hat id; why_new=equipped is new; seam=none; no_claim=real localStorage quota (jsdom storage)
+- `src/lib/rewards.test.ts` (extend): `rewardSource` covers all 30 hats with one source each.
+  Value: protects=locked labels name the right stage/category; fails_when=the tables change and a hat loses or doubles its source; why_new=no reverse lookup exists; seam=none; no_claim=none beyond protects
+- `src/components/PetPicker.test.tsx` (extend): hat row flows (wear, 없음, locked, empty line, radiogroup labels "잠김, 3스테이지", Esc/Tab).
+  Value: protects=D9/D10/D23 behavior; fails_when=a locked hat can be worn or the sheet traps no focus; why_new=PetPicker tests cover animals only; seam=none; no_claim=visual fit of hats (T1 images)
+- `src/pages/pages.test.tsx` (extend, '스티커 보상'): D28 card flow; item card has no 씌우기; D27 home claim with a v1 fixture.
+  Value: protects=one-tap equip from the result and home recording for both topics; fails_when=씌우기 equips the wrong pet or home records nothing; why_new=existing tests cover the card text only; seam=none; no_claim=network caching of the extra topic file (mocked fetch)
+- `src/components/RewardArt.test.tsx` or a new `PetPortrait` row: no hat by default, hat as last child when given (regression: AppIcon/OG unchanged).
+  Value: protects=icon and OG render stay identical; fails_when=PetPortrait draws a hat or changes markup without a hat prop; why_new=no portrait test exists; seam=none; no_claim=pixel output of the OG PNG
+
+Tests made obsolete: none.
+
+Findings: No issues found beyond the gaps above (all required proof of approved behavior).
+Dispositions: tests carried as required proof (no new test policy, no question).
+
+### Section 4 (PR ②): Performance
+
+- The hat row renders 30 small SVGs plus 4 portraits once, when the sheet opens. That is fine at this size [estimated].
+- The home page claim (D27) runs `claimRewards` on progress changes. It is a no-op that returns the same object over 62 cells, so it does not save or re-render in a loop (same as PR ①).
+- One extra topic file is fetched per first home visit (36 KB MBTI, or 139 KB nonsense when MBTI is the continue topic) [measured: `ls -la public/data/quiz/`]. After that it is served from the HTTP cache or service worker.
+
+Findings: No issues found.
+
+### Outside Voice (PR ②, Claude Plan subagent; Codex not installed, so this is not outside coverage)
+
+The reviewer returned 13 findings (VERDICT: FINDINGS). The parent checked each against the code.
+
+Factual corrections, applied without a question (necessary implementation of approved contracts):
+
+- OV2-1 (High). The hat goes inside `<g data-part="figure">` (`PetPortrait.tsx:359`) as its last child, so it breathes with the pet. The test checks that parent. This corrects "hat as last child" in Section 3.
+- OV2-2 (High). `RewardArt` exports a `HatShape({reward})` that does the colour lookup and the stroke group (`RewardArt.tsx:543` sets stroke on the wrapper). `PetPortrait` uses it, never the bare `hat()` or `COLORS`.
+- OV2-6 (Medium). The home and PetPicker tests mock `fetchTopicFile` with one nonsense file (`HomePage.test.tsx:25`). Whatever D29 decides, the fixtures become per-topic, and the retry test keeps targeting the continue card.
+- OV2-9 (Medium). Locked-hat copy picks 을/를 from the last syllable's final consonant, and MBTI sources read "MBTI 일상을 다 풀면 받아요". The `rewardSource` test checks the sentence for one stage hat and for one MBTI hat of each particle.
+- OV2-11 (Low). `PestLayer` takes a `hat` prop and the pages compute it, because `PestLayer.test.tsx` renders without `ProgressProvider`.
+- OV2-12 (Low). The privacy line becomes "푼 문제, 골드, 연 힌트, 받은 스티커와 씌운 모자 같은 진행 상황" (`PrivacyPage.tsx:32`, CLAUDE.md rule). The scope record adds `progressContext.ts` and `useProgressState.ts` (the `equipHat` action).
+- OV2-13 (Low). `useQuestionPage.ts:119` has rounds ready but never claims. Add `useClaimRewards` there. This is PR ①'s approved rule ("record where the topic data is ready"), so it needs no new approval.
+
+Choices reopened or new (asked below): OV2-3/4/5 → R5 reopened (D29); OV2-7 → R7 (D30); OV2-8 → R8 (D31); OV2-10 → R6 reopened (D32).
+
+Evidence for D29:
+
+- The service worker precaches the data files at install (`scripts/sw/worker.js:22`) and serves `/data/quiz/*` network-first (`worker.js:58`). So the extra cost is one revalidating request on each home visit, and a parse of the file (139 KB for nonsense) when MBTI is the continue topic. It is not a one-time 36 KB download.
+- "이어서 풀기" already claims on the play page (`useStagePlayPage`).
+
+### R5 (reopened): where rewards are recorded for the hat sheet
+
+Finding: OV2-3, OV2-4, OV2-5 (Medium, Claude Plan subagent)
+Plan baseline: D27 A, "the home page records every enterable topic".
+Runtime evidence: precache + network-first as above. One hook per topic over a list breaks the rules of hooks, so A needs a new multi-load hook.
+
+| Choice       | Current (D27)                     | A apply                                                                                                                  | B keep    | C investigate            | D defer                      |
+| ------------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------- | ------------------------ | ---------------------------- |
+| R5 recording | home loads every topic each visit | home records the continue topic it already loads; the hat sheet loads and records the other topics only while it is open | unchanged | ≤30 min probe, no change | row stays as D27, unresolved |
+
+Question D29: see the AskUserQuestion of 2026-11-24 (options A apply / B keep D27 / C investigate / D defer; recommendation A).
+State: approved
+Actual answer: A) 시트 열 때 (D29, AskUserQuestion answer 2026-11-24)
+Accepted scope: supersedes D27. The home page records the continue topic it already loads (`useClaimRewards` on the `useTopicRounds` result in `useHomePage`). While the hat sheet is open, HatRow loads each other enterable topic and records it. A locked hat may unlock a moment after the sheet opens. Test: a v1 progress whose lists were never opened shows both topics' hats unlocked once the sheet is open; the home page without the sheet requests only the continue topic.
+History: D27 A (2026-11-24), approved on a cost model that the service worker evidence corrects.
+
+### R7: how bad `equipped` entries are handled
+
+Finding: OV2-7 (Medium, Claude Plan subagent), `progressRepository.ts:39` (the unknown-id rule)
+Plan baseline: line 67, "ignored on load". Section 2 item 2 proposed deleting them on load.
+
+| Choice               | Current                                    | A apply                                                                                                                                                                                  | B keep                            |
+| -------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| R7 equipped cleaning | delete unknown or unearned entries on load | on load, drop only wrongly shaped entries (non-string value, unknown pet key); `hatOf` ignores unknown or unearned hats at read time, so an older build never erases a newer build's hat | delete on load (Section 2 item 2) |
+
+Question D30: see AskUserQuestion; recommendation A.
+State: approved
+Actual answer: A) 그릴 때 거르기 (D30, AskUserQuestion answer 2026-11-24)
+Accepted scope: sanitize `equipped` drops only wrongly shaped entries (a non-string value or an unknown pet key). `hatOf` returns no hat for an unknown, non-hat or unearned id. Test: an unknown hat id stays in storage and is not drawn. This replaces Section 2 item 2.
+
+### R8: hat sheet layout
+
+Finding: OV2-8 (Medium, Claude Plan subagent), `PetPicker.module.css:15` (max-height 92dvh), D9
+Plan baseline: D9 says preview on top, the four animals as today (2-column cards with descriptions), then hat tiles in 3 columns.
+
+| Choice    | Current                                                                                  | A apply                                                                                                                          | B keep        | C investigate                              |
+| --------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------ |
+| R8 layout | about 1,100 px of content in about 680 px of sheet [estimated]; the preview scrolls away | the preview stays fixed at the top; the animals become one compact row of 4 (portrait + name, ≥44 px); only the hat grid scrolls | D9 as written | a mockup in /design-review before choosing |
+
+Question D31: see AskUserQuestion; recommendation A.
+State: approved
+Actual answer: A) 미리보기 고정 (D31, AskUserQuestion answer 2026-11-24)
+Accepted scope: the sheet keeps the preview fixed at the top. The animals become one row of 4 (portrait and name, each ≥44 px), with one line of description for the selected animal only. Only the hat grid scrolls. This amends D9's middle row; the rest of D9 is unchanged. Checked at 360 px in /design-review.
+
+### R6 (reopened): the card toggle
+
+Finding: OV2-10 (Low, Claude Plan subagent)
+Plan baseline: D28 A, with the label changing to "쓰고 있어요" and a second tap taking the hat off.
+
+| Choice    | Current (D28)                                           | A apply                                                                                                                                                                                    | B keep         |
+| --------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------- |
+| R6 toggle | the label changes, and a second tap leaves the pet bare | the label stays "씌우기" with `aria-pressed` and a status line "○○가 쓰고 있어요"; a second tap puts back the hat worn before; the hat goes on the session's pest (`usePestSession.ts:37`) | D28 as written |
+
+Question D32: see AskUserQuestion; recommendation A.
+State: approved
+Actual answer: A) 다듬기 (D32, AskUserQuestion answer 2026-11-24)
+Accepted scope: amends D28. The button label stays "씌우기", with `aria-pressed`, and a status line under it reads "○○가 쓰고 있어요". A second tap restores the hat worn before the first tap (or none). The hat goes on the session's pest (`usePestSession` animal). Test: wearing X, tap → Y, tap again → X.
+History: D28 A (2026-11-24).
+
+### NOT in scope (PR ②)
+
+- The yard hat tab (PR ③, D13). It reuses `HatRow`.
+- Per-animal hat anchors. T1 found that one anchor fits all four animals.
+- Buying hats. Hats come only from stage rewards (D11); the shop is PR ③ and sells items.
+- Hats on the app icon and the share (OG) card. They always show the bare rabbit (OV7).
+
+### Failure modes (PR ②)
+
+| Path                   | Realistic failure                     | Covered by                                                            | User sees                                   |
+| ---------------------- | ------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------- |
+| `equipped` load        | stored id unknown or unearned         | D30 `hatOf` filter + test                                             | pet without hat (no error, correct)         |
+| 씌우기 (D32)           | claim not saved yet                   | claim runs on the finishing answer before the result phase; test      | button works                                |
+| sheet topic load (D29) | offline, file fetch fails             | sheet stays usable, hats stay as recorded; test with a rejected fetch | other topic's hats stay locked until online |
+| hat drawing            | hat outside the breathing group       | OV2-1 parent test                                                     | hat moves with the pet                      |
+| hat stroke             | bare `hat()` without its stroke group | OV2-2 `HatShape` export                                               | outlined hat                                |
+
+Critical gaps: 0. Every failure is either handled or visible.
+
+### Parallelization (PR ②)
+
+Sequential implementation, no parallelization opportunity. lib and data come first (progress, rewards, sanitize); components and pages build on them.
+
+## Implementation Tasks (PR ②)
+
+Synthesized from this review's findings. Each task derives from a specific finding above.
+
+- [ ] **P2-1 (P1, human: ~3h / CC: ~15min)** — progress — `equipped` field, sanitize (shape only), `hatOf` (known + earned), `equipHat` (same object on no-op or unearned), context action
+  - Surfaced by: D30, line 67, OV2-12
+  - Files: src/types/progress.ts, src/data/progressRepository.ts, src/lib/progress.ts, src/hooks/progressContext.ts, src/hooks/useProgressState.ts
+  - Verify: `npm test -- progress progressRepository`
+- [ ] **P2-2 (P1, human: ~2h / CC: ~10min)** — rewards — `rewardSource(hatId)` derived from the two tables, plus the locked sentence with 을/를
+  - Surfaced by: D10, OV2-9
+  - Files: src/lib/rewards.ts
+  - Verify: `npm test -- rewards`
+- [ ] **P2-3 (P1, human: ~3h / CC: ~15min)** — PetPortrait — `HatShape` export in RewardArt; optional `hat` prop drawn last inside `data-part="figure"`
+  - Surfaced by: OV7, OV2-1, OV2-2, T1
+  - Files: src/components/RewardArt.tsx, src/components/PetPortrait.tsx
+  - Verify: portrait test (no hat by default; hat's parent is the figure group); `npm run build` (OG unchanged)
+- [ ] **P2-4 (P1, human: ~1d / CC: ~45min)** — HatRow + PetPicker — fixed preview, compact animal row, scrolling 3-column hat grid ("없음" first), locked tiles, empty line, radiogroup, `useModalSheet` with focus on the selected animal, other-topic claim while open
+  - Surfaced by: D9, D10, D23, D29, D31, F3, Section 2 item 1
+  - Files: src/components/HatRow.tsx (+ .module.css), src/components/PetPicker.tsx (+ .module.css)
+  - Verify: PetPicker tests (per-topic fetch fixtures, OV2-6); 360 px in /design-review
+- [ ] **P2-5 (P1, human: ~3h / CC: ~15min)** — callers — pass `hatOf` to every own-pet portrait: HomePage hero + parade, PestLayer `hat` prop (from StagePlayPage), QuestionPage ×2
+  - Surfaced by: OV7, OV2-11, Section 2 item 3
+  - Files: src/pages/HomePage.tsx, src/components/PestLayer.tsx, src/pages/StagePlayPage.tsx, src/pages/QuestionPage.tsx
+  - Verify: page tests show the worn hat
+- [ ] **P2-6 (P1, human: ~3h / CC: ~15min)** — result card — 씌우기 with fixed label, `aria-pressed`, status line; a second tap restores the previous hat; goes on the session's pest; no button for items
+  - Surfaced by: D6, D28, D32
+  - Files: src/components/StageResult.tsx (+ .module.css), src/hooks/useStageSession.ts, src/pages/StagePlayPage.tsx
+  - Verify: pages.test.tsx '스티커 보상'
+- [ ] **P2-7 (P1, human: ~1h / CC: ~10min)** — claims — the home page claims its continue topic; the question page claims its topic
+  - Surfaced by: D29, OV2-13
+  - Files: src/hooks/useHomePage.ts, src/hooks/useQuestionPage.ts
+  - Verify: v1 fixture tests (home without the sheet requests only the continue topic)
+- [ ] **P2-8 (P1, human: ~15min / CC: ~2min)** — privacy — "받은 스티커와 씌운 모자"
+  - Surfaced by: T7, OV2-12
+  - Files: src/pages/PrivacyPage.tsx
+  - Verify: page text
+
+### Completion summary (PR ②)
+
+- Step 0: Scope Challenge — scope accepted as-is (structure B, D26)
+- Reality rows: 7/7 tier-1 rows emitted, 0 unverified premises
+- Architecture Review: 0 issues found (F1–F3 came from the Scope Challenge)
+- Code Quality Review: 3 issues found (all carried as necessary work)
+- Test Review: diagram produced, 22 gaps identified (all required proof)
+- Performance Review: 0 issues found
+- NOT in scope: written
+- What already exists: written (Scope Challenge A)
+- TODOS.md updates: 0 items proposed
+- Failure modes: 0 critical gaps flagged
+- Unresolved decisions: 0 in this review
+- Outside voice: codex not installed; native Claude Plan subagent completed with 13 findings (7 corrections applied, 4 choices D29–D32 answered). This does not count as outside coverage.
+- Parallelization: 0 lanes, sequential
+- Lake Score: 1/1 (D27 was the only answer with completeness scores; the 10/10 option was picked, later superseded by D29)
+
 ## GSTACK REVIEW REPORT
 
-| Review         | Trigger                                       | Why                             | Runs | Status                                                           | Findings                            |
-| -------------- | --------------------------------------------- | ------------------------------- | ---- | ---------------------------------------------------------------- | ----------------------------------- |
-| CEO Review     | `/plan-ceo-review`                            | Scope & strategy                | 0    | —                                                                | —                                   |
-| Outside Review | native Claude subagents (Codex not installed) | Independent 2nd opinion         | 2    | unavailable (native fallback completed: eng plan-review, design) | eng 11 findings; design 27 findings |
-| Eng Review     | `/plan-eng-review`                            | Architecture & tests (required) | 1    | issues_open (ISSUES OPEN)                                        | 32 issues, 0 critical gaps          |
-| Design Review  | `/plan-design-review`                         | UI/UX gaps                      | 1    | clean (CLEAR)                                                    | score: 2/10 → 8/10, 22 decisions    |
-| DX Review      | `/plan-devex-review`                          | Developer experience gaps       | 0    | —                                                                | —                                   |
+| Review         | Trigger                                           | Why                             | Runs                               | Status                                  | Findings                                        |
+| -------------- | ------------------------------------------------- | ------------------------------- | ---------------------------------- | --------------------------------------- | ----------------------------------------------- |
+| CEO Review     | `/plan-ceo-review`                                | Scope & strategy                | 0                                  | —                                       | —                                               |
+| Outside Review | native Claude Plan subagent (Codex not installed) | Independent 2nd opinion         | 1 (this branch)                    | unavailable (native fallback completed) | 13 findings, 7 corrections applied, 4 decisions |
+| Eng Review     | `/plan-eng-review`                                | Architecture & tests (required) | 1 (this branch)                    | issues_open (ISSUES OPEN)               | 25 issues, 0 critical gaps                      |
+| Design Review  | `/plan-design-review`                             | UI/UX gaps                      | 1 (feat/sticker-album, 2026-11-20) | clean (CLEAR)                           | score: 2/10 → 8/10, 22 decisions                |
+| DX Review      | `/plan-devex-review`                              | Developer experience gaps       | 0                                  | —                                       | —                                               |
 
-- **OUTSIDE COVERAGE:** codex unavailable (not installed) for both the eng plan-review and design phases; in-host Claude subagents completed both, which does not count as outside coverage.
-- **VERDICT:** DESIGN CLEARED. Eng review is not CLEAR (issues mapped to T1–T9) and predates design decisions D8 (new stored "shown" marker) and D15 (yard renders before the claim, superseding an eng failure-mode row). eng review required
-  NO UNRESOLVED DECISIONS
+- **OUTSIDE COVERAGE:** codex unavailable (not installed) for the PR ② eng plan review. An in-host Claude Plan subagent completed instead, which does not count as outside coverage.
+- **VERDICT:** DESIGN CLEARED (earlier branch). Eng review for PR ② is ISSUES OPEN: all 25 issues are mapped to tasks P2-1 to P2-8, with 0 unresolved and 0 critical gaps. eng review required
+
+NO UNRESOLVED DECISIONS
