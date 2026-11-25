@@ -62,12 +62,7 @@ export function YardPage(): ReactElement {
       setHint(undefined);
       return;
     }
-    if (items[cell]) {
-      // 놓인 칸: 바꾸려면 내 물건에서 고르게 한다.
-      setTab('mine');
-      setHint('pick');
-      return;
-    }
+    // 놓인 칸이든 빈 칸이든, 놓을 물건이 남아 있으면 내 물건에서 고르게 한다.
     if (unplaced.length > 0) {
       setTab('mine');
       setHint('pick');
