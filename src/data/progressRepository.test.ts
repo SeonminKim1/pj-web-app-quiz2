@@ -187,18 +187,26 @@ describe('보상 필드 정리', () => {
     expect(createProgressStore({ storage }).load()).toEqual(SAVED);
   });
 
-  it('놀이터: 산 물건은 문자열만, 칸은 "0"~"5"의 문자열 값만 남기고 빈 배치는 그대로 둔다', () => {
+  // Value: protects=놀이터 칸 값이 모두 깨졌으면 "다 치움"이 아니라 기본 배치(모래 놀이통)로 돌린다(F4, 적대 리뷰); fails_when=깨진 값이 빈 객체가 되어 기본 물건이 사라지면; why_new=전부 깨진 배치 테스트가 없음; seam=none; no_claim=none beyond protects
+  it('놀이터: 칸 값이 모두 깨졌으면 기본 배치로 돌린다', () => {
+    const storage = memoryStorage({
+      [PROGRESS_KEY]: JSON.stringify({ ...SAVED, placed: { x: 1, '9': 2 } }),
+    });
+    expect(createProgressStore({ storage }).load()).toEqual(SAVED);
+  });
+
+  it('놀이터: 산 물건은 문자열만, 칸은 숫자 칸의 문자열 값만 남기고(지금 없는 칸도) 빈 배치는 그대로 둔다', () => {
     const storage = memoryStorage({
       [PROGRESS_KEY]: JSON.stringify({
         ...SAVED,
         ownedItems: ['item-kite-yellow', 3],
-        placed: { '0': 'big-sandbox', '7': 'big-slide', '2': 5 },
+        placed: { '0': 'big-sandbox', '7': 'big-slide', '2': 5, x: 'big-pond' },
       }),
     });
     expect(createProgressStore({ storage }).load()).toEqual({
       ...SAVED,
       ownedItems: ['item-kite-yellow'],
-      placed: { '0': 'big-sandbox' },
+      placed: { '0': 'big-sandbox', '7': 'big-slide' },
     });
     const empty = memoryStorage({
       [PROGRESS_KEY]: JSON.stringify({ ...SAVED, placed: {} }),

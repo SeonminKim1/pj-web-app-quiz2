@@ -371,7 +371,12 @@ export function placeItem({
   itemId: string;
   cell: number;
 }): Progress {
-  if (cell < 0 || cell >= YARD_CELLS || !ownsYardItem(progress, itemId)) {
+  if (
+    !Number.isInteger(cell) ||
+    cell < 0 ||
+    cell >= YARD_CELLS ||
+    !ownsYardItem(progress, itemId)
+  ) {
     return progress;
   }
   if (placedItems(progress)[cell]?.id === itemId) return progress;
@@ -392,9 +397,12 @@ export function unplaceItem({
   cell: number;
 }): Progress {
   const stored = storedPlaced(progress);
-  if (stored[String(cell)] === undefined) return progress;
-  const placed = { ...stored };
-  delete placed[String(cell)];
+  const id = stored[String(cell)];
+  if (id === undefined) return progress;
+  // 같은 물건이 저장된 다른 칸(깨진 값)도 함께 뺀다(placeItem과 같은 규칙, F12).
+  const placed = Object.fromEntries(
+    Object.entries(stored).filter(([, other]) => other !== id),
+  );
   return { ...progress, placed };
 }
 

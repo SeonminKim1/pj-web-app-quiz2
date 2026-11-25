@@ -52,14 +52,24 @@ export function YardPage(): ReactElement {
   // 결과 카드가 넘긴 "놓기" 요청은 한 번만 쓴다(새로 고침·뒤로 가기로 다시 놓기 모드가 되지 않게).
   useEffect(() => {
     if (requested !== undefined) {
-      navigate(location.pathname, { replace: true, state: null });
+      navigate(
+        {
+          pathname: location.pathname,
+          search: location.search,
+          hash: location.hash,
+        },
+        { replace: true, state: null },
+      );
     }
-  }, [requested, navigate, location.pathname]);
+  }, [requested, navigate, location.pathname, location.search, location.hash]);
   // 놓기 모드에서 Esc는 취소(D23).
   useEffect(() => {
     if (!placing) return;
     const onKeyDown = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') setPlacing(undefined);
+      // 열린 시트가 먼저 Esc를 받는다(시트만 닫고 놓기 모드는 남긴다).
+      if (event.key !== 'Escape') return;
+      if (document.querySelector('[aria-modal="true"]')) return;
+      setPlacing(undefined);
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);

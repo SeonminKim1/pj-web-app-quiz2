@@ -1365,7 +1365,7 @@ The yard renders at most 6 items and 4 animals, all static in PR ③. The backgr
 ### Implementation Tasks (PR ③)
 
 - [ ] **P3-1 (P1, human: ~3h / CC: ~15min)** — rewards: shop catalog (yellow × 7 shapes, 100 gold), `likedBy` by shape (D39), starter item (colourless big) + its drawing, `getYardItem` (F5)
-- [ ] **P3-2 (P1, human: ~4h / CC: ~20min)** — progress: `ownedItems` / `placed` + sanitize (keys 0–5, F12), `buyItem` (union result, F8) / `placeItem` / `unplaceItem` (starter copy-in, F4), `ownedYardItems` / `placedItems`, yard seen marking (D38), context actions
+- [ ] **P3-2 (P1, human: ~4h / CC: ~20min)** — progress: `ownedItems` / `placed` + sanitize (numeric keys, F12), `buyItem` (union result, F8) / `placeItem` / `unplaceItem` (starter copy-in, F4), `ownedYardItems` / `placedItems`, yard seen marking (D38), context actions
 - [ ] **P3-3 (P1, human: ~1d / CC: ~45min)** — YardPage + YardScene + ItemShelf on route `/playground` (D13–D19, D33), `--color-grass` token
 - [ ] **P3-4 (P1, human: ~2h / CC: ~10min)** — lift ClaimTopic out of HatRow into PetPicker and YardPage, reporting {error, retry} for the D15 failure line (F6)
 - [ ] **P3-5 (P1, human: ~2h / CC: ~10min)** — home 놀이터 pill + dot for unseen yard items (D20 as amended by D38, F10); result card "놀이터에 놓기" for item and big rewards (D6, F7)
@@ -1390,7 +1390,7 @@ Corrections (necessary implementation of approved contracts, applied without a q
 - **F9.** Yard height is `min(300px, 42dvh)`. The tab bar uses `env(safe-area-inset-bottom)`. Animals stand behind the cell labels, which sit above the animals.
 - **F10.** The home pill gets its own position in `Page.module.css` and is checked at 360px.
 - **F11.** Copy and tests use shop item names, for example "노랑 풍선을 샀어요".
-- **F12.** Sanitize for `placed` keeps only keys "0"–"5" with string values. `placeItem` removes every stored copy of the item.
+- **F12.** Sanitize for `placed` keeps numeric keys ("0", "1", …) with string values; keys beyond the 6 cells are kept so an old tab never deletes a newer version's cells (/ship D6 2026-11-26, was "0"–"5" only). `placeItem` removes every stored copy of the item.
 
 ### Completion summary (PR ③)
 

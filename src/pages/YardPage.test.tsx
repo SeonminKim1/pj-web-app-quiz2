@@ -369,3 +369,23 @@ it('산 알림은 3초 뒤 사라진다', async () => {
     vi.useRealTimers();
   }
 });
+
+// Value: protects=놓기 모드에서 사기 시트를 열고 Esc를 누르면 시트만 닫히고 놓기 모드는 남는다(D23, 적대 리뷰); fails_when=문서 Esc 처리가 시트 여부를 안 보고 놓기를 끄면; why_new=시트와 놓기 모드가 함께인 Esc 테스트가 없음; seam=none; no_claim=포커스 되돌리기
+it('놓기 모드에서 사기 시트의 Esc는 시트만 닫는다', async () => {
+  const user = renderAt('/playground', {
+    earnedRewards: ['item-yarn-pink'],
+    seenRewards: ['item-yarn-pink'],
+  });
+  await user.click(screen.getByRole('tab', { name: '내 물건' }));
+  await user.click(screen.getByRole('button', { name: '분홍 털실 공 놓기' }));
+  await user.click(screen.getByRole('tab', { name: '상점' }));
+  await user.click(
+    screen.getByRole('button', { name: '노랑 털실 공, 100골드' }),
+  );
+  expect(screen.getByRole('dialog')).toBeInTheDocument();
+  await user.keyboard('{Escape}');
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(within(yard()).getByRole('status')).toHaveTextContent(
+    '어느 칸에 놓을까요?',
+  );
+});

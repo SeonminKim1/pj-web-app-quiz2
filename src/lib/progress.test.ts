@@ -420,6 +420,20 @@ describe('놀이터(PR ③)', () => {
     expect(placedItems(cleared).every((item) => item === undefined)).toBe(true);
   });
 
+  // Value: protects=빼기는 깨진 저장에 같은 물건이 두 칸에 있어도 모두 빼고, placeItem은 정수가 아닌 칸을 거부한다(F12, 적대 리뷰); fails_when=빼기 뒤 같은 물건이 다른 칸에 다시 나타나거나 "1.5" 칸이 저장되면; why_new=중복 칸·소수 칸 테스트가 없음; seam=none; no_claim=none beyond protects
+  it('unplaceItem은 같은 물건의 모든 칸을 비우고, placeItem은 소수 칸을 거부한다', () => {
+    const corrupt = {
+      ...base,
+      earnedRewards: ['item-yarn-pink'],
+      placed: { '0': 'item-yarn-pink', '3': 'item-yarn-pink' },
+    };
+    const cleared = unplaceItem({ progress: corrupt, cell: 0 });
+    expect(cleared.placed).toEqual({});
+    expect(
+      placeItem({ progress: corrupt, itemId: 'item-yarn-pink', cell: 1.5 }),
+    ).toBe(corrupt);
+  });
+
   // Value: protects=같은 물건은 한 칸에만 있고 옮기면 원래 칸이 빈다, 가지지 않은 물건은 못 놓는다(설계 line 73, F12); fails_when=placeItem이 옛 자리를 남기거나 안 가진 물건을 놓으면; why_new=새 규칙; seam=none; no_claim=none beyond protects
   it('placeItem: 옮기기·바꾸기, 가지지 않은 물건은 같은 객체', () => {
     const owned = { ...base, earnedRewards: ['item-yarn-pink', 'big-slide'] };
