@@ -118,7 +118,7 @@ export function YardPage(): ReactElement {
       )}
       {hint === 'pick' && (
         <p className={styles.line} role="status">
-          놓을 물건의 "놓기"를 눌러요
+          놓을 물건의 “놓기”를 눌러요
         </p>
       )}
       <ItemShelf
