@@ -6,7 +6,10 @@ import {
 } from '../data/progressRepository.ts';
 import {
   claimRewards as applyClaimRewards,
+  buyItem as applyBuyItem,
   equipHat as applyEquipHat,
+  placeItem as applyPlaceItem,
+  unplaceItem as applyUnplaceItem,
   markRewardsSeen as applyMarkRewardsSeen,
   openHint as applyOpenHint,
   openedHintCount,
@@ -98,6 +101,31 @@ export function useProgressState(
     [commit],
   );
 
+  const buyItem = useCallback<ProgressContextValue['buyItem']>(
+    (itemId) => {
+      const result = applyBuyItem({ progress: latest.current, itemId });
+      if (result.ok) commit(result.progress);
+      return result;
+    },
+    [commit],
+  );
+
+  const placeItem = useCallback<ProgressContextValue['placeItem']>(
+    (itemId, cell) => {
+      const next = applyPlaceItem({ progress: latest.current, itemId, cell });
+      if (next !== latest.current) commit(next);
+    },
+    [commit],
+  );
+
+  const unplaceItem = useCallback<ProgressContextValue['unplaceItem']>(
+    (cell) => {
+      const next = applyUnplaceItem({ progress: latest.current, cell });
+      if (next !== latest.current) commit(next);
+    },
+    [commit],
+  );
+
   return useMemo(
     () => ({
       progress,
@@ -106,6 +134,9 @@ export function useProgressState(
       claimRewards,
       markRewardsSeen,
       equipHat,
+      buyItem,
+      placeItem,
+      unplaceItem,
     }),
     [
       progress,
@@ -114,6 +145,9 @@ export function useProgressState(
       claimRewards,
       markRewardsSeen,
       equipHat,
+      buyItem,
+      placeItem,
+      unplaceItem,
     ],
   );
 }

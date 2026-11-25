@@ -24,6 +24,8 @@ type StageResultProps = {
   stickerSpot?: string;
   /** 새 보상이 모자면 방금 같이 푼 방해꾼에게 씌우는 버튼(설계 D28·D32). */
   wear?: HatWear | undefined;
+  /** 새 보상이 놀이터 물건이면 놀이터에서 바로 놓으러 가기(설계 D6, F7). */
+  onPlace?: (() => void) | undefined;
   onList: () => void;
   onNext: () => void;
 };
@@ -56,6 +58,7 @@ export function StageResult({
   newTitle,
   stickerSpot = '',
   wear,
+  onPlace,
   onList,
   onNext,
 }: StageResultProps): ReactElement {
@@ -110,6 +113,11 @@ export function StageResult({
           <span className={styles.rewardNote}>
             스티커첩 {stickerSpot} 칸에 붙었어요
           </span>
+          {onPlace && newReward.kind !== 'hat' && (
+            <button type="button" className={styles.wear} onClick={onPlace}>
+              놀이터에 놓기
+            </button>
+          )}
           {wear && newReward.kind === 'hat' && (
             <>
               {/* 이름은 그대로 두고 눌림 상태로 알린다(다시 누르면 전에 쓰던 모자로, 설계 D32). */}

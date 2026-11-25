@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { QuizTopic } from '../types/quiz.ts';
 import {
+  buyItem,
   claimRewards,
   equipHat,
   hatOf,
@@ -9,10 +10,16 @@ import {
   openHint,
   openableHints,
   openedHintCount,
+  ownedYardItems,
+  placeItem,
+  placedItems,
   recordCorrect,
   solvedSet,
+  unplaceItem,
   unseenRewards,
+  unseenYardItems,
 } from './progress.ts';
+import { STARTER_ITEM_ID } from './rewards.ts';
 import { getQuizTopic } from './quizTopics.ts';
 
 const NONSENSE = getQuizTopic('nonsense');
@@ -358,5 +365,131 @@ describe('hatOf / equipHat', () => {
       dog: 'hat-crown-pink',
       rabbit: 'item-yarn-pink',
     });
+  });
+});
+
+describe('놀이터(PR ③)', () => {
+  const base = { ...initialProgress(), gold: 250 };
+
+  // Value: protects=사기는 골드를 100 빼고 한 번만 산다(D37, F8); fails_when=이미 가진 물건을 또 사서 골드가 두 번 빠지거나 골드가 모자란데 사지면; why_new=상점이 새로 생김; seam=none; no_claim=사기 시트 화면
+  it('buyItem: 사면 골드 -100, 이미 가졌거나 골드가 모자라면 이유만', () => {
+    const bought = buyItem({ progress: base, itemId: 'item-balloon-yellow' });
+    expect(bought.ok && bought.progress.gold).toBe(150);
+    expect(bought.ok && bought.progress.ownedItems).toEqual([
+      'item-balloon-yellow',
+    ]);
+    const again = buyItem({
+      progress: bought.ok ? bought.progress : base,
+      itemId: 'item-balloon-yellow',
+    });
+    expect(again).toEqual({ ok: false, reason: 'owned' });
+    expect(
+      buyItem({ progress: { ...base, gold: 99 }, itemId: 'item-kite-yellow' }),
+    ).toEqual({ ok: false, reason: 'insufficientGold' });
+    expect(buyItem({ progress: base, itemId: 'item-yarn-pink' })).toEqual({
+      ok: false,
+      reason: 'unknown',
+    });
+  });
+
+  // Value: protects=처음엔 기본 물건이 0번 칸, 다른 칸에 놓아도 기본 물건이 남고 다 치워도 돌아오지 않는다(D14, F4); fails_when=첫 저장이 기본 물건을 지우거나 빈 배치를 지워 기본 물건이 다시 나타나면; why_new=칸 배치가 새로 생김; seam=none; no_claim=마당 그림
+  it('기본 물건: 0번 칸에서 시작하고, 첫 저장에도 남고, 다 치우면 비어 있다', () => {
+    expect(placedItems(base).map((item) => item?.id)).toEqual([
+      STARTER_ITEM_ID,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ]);
+    const owned = { ...base, earnedRewards: ['item-yarn-pink'] };
+    const placed = placeItem({
+      progress: owned,
+      itemId: 'item-yarn-pink',
+      cell: 3,
+    });
+    expect(placed.placed).toEqual({
+      '0': STARTER_ITEM_ID,
+      '3': 'item-yarn-pink',
+    });
+    const cleared = unplaceItem({
+      progress: unplaceItem({ progress: placed, cell: 0 }),
+      cell: 3,
+    });
+    expect(cleared.placed).toEqual({});
+    expect(placedItems(cleared).every((item) => item === undefined)).toBe(true);
+  });
+
+  // Value: protects=빼기는 깨진 저장에 같은 물건이 두 칸에 있어도 모두 빼고, placeItem은 정수가 아닌 칸을 거부한다(F12, 적대 리뷰); fails_when=빼기 뒤 같은 물건이 다른 칸에 다시 나타나거나 "1.5" 칸이 저장되면; why_new=중복 칸·소수 칸 테스트가 없음; seam=none; no_claim=none beyond protects
+  it('unplaceItem은 같은 물건의 모든 칸을 비우고, placeItem은 소수 칸을 거부한다', () => {
+    const corrupt = {
+      ...base,
+      earnedRewards: ['item-yarn-pink'],
+      placed: { '0': 'item-yarn-pink', '3': 'item-yarn-pink' },
+    };
+    const cleared = unplaceItem({ progress: corrupt, cell: 0 });
+    expect(cleared.placed).toEqual({});
+    expect(
+      placeItem({ progress: corrupt, itemId: 'item-yarn-pink', cell: 1.5 }),
+    ).toBe(corrupt);
+  });
+
+  // Value: protects=같은 물건은 한 칸에만 있고 옮기면 원래 칸이 빈다, 가지지 않은 물건은 못 놓는다(설계 line 73, F12); fails_when=placeItem이 옛 자리를 남기거나 안 가진 물건을 놓으면; why_new=새 규칙; seam=none; no_claim=none beyond protects
+  it('placeItem: 옮기기·바꾸기, 가지지 않은 물건은 같은 객체', () => {
+    const owned = { ...base, earnedRewards: ['item-yarn-pink', 'big-slide'] };
+    const a = placeItem({ progress: owned, itemId: 'item-yarn-pink', cell: 1 });
+    const moved = placeItem({ progress: a, itemId: 'item-yarn-pink', cell: 2 });
+    expect(moved.placed).toEqual({
+      '0': STARTER_ITEM_ID,
+      '2': 'item-yarn-pink',
+    });
+    const swapped = placeItem({
+      progress: moved,
+      itemId: 'big-slide',
+      cell: 2,
+    });
+    expect(swapped.placed).toEqual({ '0': STARTER_ITEM_ID, '2': 'big-slide' });
+    expect(
+      placeItem({ progress: owned, itemId: 'item-kite-yellow', cell: 1 }),
+    ).toBe(owned);
+    expect(placeItem({ progress: swapped, itemId: 'big-slide', cell: 2 })).toBe(
+      swapped,
+    );
+  });
+
+  it('placedItems: 모르는 물건·가지지 않은 물건·겹친 물건은 빈칸으로 본다', () => {
+    const odd = {
+      ...base,
+      earnedRewards: ['item-yarn-pink'],
+      placed: {
+        '0': 'big-from-future',
+        '1': 'big-slide',
+        '2': 'item-yarn-pink',
+        '3': 'item-yarn-pink',
+      },
+    };
+    expect(placedItems(odd).map((item) => item?.id)).toEqual([
+      undefined,
+      undefined,
+      'item-yarn-pink',
+      undefined,
+      undefined,
+      undefined,
+    ]);
+  });
+
+  // Value: protects=첫 화면 점은 아직 안 본 놀이터 물건 보상만 센다(D38); fails_when=모자나 본 물건도 세어 점이 꺼지지 않으면; why_new=새 규칙; seam=none; no_claim=첫 화면 점 그림
+  it('unseenYardItems: 안 본 물건 보상만(모자 제외)', () => {
+    const p = {
+      ...base,
+      earnedRewards: ['hat-ribbon-pink', 'item-yarn-pink', 'big-slide'],
+      seenRewards: ['big-slide'],
+    };
+    expect(unseenYardItems(p)).toEqual(['item-yarn-pink']);
+    expect(ownedYardItems(p).map((item) => item.id)).toEqual([
+      STARTER_ITEM_ID,
+      'item-yarn-pink',
+      'big-slide',
+    ]);
   });
 });

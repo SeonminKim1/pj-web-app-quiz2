@@ -2,6 +2,7 @@
 // 보상 id는 진행(earnedRewards)에 영원히 남으므로 이름을 바꾸거나 지우지 않는다(rewards.test.ts가 목록을 고정한다).
 // 그림은 src/components/RewardArt.tsx.
 import type { QuizTopic } from '../types/quiz.ts';
+import type { PetId } from '../types/settings.ts';
 import type { Stage } from './stages.ts';
 
 /** 모자(동물이 쓴다) / 놀이터 작은 물건 / 5스테이지마다 오는 큰 물건. */
@@ -57,6 +58,8 @@ const SHAPE_NAMES: Record<string, string> = {
   treehouse: '나무집',
   pond: '연못',
   rainbow: '무지개 다리',
+  // 기본 물건(모두 가진다, 설계 D14)
+  sandbox: '모래 놀이통',
 };
 
 /** 넌센스 스테이지 1~55번의 보상(D4: 표 밖 스테이지는 보상 없음). 5의 배수는 큰 물건. */
@@ -190,4 +193,51 @@ export function rewardFor({
         ? undefined
         : table.byCategory[round.name];
   return id === undefined ? undefined : getReward(id);
+}
+
+// ── 놀이터 물건(설계 PR ③: D14, D36, D37, D39) ──
+
+/** 모두가 처음부터 가진 기본 물건(진행에 저장하지 않는다). 놓은 적이 없으면 0번 칸에 있다(D14). */
+export const STARTER_ITEM_ID = 'big-sandbox';
+
+/** 상점 물건 하나의 값(D37). */
+export const SHOP_PRICE = 100;
+
+/** 상점 물건: 보상 작은 물건의 모양을 노랑으로(D36, 그림은 보상과 같다). 보상 표와 겹치지 않는다. */
+export const SHOP_ITEM_IDS: readonly string[] = [
+  ...new Set(
+    [...REWARDS.values()]
+      .filter((reward) => reward.kind === 'item')
+      .map((reward) => `item-${reward.shape}-yellow`),
+  ),
+];
+
+/** 놀이터에 놓을 수 있는 물건 전체(보상 물건·상점 물건·기본 물건). */
+const YARD_ITEMS: ReadonlyMap<string, Reward> = new Map(
+  [
+    ...[...REWARDS.values()].filter((reward) => reward.kind !== 'hat'),
+    ...[...SHOP_ITEM_IDS, STARTER_ITEM_ID].map((id) => {
+      const reward = parseReward(id);
+      if (!reward) throw new Error(`놀이터 물건 id 형식이 틀렸어요: ${id}`);
+      return reward;
+    }),
+  ].map((reward) => [reward.id, reward]),
+);
+
+/** id로 놀이터 물건을 찾는다(모자이거나 모르는 id면 undefined). */
+export function getYardItem(id: string): Reward | undefined {
+  return YARD_ITEMS.get(id);
+}
+
+/** 모양별로 좋아하는 동물(D39: 색과 상관없이 모양 단위, 동물마다 한 모양). */
+const LIKED_BY: Readonly<Record<string, PetId>> = {
+  yarn: 'cat',
+  bone: 'dog',
+  'carrot-patch': 'rabbit',
+  'acorn-tree': 'squirrel',
+};
+
+/** 이 물건을 좋아하는 동물(없으면 undefined). */
+export function likedBy(item: Reward): PetId | undefined {
+  return LIKED_BY[item.shape];
 }

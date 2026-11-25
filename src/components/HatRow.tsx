@@ -1,28 +1,18 @@
 // 모자 고르기 줄(설계 D9·D10·D23). 방해꾼 시트가 쓰고, PR ③ 놀이터의 모자 탭도 이 부품을 그대로 쓴다.
 // 모든 모자를 보여 주고, 받은 모자는 누르면 바로 씌운다(확인 없음). 받지 않은 모자는 흐리게, 어느 판에서 받는지 알려 준다.
-// 열려 있는 동안 들어갈 수 있는 주제를 모두 읽어 다 푼 판의 보상을 기록한다(설계 D29: 목록을 안 연 사용자도 모자가 풀린다).
+// 보상 기록(설계 D29)은 이 줄을 쓰는 쪽이 ClaimTopics로 한다(모자 시트, 놀이터).
 import { useState, type ReactElement } from 'react';
 import { useProgress } from '../hooks/useProgress.ts';
-import { useTopicRounds } from '../hooks/useTopicRounds.ts';
 import { hatOf } from '../lib/progress.ts';
-import {
-  QUIZ_TOPICS,
-  isEnterableTopic,
-  rewardSourceLabel,
-} from '../lib/quizTopics.ts';
+import { rewardSourceLabel } from '../lib/quizTopics.ts';
 import { REWARDS, type Reward } from '../lib/rewards.ts';
 import { josa } from '../lib/shareLink.ts';
-import type { QuizTopic } from '../types/quiz.ts';
 import type { PetId } from '../types/settings.ts';
 import { RewardArt } from './RewardArt.tsx';
 import styles from './HatRow.module.css';
 
 const HATS: readonly Reward[] = [...REWARDS.values()].filter(
   (reward) => reward.kind === 'hat',
-);
-
-const CLAIM_TOPICS: readonly QuizTopic[] = QUIZ_TOPICS.filter(
-  (topic) => isEnterableTopic(topic) && topic.rewards !== undefined,
 );
 
 export function HatRow({ animal }: { animal: PetId }): ReactElement {
@@ -39,9 +29,6 @@ export function HatRow({ animal }: { animal: PetId }): ReactElement {
   const [notice, setNotice] = useState('');
   return (
     <div className={styles.row}>
-      {CLAIM_TOPICS.map((topic) => (
-        <ClaimTopic key={topic.id} topic={topic} />
-      ))}
       {!hasAny && (
         <p className={styles.empty}>스테이지를 다 풀면 모자가 생겨요</p>
       )}
@@ -107,10 +94,4 @@ export function HatRow({ animal }: { animal: PetId }): ReactElement {
       </p>
     </div>
   );
-}
-
-// 주제 하나를 읽어 다 푼 판의 보상을 기록한다(useTopicRounds가 기록까지 한다). 그리는 것은 없다.
-function ClaimTopic({ topic }: { topic: QuizTopic }): null {
-  useTopicRounds(topic);
-  return null;
 }

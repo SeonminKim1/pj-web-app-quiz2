@@ -11,6 +11,7 @@ import { HomePage } from './pages/HomePage';
 import { TopicPage } from './pages/TopicPage.tsx';
 import { CategoryPlayPage, StagePlayPage } from './pages/StagePlayPage.tsx';
 import { QuestionPage } from './pages/QuestionPage.tsx';
+import { YardPage } from './pages/YardPage.tsx';
 import { PrivacyPage } from './pages/PrivacyPage.tsx';
 import { SHARE_TOPICS } from './lib/quizTopics.ts';
 
@@ -72,6 +73,7 @@ export function AppRoutes(): ReactElement {
           element={<QuestionPage key={prefix} prefix={prefix} />}
         />
       ))}
+      <Route path="/playground" element={<YardPage />} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

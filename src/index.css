@@ -15,6 +15,8 @@
   --color-gold-soft: #fff1c9;
   /* 보상 색 변형의 네 번째 색(분홍·민트·노랑·하늘). 그림은 RewardArt.tsx가 같은 값을 쓴다. */
   --color-sky: #a9d8ff;
+  /* 놀이터 풀밭(설계 D22). */
+  --color-grass: #bfe8a6;
   --color-danger: #c2343f;
   --color-danger-soft: #fde4e4;
   --color-focus: #3d6bff;

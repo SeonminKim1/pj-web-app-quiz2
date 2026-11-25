@@ -1,0 +1,253 @@
+/* 탭 내용: 카드 한 줄을 가로로 넘긴다(설계 D33). 아래 고정 탭 막대 높이만큼 페이지가 비워 둔다. */
+.panel {
+  margin-top: var(--space-4);
+}
+
+.row {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0 calc(-1 * var(--space-4));
+  padding: var(--space-1) var(--space-4) var(--space-3);
+  overflow-x: auto;
+  list-style: none;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: var(--space-4);
+  scroll-snap-type: x proximity;
+}
+
+.card {
+  position: relative;
+  display: grid;
+  flex: 0 0 128px;
+  justify-items: center;
+  align-content: start;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-2);
+  border: var(--border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-pressed);
+  scroll-snap-align: start;
+}
+
+.art {
+  line-height: 0;
+}
+
+.name {
+  min-height: 2.6em;
+  font-size: 0.9375rem;
+  line-height: 1.3;
+  font-weight: 700;
+  text-align: center;
+  word-break: keep-all;
+}
+
+/* 좋아하는 동물 얼굴(설계 D19). */
+.face {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  overflow: hidden;
+  place-items: center;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-pink-soft);
+}
+
+.place,
+.price {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--color-pink);
+  box-shadow: var(--shadow-pressed);
+  color: var(--color-ink);
+  font: inherit;
+  font-weight: 700;
+}
+
+.price {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: var(--color-surface);
+}
+
+/* 골드가 모자라면 값이 흐리다(누르면 시트가 이유를 보여 준다, D16). */
+.price[data-short='true'] {
+  color: var(--color-ink-soft);
+}
+
+.price[data-short='true'] .coin {
+  opacity: 0.45;
+}
+
+.coin {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+  background: var(--color-gold);
+}
+
+.unplace {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-pressed);
+  color: var(--color-ink);
+  font: inherit;
+  font-weight: 700;
+}
+
+.hats {
+  max-height: 34dvh;
+  overflow-y: auto;
+}
+
+/* 화면 아래 고정 탭 막대(엄지가 닿는 자리, D33). */
+.bar {
+  position: fixed;
+  z-index: 10;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: var(--space-2) var(--space-3)
+    calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  border-top: var(--border);
+  background: var(--color-surface);
+}
+
+.tabs {
+  display: flex;
+  max-width: 480px;
+  margin: 0 auto;
+  gap: var(--space-2);
+}
+
+.tab {
+  flex: 1;
+  min-height: 48px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-button);
+  background: transparent;
+  color: var(--color-ink);
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.tab[aria-selected='true'] {
+  border-color: var(--color-ink);
+  background: var(--color-pink);
+  box-shadow: var(--shadow-pressed);
+}
+
+.tab:focus-visible,
+.place:focus-visible,
+.unplace:focus-visible,
+.price:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.notice {
+  position: fixed;
+  z-index: 11;
+  right: var(--space-4);
+  bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  left: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 448px;
+  margin: 0 auto;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: var(--color-surface);
+  font-weight: 700;
+}
+
+.noticeAction {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 2px solid var(--color-surface);
+  border-radius: 999px;
+  background: var(--color-pink);
+  color: var(--color-ink);
+  font: inherit;
+  font-weight: 700;
+}
+
+.backdrop {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--color-scrim);
+}
+
+.sheet {
+  display: grid;
+  width: 100%;
+  max-width: 480px;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4)
+    calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  background: var(--color-bg);
+}
+
+.sheet:focus {
+  outline: none;
+}
+
+.sheetArt {
+  line-height: 0;
+}
+
+.sheetTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.sheetNote,
+.short {
+  margin: 0;
+  color: var(--color-ink-soft);
+  font-weight: 700;
+}
+
+.short {
+  color: var(--color-pink-strong);
+}
+
+.sheetActions {
+  display: flex;
+  width: 100%;
+  gap: var(--space-3);
+}
+
+.cancel {
+  composes: secondary from '../styles/ui.module.css';
+  flex: 1;
+}
+
+.buy {
+  composes: primary from '../styles/ui.module.css';
+  flex: 1;
+}

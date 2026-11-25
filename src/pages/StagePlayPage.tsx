@@ -4,6 +4,7 @@ import { TitleToast } from '../components/TitleToast.tsx';
 import { useTitleUp } from '../hooks/useTitleUp.ts';
 import { usePhaseSound } from '../hooks/usePhaseSound.ts';
 import { useState, useEffect, type ReactElement } from 'react';
+import { useNavigate } from 'react-router';
 import { useProgress } from '../hooks/useProgress.ts';
 import { useSettings } from '../hooks/useSettings.ts';
 import { hatOf } from '../lib/progress.ts';
@@ -29,6 +30,7 @@ import { loadNickname, useShare } from '../hooks/useShare.ts';
 import { ManualCopy, ShareToast } from '../components/ShareFeedback.tsx';
 import { ShareButton } from '../components/ShareButton.tsx';
 import styles from './Page.module.css';
+import type { YardLocationState } from './YardPage.tsx';
 
 /** 풀이 화면(/topics/:topicId/stages/:stageNo): 주소의 주제·스테이지를 확인하고 풀이 세션을 띄운다. */
 export function StagePlayPage(): ReactElement {
@@ -112,6 +114,7 @@ function StageSession({
   const { setLastTopic } = useSettings();
   const { progress } = useProgress();
   const hatWear = useHatWear({ reward: newReward, animal });
+  const navigate = useNavigate();
   useEffect(
     () => setLastTopic(target.topic.id),
     [setLastTopic, target.topic.id],
@@ -153,6 +156,15 @@ function StageSession({
           newReward={newReward}
           newTitle={resultTitle}
           wear={hatWear}
+          onPlace={
+            newReward && newReward.kind !== 'hat'
+              ? () =>
+                  navigate('/playground', {
+                    replace: true,
+                    state: { place: newReward.id } satisfies YardLocationState,
+                  })
+              : undefined
+          }
           stickerSpot={
             target.topic.round.byCategory
               ? target.stageLabel

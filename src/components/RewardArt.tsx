@@ -286,6 +286,17 @@ function item(shape: string, { main, dark }: Paint): ReactElement | null {
 
 function big(shape: string): ReactElement | null {
   switch (shape) {
+    // 기본 물건(D14): 모래가 담긴 놀이통과 삽.
+    case 'sandbox':
+      return (
+        <g>
+          <path d="M10 30 H54 L49 56 H15 Z" fill={WOOD} />
+          <path d="M12 30 C22 22 42 22 52 30 Z" fill={SAND} />
+          <path d="M40 26 L52 8" strokeWidth={3} />
+          <path d="M49 6 L56 9 L53 14 L47 11 Z" fill="#ff9ebb" />
+          <path d="M18 40 H46" />
+        </g>
+      );
     case 'slide':
       return (
         <g>

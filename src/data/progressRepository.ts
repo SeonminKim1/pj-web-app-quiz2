@@ -46,10 +46,14 @@ function sanitizeProgress(progress: Progress): Progress {
   const earnedRewards = cleanRewardIds(progress.earnedRewards);
   const seenRewards = cleanRewardIds(progress.seenRewards);
   const equipped = cleanEquipped(progress.equipped);
+  const ownedItems = cleanRewardIds(progress.ownedItems);
+  const placed = cleanPlaced(progress.placed);
   if (
     earnedRewards === progress.earnedRewards &&
     seenRewards === progress.seenRewards &&
-    equipped === progress.equipped
+    equipped === progress.equipped &&
+    ownedItems === progress.ownedItems &&
+    placed === progress.placed
   ) {
     return progress;
   }
@@ -57,10 +61,30 @@ function sanitizeProgress(progress: Progress): Progress {
   delete next.earnedRewards;
   delete next.seenRewards;
   delete next.equipped;
+  delete next.ownedItems;
+  delete next.placed;
+  if (ownedItems) next.ownedItems = ownedItems;
+  if (placed) next.placed = placed;
   if (earnedRewards) next.earnedRewards = earnedRewards;
   if (seenRewards) next.seenRewards = seenRewards;
   if (equipped) next.equipped = equipped;
   return next;
+}
+
+// 놀이터 칸: 숫자 칸("0", "1", …)의 문자열 값만 남긴다. 지금 없는 칸(6 이상)도 남겨 칸을 늘린 새 버전의
+// 배치를 옛 탭이 지우지 않게 한다(그릴 때 placedItems가 거른다). 빈 객체(다 치움)는 그대로 둔다(설계 F4, F12).
+function cleanPlaced(value: unknown): Progress['placed'] {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) return undefined;
+  const entries = Object.entries(value);
+  const kept = entries.filter(
+    (entry): entry is [string, string] =>
+      /^\d+$/.test(entry[0]) && typeof entry[1] === 'string',
+  );
+  if (kept.length === entries.length) return value as Progress['placed'];
+  // 남은 칸이 하나도 없으면 깨진 값이다: "다 치움"({})이 아니라 기본 배치로 돌린다.
+  if (kept.length === 0) return undefined;
+  return Object.fromEntries(kept);
 }
 
 // 쓰고 있는 모자: 아는 동물 칸의 문자열 값만 남긴다. 모르는 모자 id는 남긴다(그릴 때 hatOf가 거른다).

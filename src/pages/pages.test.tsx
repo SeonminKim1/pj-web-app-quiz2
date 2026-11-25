@@ -575,7 +575,7 @@ describe('방해꾼', () => {
 
 // Value: protects=판을 다 푼 순간 결과 화면 제목 아래에 "새 보상!" 카드가 한 번 뜨고(D6), 본 것으로 기록돼 목록에서 "모은 스티커" 시트가 다시 뜨지 않는다; fails_when=풀이 화면이 맞힐 때 보상을 먼저 기록해 카드가 사라지거나(OV2), 본 표시를 안 남기면; why_new=보상 카드가 새로 생김; seam=none; no_claim=붙는 움직임·효과음
 describe('스티커 보상', () => {
-  // Value: protects=모자 카드의 "씌우기"는 같이 푼 방해꾼에게 바로 씌우고, 이름은 그대로 눌림으로 알리며, 다시 누르면 전에 쓰던 모자로 돌린다(D28·D32); fails_when=다른 동물에게 씌우거나, 다시 누를 때 맨머리가 되거나, 저장하지 않으면; why_new=씌우기 버튼이 새로 생김; seam=none; no_claim=카드 속 동물 그림 모양
+  // Value: protects=모자 카드의 "씌우기"는 같이 푼 방해꾼에게 바로 씌우고(놀이터에 놓기는 없다), 이름은 그대로 눌림으로 알리며, 다시 누르면 전에 쓰던 모자로 돌린다(D28·D32); fails_when=다른 동물에게 씌우거나, 다시 누를 때 맨머리가 되거나, 저장하지 않으면; why_new=씌우기 버튼이 새로 생김; seam=none; no_claim=카드 속 동물 그림 모양
   it('모자 카드의 씌우기: 바로 씌우고, 다시 누르면 전에 쓰던 모자로', async () => {
     store.save({
       version: 1,
@@ -595,6 +595,10 @@ describe('스티커 보상', () => {
     await clickAdvance(user, '결과 보기 ›');
     const result = screen.getByRole('region', { name: '스테이지 결과' });
     const wear = within(result).getByRole('button', { name: '씌우기' });
+    // 모자는 놀이터에 놓지 않는다(D6).
+    expect(
+      within(result).queryByRole('button', { name: '놀이터에 놓기' }),
+    ).not.toBeInTheDocument();
     expect(wear).toHaveAttribute('aria-pressed', 'false');
     await user.click(wear);
     expect(wear).toHaveAttribute('aria-pressed', 'true');
@@ -608,6 +612,33 @@ describe('스티커 보상', () => {
     await user.click(wear);
     expect(wear).toHaveAttribute('aria-pressed', 'false');
     expect(store.load().equipped).toEqual({ rabbit: 'hat-crown-sky' });
+  });
+
+  // Value: protects=물건 보상 카드의 "놀이터에 놓기"가 그 물건을 놓는 놀이터로 간다(D6, F7); fails_when=버튼이 없거나 놀이터가 놓기 모드로 열리지 않으면; why_new=놀이터 입구가 새로 생김; seam=none; no_claim=뒤로 가기 동작
+  it('물건 카드의 놀이터에 놓기는 그 물건을 놓는 놀이터로 간다', async () => {
+    const user = renderAt('/topics/nonsense/stages/2');
+    await screen.findByText('지구가 제일 힘들었던 시기는?');
+    await typeAnswer(user, '고생대');
+    await clickAdvance(user, '다음 ›');
+    await typeAnswer(user, '참새');
+    await clickAdvance(user, '결과 보기 ›');
+    const result = screen.getByRole('region', { name: '스테이지 결과' });
+    await user.click(
+      within(result).getByRole('button', { name: '놀이터에 놓기' }),
+    );
+    const yard = await screen.findByRole('region', { name: '놀이터 마당' });
+    expect(within(yard).getByRole('status')).toHaveTextContent(
+      '어느 칸에 놓을까요?',
+    );
+    await user.click(
+      within(yard).getByRole('button', {
+        name: '칸 3, 비어 있음, 여기에 놓기',
+      }),
+    );
+    expect(store.load().placed).toEqual({
+      '0': 'big-sandbox',
+      '2': 'item-yarn-pink',
+    });
   });
 
   it('놀이터 물건 카드에는 씌우기가 없다', async () => {
