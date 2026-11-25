@@ -160,6 +160,7 @@ function StageSession({
             newReward && newReward.kind !== 'hat'
               ? () =>
                   navigate('/playground', {
+                    replace: true,
                     state: { place: newReward.id } satisfies YardLocationState,
                   })
               : undefined

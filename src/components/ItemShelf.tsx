@@ -43,11 +43,14 @@ export function ItemShelf({
   /** 물건을 칸에 놓으러 가기(놓기 모드). */
   onPlace: (item: Reward) => void;
 }): ReactElement {
-  const { progress, buyItem } = useProgress();
+  const { progress, buyItem, unplaceItem } = useProgress();
   const owned = ownedYardItems(progress);
   const ownedIds = new Set(owned.map((item) => item.id));
-  const placedIds = new Set(
-    placedItems(progress).flatMap((item) => (item ? [item.id] : [])),
+  // 놓인 물건 id → 칸 번호(빼기에 쓴다).
+  const placedCell = new Map(
+    placedItems(progress).flatMap((item, cell) =>
+      item ? [[item.id, cell] as const] : [],
+    ),
   );
   const [buying, setBuying] = useState<Reward | undefined>(undefined);
   const [bought, setBought] = useState<Reward | undefined>(undefined);
@@ -80,9 +83,18 @@ export function ItemShelf({
     );
   };
 
-  const placeButton = (item: Reward, label = '놓기'): ReactElement =>
-    placedIds.has(item.id) ? (
-      <span className={styles.placed}>놓임</span>
+  const placeButton = (item: Reward, label = '놓기'): ReactElement => {
+    const cell = placedCell.get(item.id);
+    // 놓인 물건은 빼기(칸이 비고, 다시 놓기로 다른 칸에 옮길 수 있다).
+    return cell !== undefined ? (
+      <button
+        type="button"
+        className={styles.unplace}
+        aria-label={`${item.name} 빼기, 칸 ${cell + 1}`}
+        onClick={() => unplaceItem(cell)}
+      >
+        빼기
+      </button>
     ) : (
       <button
         type="button"
@@ -93,6 +105,7 @@ export function ItemShelf({
         {label}
       </button>
     );
+  };
 
   return (
     <>
@@ -145,13 +158,35 @@ export function ItemShelf({
         </div>
       )}
       <nav className={styles.bar} aria-label="놀이터 탭">
-        <div role="tablist" className={styles.tabs}>
+        <div
+          role="tablist"
+          className={styles.tabs}
+          onKeyDown={(event) => {
+            // 왼쪽·오른쪽 화살표로 탭을 옮긴다(끝에서 돌아간다, D23).
+            const step =
+              event.key === 'ArrowRight'
+                ? 1
+                : event.key === 'ArrowLeft'
+                  ? -1
+                  : 0;
+            if (step === 0) return;
+            event.preventDefault();
+            const index = TABS.findIndex((item) => item.id === tab);
+            const next = TABS[(index + step + TABS.length) % TABS.length]!;
+            onTab(next.id);
+            event.currentTarget
+              .querySelector<HTMLElement>(`[data-tab="${next.id}"]`)
+              ?.focus();
+          }}
+        >
           {TABS.map((item) => (
             <button
               key={item.id}
               type="button"
               role="tab"
+              data-tab={item.id}
               aria-selected={tab === item.id}
+              tabIndex={tab === item.id ? 0 : -1}
               className={styles.tab}
               onClick={() => onTab(item.id)}
             >

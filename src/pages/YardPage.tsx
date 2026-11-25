@@ -43,11 +43,27 @@ export function YardPage(): ReactElement {
   const [retryClaim, setRetryClaim] = useState<(() => void) | undefined>(
     undefined,
   );
-  // 열면 가진 물건 보상을 본 것으로(첫 화면 점이 꺼진다, D38).
+  // 열 때 내 물건 탭에 보여 준 새 물건 보상만 본 것으로(첫 화면 점이 꺼진다, D38).
+  // 연 뒤에 뒤에서 기록된 보상은 보여 주지 않았으므로 남겨 둔다(다음에 점·스티커 시트로 알린다).
+  const [shownUnseen] = useState(() => unseenYardItems(progress));
   useEffect(() => {
-    const unseen = unseenYardItems(progress);
-    if (unseen.length > 0) markRewardsSeen(unseen);
-  }, [progress, markRewardsSeen]);
+    if (shownUnseen.length > 0) markRewardsSeen(shownUnseen);
+  }, [shownUnseen, markRewardsSeen]);
+  // 결과 카드가 넘긴 "놓기" 요청은 한 번만 쓴다(새로 고침·뒤로 가기로 다시 놓기 모드가 되지 않게).
+  useEffect(() => {
+    if (requested !== undefined) {
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [requested, navigate, location.pathname]);
+  // 놓기 모드에서 Esc는 취소(D23).
+  useEffect(() => {
+    if (!placing) return;
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') setPlacing(undefined);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [placing]);
 
   const items = placedItems(progress);
   const placedIds = new Set(items.flatMap((item) => (item ? [item.id] : [])));
