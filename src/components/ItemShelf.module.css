@@ -11,6 +11,7 @@
   overflow-x: auto;
   list-style: none;
   overscroll-behavior-x: contain;
+  scroll-padding-inline: var(--space-4);
   scroll-snap-type: x proximity;
 }
 
