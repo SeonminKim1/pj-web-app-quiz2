@@ -16,6 +16,8 @@ Deferred by /autoplan on 2026-11-18 (design doc: ~/.gstack/projects/web-app-quiz
 - **Album spacing literals** — What: replace `top: -11px`, `padding: 1px 8px`, `top: 6px; left: 10px`, `gap: 2px` in StickerAlbum/StageResult CSS with `--space-*` tokens. Why: /design-review 2026-11-20 (polish). Effort: human XS / CC XS.
 - **Result card wear line without a jump** — What: reserve the line under 씌우기 (or fade it in place) so "토끼가 쓰고 있어요" does not push the card down about 22px. Why: /design-review on feat/sticker-hats (2026-11-24, FINDING-002, polish). Effort: human XS / CC XS.
 
+- **Shared reduced-motion check** — What: make `CoinBurst.tsx:14`, `StatusViews.tsx:53` and `StickerAlbum.tsx:190` call `prefersReducedMotion()` from `src/lib/reducedMotion.ts` instead of their inline `globalThis.matchMedia?.(…)`. Why: one place reads the OS setting, so a later app-level "움직임 줄이기" toggle has one switch. Pros: 5 callers, one helper. Cons: touches 3 shipped components for no visible change. Context: /plan-eng-review of PR ④ (D44, D48, 2026-11-26) moved the helper out of `usePestMotion.ts` for the two motion hooks and left these 3 out to keep the PR small. Depends on: PR ④ (feat/yard-motion). Effort: human S / CC XS.
+
 ## Completed
 
 - **likedBy, one-liked-item test and `--color-grass` (P1, PR ③)** — Deferred from plan: docs/designs/rewards-playground.md (eng T2 shop catalog + `likedBy`, test "one liked item per animal", design D22 token `--color-grass`). Why deferred: only the yard (PR ③) uses them; adding them in PR ① would be unused exports. Depends on: PR ③. Effort: human S / CC XS. **Completed:** feat/sticker-yard PR ③ (2026-11-26)

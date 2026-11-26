@@ -1409,17 +1409,691 @@ Corrections (necessary implementation of approved contracts, applied without a q
 - Parallelization: sequential (rewards → progress → yard UI → home/result entry)
 - Lake Score: N/A (no completeness-scored answers)
 
+## PR ④ eng review (2026-11-26, branch feat/yard-motion)
+
+Target: this document, PR ④ scope only (the yard motion loop that D34 moved out of PR ③). PR ③ merged as #29 (`843d7ff`).
+
+Approved PR ④ scope (carried; no new approval needed):
+
+- D34: `useYardMotion` adds roaming, walking to liked items and pausing in hidden tabs. With reduced motion the animals stand still as in PR ③.
+- Line 76 and D39: an animal goes to its liked shape. When several are placed it uses the lowest cell index.
+- Line 77: the yard has its own light frame loop on `pestMotion.ts` pure functions, not `usePestMotion`.
+- D18 and F9: animals never take taps, stand behind the cell labels, and the chosen pest is drawn in front. Hats show in the yard.
+- D35: motion goes into `YardScene` (its file header line 3 says so).
+- Performance note (line 429): one `requestAnimationFrame` for all 4 animals. It stops on unmount, under reduced motion and while the tab is hidden.
+
+### Scope Challenge A: assessment (PR ④)
+
+What already exists:
+
+- **`src/lib/pestMotion.ts`**: `pickRoamTarget`, `stepToward`, `travelSpeed`, `isInside` and `clampToArea`, all pure. But `areaBounds` (line 37) hard-codes `PEST_SIZE` (56 to 96 px), and yard animals are 50 or 60 px (`YardScene.tsx:87`).
+- **`src/lib/pestAnimals.ts`**: each animal has `speed` (50 to 130 px/s) and `gait`, and `gaitLift` gives the hop height.
+- **`src/hooks/usePestMotion.ts`**: the play-screen loop. Its patterns are reused, not the hook: rAF with `MAX_DT` 0.05 s (line 81), `subscribe` so frames do not re-render React (line 76), `prefersReducedMotion` (line 85) and `ResizeObserver` measuring (line 314).
+- **`src/components/PestLayer.tsx:150-159`**: facing flip with hysteresis, plus stretch and squash from `hop`.
+- **`src/hooks/usePest.ts:371`**: pauses on `visibilitychange`. The yard has no pest reducer, so it needs its own listener.
+- **`src/components/YardScene.tsx`**: animals are placed by CSS grid percentages (`YardScene.module.css:116-128`). `standingCell` (line 28) does the D39 lowest-cell rule.
+
+Complexity: 4 changed source files (`pestMotion.ts`, new `useYardMotion.ts`, `YardScene.tsx`, `YardScene.module.css`) plus tests, and 1 new module [estimated from D34 and line 77]. That is under the 8-file and 2-module gate, so B is skipped.
+
+Search check: the rAF, visibility and reduced-motion patterns are already in this repo [Layer 1]. Aside is not installed, and no web search was needed for a pattern the repo already uses.
+
+TODOS cross-reference: nothing in `TODOS.md` blocks this. "Sticker art palette and sizes" (named art sizes) touches the same 50/60 literals but stays separate.
+
+Premise table:
+
+| premise | claim                                                 | receipt                                                               | verdict |
+| ------- | ----------------------------------------------------- | --------------------------------------------------------------------- | ------- |
+| P1      | yard animals stand still today                        | `YardScene.tsx:3` "움직임은 다음 PR(D34)이 이 부품에 얹는다"          | true    |
+| P2      | `useYardMotion` does not exist on main                | `grep -rn useYardMotion src` on `843d7ff`: none                       | true    |
+| P3      | reduced motion is only the OS setting (no app toggle) | `usePestMotion.ts:85-89`; `src/types/settings.ts` has no motion field | true    |
+| P4      | `areaBounds` cannot be reused for 50/60 px animals    | `pestMotion.ts:38` `const half = PEST_SIZE.near / 2`                  | true    |
+| P5      | cells sit above animals                               | `YardScene.module.css:29` `z-index: 2` vs `:111` `z-index: 1`         | true    |
+
+REALITY: premise-table pass unverified=0 (5 premises, all with receipts) src/components/YardScene.tsx:3
+REALITY: already-done pass origin/main 843d7ff has no useYardMotion (grep: none) src/components/YardScene.tsx:3
+REALITY: surface-check pass no new route or CLI; /playground already exists src/pages/YardPage.tsx:1
+REALITY: binding-decisions pass D34, D18, D39, F9 and D35 carried; decision-search (branch) returned none docs/designs/rewards-playground.md:1275
+REALITY: numbers pass yard min(300px, 42dvh) [measured: YardScene.module.css:4]; speeds 50–130 px/s [measured: pestAnimals.ts]; sizes 50/60 [measured: YardScene.tsx:87] src/components/YardScene.module.css:4
+REALITY: deferred-asks pass no linked issue for PR ④ docs/designs/rewards-playground.md:1275
+REALITY: pr-count pass PR ④ is the one extra PR that D34 created; no further split docs/designs/rewards-playground.md:1275
+
+### Scope record (PR ④)
+
+feature answers: none proposed (D34 scope as written); structure: gate not tripped (4 source files, 1 new module); accepted scope: `useYardMotion` + yard pure functions in `pestMotion.ts` + `YardScene` drawing from frames; pending remedies: none.
+
+### Scope Challenge C: findings (PR ④)
+
+1. [INFORMATIONAL] (confidence 9/10) `src/lib/pestMotion.ts:38` `const half = PEST_SIZE.near / 2`. `areaBounds` and `clampToArea` assume a 96 px pest. Yard bounds need the animal's size as an input: the feet stay on the grass below the sky band (20%) and the whole body stays inside the yard. This is a new pure function, a correction with no question.
+2. [INFORMATIONAL] (confidence 8/10) `src/components/YardScene.module.css:30-33` `inset: 22% 2% 3%` and `grid-template-rows: 1fr 1.15fr`. JS must not copy these percentages (red flag 8, hand-synced list). The hook measures the cell buttons' rects to get each cell's "beside the item" point. This is a correction with no question.
+
+Dispositions: both carried as necessary implementation.
+
+Scope Challenge result: scope accepted as-is.
+
+### Section 1 (PR ④): Architecture
+
+```
+YardPage ── items (placedItems), pet, hatOf ──▶ YardScene
+                                                 │ liked: {rabbit: cell?, dog: cell?, cat: cell?, squirrel: cell?}
+                                                 │        (standingCell, D39 lowest cell)
+                                                 ▼
+                     useYardMotion({ yardRef, cellRefs, liked, random })
+                       measure (ResizeObserver): yard size, cell rects ──▶ bounds per animal size (finding 1)
+                       reduced motion? ──yes──▶ each animal at its standing point, no loop (D18)
+                                      └─no──▶ one rAF for 4 animals (dt ≤ 0.05 s)
+                                               per animal: walk ─arrive─▶ rest ─timer─▶ next target
+                                               target = liked cell point | random grass point
+                       visibilitychange hidden ──▶ cancel rAF; visible ──▶ restart (no teleport)
+                       subscribe(id, listener) ──▶ frames {x, y, hop, facing}
+                                                 ▼
+                     YardScene animal <span>: style.transform per frame (no React re-render)
+```
+
+Design-twice (`useYardMotion` is a new module):
+
+- Shape 1 (chosen): one hook owns all 4 animals in one ref and one rAF, and returns `subscribe(id, listener)`. The loop, visibility pause, reduced motion and measuring are hidden behind one small surface.
+- Shape 2: a per-animal `useYardAnimal` hook used 4 times, each with its own rAF and its own `visibilitychange` listener. Each hook is simpler, but it repeats the loop 4 times and breaks line 429 (one rAF).
+- Pick: Shape 1, because it hides more behind less.
+
+Red flags screened on Shape 1:
+
+- **Hand-synced list**: cell geometry is measured, not copied from CSS (Scope finding 2).
+- **Split ownership**: positions are owned only by the hook. `placed` stays the only owner of which cell holds what. The hook reads `liked` and never writes progress.
+- **Two ways to do one task**: today the CSS grid places standing animals. If the hook also places them, there are two layouts. This is D41.
+
+Production failures:
+
+- Items change while an animal walks (placed, moved, removed). The hook reads `liked` from a ref every frame, so the animal turns toward the new cell, or back to roaming when the item is gone. Test.
+- The yard resizes (rotation, or `42dvh` changing when the URL bar hides). Positions and targets are clamped into the new bounds and cell points are measured again. Test.
+- The tab is hidden for minutes. The rAF is cancelled; on return `last` resets, so `dt` is never larger than 0.05 s and nothing teleports. Test.
+
+## Decision ledger (PR ④)
+
+### R9: what an animal does at its liked item
+
+Finding: Section 1, design gap, confidence 8/10, `docs/designs/rewards-playground.md:91` "좋아하는 물건을 놓으면 해당 동물이 그쪽으로 간다", reviewer: plan-eng-review (Claude)
+Plan baseline: line 76/91 say the animal "goes there". Nothing says what it does after it arrives.
+Runtime evidence: PR ③ shows it standing beside the item forever (`YardScene.tsx:69-73`).
+Comparison grid:
+
+| Choice                         | Current                      | A                                                  | B                                         |
+| ------------------------------ | ---------------------------- | -------------------------------------------------- | ----------------------------------------- |
+| R9 behaviour after arriving    | stands still (PR ③)          | stays 8–12 s, roams 1–2 stops, comes back, repeats | stays beside it until the item is removed |
+| R10 reduced-motion layout path | CSS grid (PR ③), pending D41 | pending                                            | pending                                   |
+| Roam rest between stops        | none yet                     | 1.5–4 s (plan value)                               | 1.5–4 s (plan value)                      |
+
+Question D40:
+D40 — 좋아하는 물건에 도착한 동물은 그다음 뭘 하나요?
+Project/branch/task: feat/yard-motion, PR ④ 놀이터 움직임(useYardMotion).
+ELI10: 설계에는 "좋아하는 물건을 놓으면 그 동물이 그쪽으로 간다"까지만 있고, 도착한 뒤는 없습니다. 계속 옆에 서 있으면 단순하지만, 고양이 털실 공·강아지 뼈다귀(상점 100골드)·토끼 당근 밭·다람쥐 도토리 나무를 다 놓으면 네 마리가 모두 멈춰서 PR ③처럼 정지된 마당이 됩니다.
+Stakes if we pick wrong: 다 놓은 사람일수록 마당이 멈춰 보여서 꾸민 보람이 줄거나, 반대로 물건 곁을 너무 자주 떠나 "좋아한다"는 느낌이 약해집니다.
+Recommendation: A because 좋아하는 물건을 다 놓아도 마당이 살아 있고, 추가 비용은 상태 하나와 타이머뿐입니다.
+Completeness: A=9/10, B=7/10
+Pros / cons:
+A) 머물다 산책하고 돌아오기 (recommended)
+✅ 물건 옆에 8~12초 머물다가 1~2곳을 돌아다니고 다시 물건으로 돌아와서, 다 놓아도 마당이 계속 움직입니다
+✅ 대부분의 시간을 물건 곁에서 보내서 "이 물건을 좋아한다"는 느낌이 그대로 남습니다
+❌ 상태가 하나 더(돌아오기) 생기고 타이머 테스트가 늘어납니다 (human: ~2h / CC: ~10min 추가)
+B) 물건 옆에 계속 있기
+✅ 가장 단순합니다: 목표가 물건이면 도착해서 두리번거리기만 하고, 물건을 치우면 다시 돌아다닙니다
+✅ 움직임 줄이기 배치(D18)와 도착 뒤 모습이 같아서 설명이 쉽습니다
+❌ 좋아하는 물건 네 개를 다 놓으면 네 마리가 모두 멈춰서, 이 PR의 목적인 움직이는 마당이 사라집니다
+Net: 다 꾸민 마당이 계속 살아 있는 것 대 상태 하나 적은 단순함.
+Header: 물건 곁 동작
+Options:
+A) 머물다 산책하고 돌아오기 (recommended)
+물건 옆에 8~12초 머물다가 마당을 1~2곳 돌아다니고 다시 돌아옵니다. 다 놓아도 마당이 움직입니다. (human: ~2h / CC: ~10min 추가)
+B) 물건 옆에 계속 있기
+도착하면 물건 옆에서 두리번거리기만 하고, 물건을 치우면 다시 돌아다닙니다. 가장 단순하지만 다 놓으면 마당이 멈춥니다.
+
+State: approved
+Actual answer: A) 머물다 산책하고 돌아오기 (AskUserQuestion D40, 2026-11-26)
+Accepted scope: An animal whose liked item is placed walks to the point beside it and stays 8–12 s. Then it roams to 1–2 random grass points (resting 1.5–4 s at each) and walks back, and this repeats. Animals with no liked item placed only roam. When the item is removed it goes back to roaming; when it moves while the animal is staying there or heading there, the animal walks to the new cell at once (Section 1 production failure 1). Tests cover the stay, leave and return cycle.
+History: none
+
+### R10: one or two ways to place the animals
+
+Finding: Section 1 red flag 6 (two ways to do one task), confidence 8/10, `src/components/YardScene.module.css:116-128` (`.animal` top/left from `--col`/`--row`), reviewer: plan-eng-review (Claude)
+Plan baseline: D34: "PR ③ shows every animal standing still, using D18's reduced-motion layout". PR ④ adds motion to `YardScene` (D35). Nothing says who places animals under reduced motion once the hook exists.
+Runtime evidence: today only CSS places animals (`YardScene.tsx:70-74` sets `--col`/`--row`; `YardPage.test.tsx:157-163` checks `data-by-item`).
+Comparison grid:
+
+| Choice                     | Current        | A                                                                                                                                         | B                                                                                                                             |
+| -------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| R9 behaviour at liked item | approved D40 A | D40 A (unchanged)                                                                                                                         | D40 A (unchanged)                                                                                                             |
+| R10 who places animals     | CSS grid only  | the hook places every animal, also under reduced motion (standing points from measured cells, no loop); the CSS grid placement is removed | CSS grid under reduced motion and before the first measure; the hook only when moving, starting from the same standing points |
+| Start point with motion on | n/a            | standing point (D18)                                                                                                                      | standing point (D18)                                                                                                          |
+
+Question D41:
+D41 — 동물 자리를 누가 정하나요(움직임 줄이기일 때 포함)?
+Project/branch/task: feat/yard-motion, PR ④ 놀이터 움직임(useYardMotion).
+ELI10: 지금은 CSS가 동물을 칸 옆이나 아래 줄에 세웁니다. 움직임을 넣으면 새 hook이 동물 위치를 px로 계산합니다. 두 방법을 같이 두면 움직임 줄이기와 첫 화면은 CSS, 평소는 hook이라서 같은 "서 있는 자리"를 두 곳에서 계산하게 됩니다.
+Stakes if we pick wrong: 두 곳이 조금만 달라도 움직임이 시작될 때 동물이 한 번 툭 튀고, 나중에 마당 배치를 바꿀 때 한쪽만 고쳐서 어긋납니다.
+Recommendation: A because 서 있는 자리를 한 곳(hook)에서만 계산해서, 움직임 줄이기와 평소 화면이 절대 어긋나지 않습니다.
+Completeness: A=9/10, B=7/10
+Pros / cons:
+A) hook 하나로 (recommended)
+✅ 서 있는 자리·돌아다니는 자리 모두 hook이 재서 정하므로 움직임 시작 때 튀는 일이 없습니다
+✅ CSS의 --col/--row 배치를 지워서, 마당 배치를 바꿀 때 고칠 곳이 한 곳뿐입니다
+❌ 처음 재기 전 한 프레임은 동물을 숨겨야 하고, 테스트에서 칸 크기(getBoundingClientRect)를 흉내 내야 합니다
+B) CSS와 hook 둘 다
+✅ 움직임 줄이기 화면이 PR ③에서 낸 그대로라서 그 경로의 위험이 0입니다
+✅ 칸을 재기 전에도 동물이 제자리에 보여서 숨길 필요가 없습니다
+❌ 서 있는 자리를 CSS 퍼센트와 hook px 두 곳에서 계산해서, 어긋나면 움직임 시작 때 동물이 튑니다
+Net: 자리 계산 한 곳 대 PR ③ 화면을 그대로 두는 안전함.
+Header: 자리 정하기
+Options:
+A) hook 하나로 (recommended)
+움직임 줄이기일 때도 hook이 잰 칸 위치로 동물을 세우고 루프만 돌리지 않습니다. CSS 칸 배치(--col/--row)는 지웁니다. 재기 전 한 프레임은 숨깁니다.
+B) CSS와 hook 둘 다
+움직임 줄이기와 처음 화면은 지금 CSS 배치 그대로, 움직일 때만 hook이 px로 그립니다. 서 있는 자리를 두 곳에서 계산합니다.
+
+State: approved
+Actual answer: A) hook 하나로 (AskUserQuestion D41, 2026-11-26)
+Accepted scope: `useYardMotion` places every animal in px from the measured yard and cell rects. Under reduced motion it computes the D18 standing points (beside the liked item at the lowest cell, otherwise a slot on the bottom row) as pure functions, emits one frame per measure, and starts no rAF. With motion on, each animal starts at the same standing point. The `--col`/`--row` placement in `YardScene.module.css:116-128` and `YardScene.tsx:70-74` is removed. Animals stay hidden (`visibility: hidden`) until their first frame. `data-by-item` stays on each animal for the existing test (`YardPage.test.tsx:157-163`). Tests stub `getBoundingClientRect` for the yard and cells.
+History: none
+
+### R11: share the hop and facing pose with PestLayer
+
+Finding: Section 2 shared code, confidence 8/10, `src/components/PestLayer.tsx:150-159` (`const side = Math.sin(facing); if (side > 0.35) flip = 1; … figure.style.transform = \`scale(${sx * flip}, ${sy})\``), reviewer: plan-eng-review (Claude)
+Plan baseline: line 77 says to build on `pestMotion.ts` pure functions. Nothing says how the yard draws hop, stretch and facing.
+Runtime evidence: the pose math lives inline in PestLayer's subscribe callback (about 9 lines, flip hysteresis in a closure variable). Callers: PestLayer.tsx:150-159 (existing), YardScene animal drawing (proposed, D41 A).
+Shared-code rubric: 2 callers (1 existing, 1 proposed, an assumption from D41 A). Same inputs (`hop`, `facing`, previous flip) and same output (`flip`, `sx`, `sy`); no side effects. Destination: `pestMotion.ts` `figurePose({ hop, facing, flip })`. Implementation lines: about 9 removed from PestLayer, about 14 added (function + doc), and the yard uses about 3 instead of a 9-line copy. Saved compared with copying: about 4 lines; including tests (one table test replaces two), about 10. Blast radius: a bug changes how both pests hop, which PestLayer.test and the new test both catch.
+Comparison grid:
+
+| Choice                     | Current                  | A                                                                                        | B                                           |
+| -------------------------- | ------------------------ | ---------------------------------------------------------------------------------------- | ------------------------------------------- |
+| R9 behaviour at liked item | approved D40 A           | D40 A                                                                                    | D40 A                                       |
+| R10 who places animals     | approved D41 A           | D41 A                                                                                    | D41 A                                       |
+| R11 pose math              | inline in PestLayer only | `figurePose` pure fn in `pestMotion.ts`, used by PestLayer and YardScene, one table test | YardScene keeps its own copy of the 9 lines |
+
+Question D42:
+D42 — 뛰기·방향 돌리기 계산을 풀이 화면 방해꾼과 같이 쓸까요?
+Project/branch/task: feat/yard-motion, PR ④ 놀이터 움직임(useYardMotion).
+ELI10: 풀이 화면 방해꾼은 뛸 때 길쭉해지고 내려앉을 때 납작해지며, 옆으로 갈 때만 몸을 돌립니다. 이 계산 9줄이 PestLayer 안에 들어 있습니다. 마당 동물도 똑같이 움직여야 하는데, 이 계산을 함수 하나로 빼서 같이 쓸지, 마당에 한 벌 더 베낄지 정합니다.
+Stakes if we pick wrong: 베끼면 나중에 한쪽만 고쳐서 풀이 화면과 마당의 같은 동물이 다르게 뛰고, 빼면 PestLayer(이미 출시된 화면)도 같이 건드립니다.
+Recommendation: A because 같은 동물이 두 화면에서 똑같이 움직이는 것이 보장되고, 테스트도 하나로 줄어듭니다.
+Completeness: A=9/10, B=7/10
+Pros / cons:
+A) 함수로 빼서 같이 쓰기 (recommended)
+✅ pestMotion.ts의 figurePose 하나를 두 화면이 써서, 뛰는 모양이 어긋날 일이 없습니다
+✅ 표 테스트 하나로 늘어남·납작해짐·방향 유지(떨림 방지)를 한 번에 지킵니다
+❌ 이미 출시된 PestLayer 코드를 같이 바꿔서, 그 화면의 기존 테스트를 다시 확인해야 합니다 (human: ~1h / CC: ~5min)
+B) 마당에 따로 베끼기
+✅ PestLayer를 전혀 건드리지 않아 풀이 화면 위험이 0입니다
+✅ 마당만 다르게 움직이고 싶을 때 바로 고칠 수 있습니다
+❌ 같은 9줄이 두 곳에 생겨서, 한쪽만 고치면 같은 동물이 화면마다 다르게 뜁니다
+Net: 두 화면의 같은 움직임 보장 대 출시된 PestLayer를 안 건드리기.
+Header: 뛰기 계산
+Options:
+A) 함수로 빼서 같이 쓰기 (recommended)
+pestMotion.ts에 figurePose를 두고 PestLayer와 마당이 함께 씁니다. PestLayer도 이 함수로 바꿉니다. (human: ~1h / CC: ~5min)
+B) 마당에 따로 베끼기
+PestLayer는 그대로 두고, 마당 그리기에 같은 계산을 한 벌 더 둡니다.
+
+State: approved
+Actual answer: A) 함수로 빼서 같이 쓰기 (AskUserQuestion D42, 2026-11-26)
+Accepted scope: `figurePose({ hop, facing, flip }) → { flip, sx, sy }` in `pestMotion.ts` with the current numbers (flip only when |sin(facing)| > 0.35, stretch = min(hop, 12) / 12, sy = 1 + 0.08 × stretch and sx = 1 − 0.05 × stretch when hop > 0.5, otherwise 1). PestLayer.tsx:150-159 calls it, and YardScene uses it for each animal. One table test in `pestMotion.test.ts`. The existing PestLayer test (`PestLayer.test.tsx:87-91`: `scale(-1, 1)` facing left, `scale(0.95, 1.08)` mid-hop) stays green unchanged as regression proof.
+History: none
+
+### Section 1 (PR ④): findings and dispositions
+
+1. [INFORMATIONAL] (confidence 8/10) `docs/designs/rewards-playground.md:91`: what an animal does after it reaches its liked item. Accepted D40 A (R9).
+2. [INFORMATIONAL] (confidence 8/10) `src/components/YardScene.module.css:116-128`: two ways to place animals. Accepted D41 A (R10).
+
+### Section 2 (PR ④): Code quality
+
+1. [INFORMATIONAL] (confidence 8/10) `src/components/PestLayer.tsx:150-159`: the pose math would be copied. Accepted D42 A (R11).
+2. [INFORMATIONAL] (confidence 9/10) `src/hooks/usePestMotion.ts:85` `function prefersReducedMotion(): boolean` is private, and the yard needs the same check. Export it and import it (reuse ladder rung 1, no new code). This is a correction with no question.
+3. [INFORMATIONAL] (confidence 7/10) Timing for the yard (stay 8–12 s from D40, roam rest 1.5–4 s, 1–2 roam stops) goes in one `YARD_TIMING` constant next to the yard pure functions in `pestMotion.ts`, like `PEST_TIMING` in `pest.ts:35`. Random picks use `randomIntBetween` (`random.ts:4`) with an injected `RandomFn` so tests are fixed. This is a correction with no question.
+
+Pure functions added to `pestMotion.ts` (all take plain values and return values):
+
+- `yardBounds({ area, size, sky })`: the feet range for an animal of `size` px. Feet stay below the sky band; the body and the largest gait lift stay inside the yard. A yard too small gives one centre point (same rule as `areaBounds`).
+- `standingPoint({ cell?: Box, slot, bounds })`: beside the liked item's measured cell (feet at the cell's lower part, to the right of the art), otherwise bottom-row slot `slot` of 4, clamped into `bounds`.
+- `nextYardLeg({ leg, liked, random })`: the trip state machine from D40: `home` (stay 8–12 s) → `roam` × 1–2 (rest 1.5–4 s each) → `home`. With no liked cell it is `roam` forever.
+- `figurePose` (D42).
+
+Dispositions: 1 accepted (D42 A), 2 and 3 carried as corrections.
+
+### Section 3 (PR ④): Tests
+
+```
+CODE PATHS                                              USER FLOWS
+[+] lib/pestMotion.ts                                   [+] Open /playground (motion on)
+  ├── yardBounds                                          ├── [GAP] animals start at standing points, then walk
+  │   ├── [GAP] feet below sky, body inside               └── [GAP] cat walks to a placed 털실 공 (after 놓기)
+  │   └── [GAP] tiny yard → centre point                [+] Open /playground (reduced motion)
+  ├── standingPoint                                       └── [★★ TESTED] cat by item, dog on bottom row
+  │   ├── [GAP] liked cell → beside it                        — YardPage.test.tsx:157-163, attribute only, runs
+  │   │                                                         with motion on today; add matchMedia stub (O4)
+  │   │                                                     └── [GAP] place item → animal moves beside it (O2)
+  │   └── [GAP] no liked → bottom slot, clamped          [+] Background tab, back again
+  ├── nextYardLeg (D40)                                   └── [GAP] no jump on return (dt ≤ 0.05 s)
+  │   ├── [GAP] home stay 8–12 s → roam 1–2 → home      [+] Rotate / URL bar hides
+  │   └── [GAP] no liked → roam only                      └── [GAP] positions clamped into new yard
+  └── figurePose (D42)
+      ├── [★★ TESTED via PestLayer.test.tsx:87-91]
+      └── [GAP] hysteresis (|sin| ≤ 0.35 keeps flip), hop ≤ 0.5 → 1
+[+] hooks/useYardMotion.ts
+  ├── [GAP] reduced motion: one frame per measure, no rAF
+  ├── [GAP] liked moved while staying → new cell at once; removed → roam
+  ├── [GAP] hidden → rAF cancelled; visible → resumes
+  ├── [GAP] resize → clamp positions and targets
+  └── [GAP] unmount → rAF, observer and listener cleaned up
+[+] components/YardScene.tsx
+  └── [GAP] animal hidden until first frame, then transform + figurePose scale
+
+COVERAGE: 2/17 paths tested (12%)  |  Code paths: 1/13  |  User flows: 1/4
+QUALITY: ★★★:0 ★★:2 ★:0  |  GAPS: 15 (0 E2E, 0 eval)
+```
+
+Every gap is required proof of approved behaviour (D34, D40, D41, D42 and the Section 1 production failures), so no new test policy is asked. Proposed tests:
+
+- `src/lib/pestMotion.test.ts` (extend): one table per pure function above. Value: protects=feet stay on grass and inside the yard for 50/60 px animals; fails_when=bounds reuse PEST_SIZE or ignore the sky band; why_new=no yard bounds test exists; seam=none; no_claim=real CSS layout (numbers only).
+- `src/lib/pestMotion.test.ts` (extend): `nextYardLeg` with fixed random. Value: protects=D40 stay 8–12 s, 1–2 roam stops, then home; fails_when=the animal never leaves or never returns; why_new=new state machine; seam=none; no_claim=timing feel on a device.
+- `src/hooks/useYardMotion.test.tsx` (new, fake rAF and timers like `usePestMotion.test.tsx:90-100`, stubbed rects like `:19-34`): reduced motion, start points, walk toward liked cell, move/remove item, hidden/visible, resize, unmount. Value: protects=one loop for 4 animals that pauses when hidden and never teleports; fails_when=visibility listener missing or dt not capped; why_new=new hook; seam=none (random and refs are already parameters, like usePestMotion); no_claim=real browser rAF timing (fake timers).
+- `src/pages/YardPage.test.tsx` (extend): the existing `data-by-item` test stays; add one check that an animal gets a `transform` after the yard is measured. Value: protects=YardScene draws hook frames; fails_when=subscribe is not wired; why_new=the page test checks attributes only; seam=none; no_claim=visual position (jsdom has no layout).
+
+Tests made obsolete by this plan: none. The `data-by-item` test is kept on purpose.
+
+Test plan artifact: `~/.gstack/projects/web-app-quiz2/smkim-feat-yard-motion-eng-review-test-plan-20261126-142152.md`.
+
+Dispositions: all 15 gaps carried as required proof.
+
+### Section 4 (PR ④): Performance
+
+One rAF for 4 animals. Each frame writes 2 inline styles per animal (position and figure scale), with no React render, no layout read and no allocation beyond small point objects. Rects are read only in the `ResizeObserver` callback and when `placed` changes, never per frame. The loop stops when hidden, under reduced motion and on unmount. Scale: 4 animals × 60 fps = 240 style writes per second [estimated]. No issues found.
+
+### Outside Voice (PR ④, Claude Plan subagent; Codex not installed, so this is not outside coverage)
+
+It returned 10 findings (VERDICT: FINDINGS), and the parent checked each against the code. 6 are corrections of how approved behaviour is built and are applied with no question. 4 need a decision (D44–D47), and the file count reopened the complexity gate (D43).
+
+Corrections (applied to the working plan):
+
+- **O1 (High).** The sky band exists only as the gradient literal `0 20%` (`YardScene.module.css:9`). `yardBounds` takes the grass top from the measured `.cells` rect top (`:30`, `inset: 22%`), never a JS `0.2`. The `sky` parameter becomes `grassTop` in px.
+- **O2 (High).** Under reduced motion there are no frames. An effect keyed on the `liked` map recomputes the standing points and emits, and so does the measure. A new test: reduced motion + place 털실 공 → the cat's frame moves beside it.
+- **O3 (Medium).** The D40 stay (8–12 s) and roam rests (1.5–4 s) count down from the capped `dt` inside the frame step, not `setTimeout`. Nothing advances while frames stop. `nextYardLeg` stays pure and is tested without timers.
+- **O4 (Medium, verified: `src/test/setup.ts` has no `matchMedia`, `usePestMotion.test.tsx:242` stubs it).** Existing `/playground` page tests run with motion on. `YardPage.test.tsx:150-163` gets a reduced-motion stub so it keeps proving the still layout. The Section 3 diagram row "★★ TESTED (reduced motion)" is corrected to "★★ TESTED (attribute only, motion on); add matchMedia stub". Implementation checks that the vitest jsdom environment provides `requestAnimationFrame`. If it does not, the page tests stub it like `usePestMotion.test.tsx:90-100`.
+- **O6 (Medium, verified: `PestLayer.module.css:47-56`).** Each yard animal gets an inner figure wrapper: the outer span takes `translate`, and the inner one takes the `figurePose` scale with `transform-origin: 50% 95%` and the same 90 ms ease-out transition.
+- **O7 (Low).** The item art size in `standingPoint` comes from `reward.kind` (`big` 64, else 48, `YardScene.tsx:113`), through one exported constant that both YardScene and the hook read. It is not measured.
+
+Reopened by O5 (file count): the honest count is 6 source files (`pestMotion.ts`, `useYardMotion.ts` new, `YardScene.tsx`, `YardScene.module.css`, `PestLayer.tsx` for D42, `usePestMotion.ts` for the export) plus 3 test files = 9. That trips the 8-file gate.
+
+### Scope record (PR ④, revised after O5)
+
+feature answers: none proposed; structure: D43 A Original arrangement (AskUserQuestion D43, 2026-11-26): no smaller arrangement keeps D40–D42; accepted scope: 6 source files + 3 test files, 1 new module (`useYardMotion`), with corrections O1–O4, O6 and O7; pending remedies: D44 (where `prefersReducedMotion` lives), D45 (animal draw order), D46 (`visibilitychange` listener), D47 (reduced-motion positions).
+
+Scope Challenge result: scope accepted as-is (unchanged by D43).
+
+### R12: where `prefersReducedMotion` lives
+
+Finding: Outside Voice O5 (Medium), confidence 7/10, `src/hooks/usePestMotion.ts:85` `function prefersReducedMotion(): boolean` (private), reviewer: Claude Plan subagent. The parent also found 3 inline copies of the same check: `CoinBurst.tsx:14`, `StatusViews.tsx:53`, `StickerAlbum.tsx:190` (`globalThis.matchMedia?.(`).
+Plan baseline: Section 2 finding 2 (correction): export it from `usePestMotion.ts` and import it in `useYardMotion.ts`.
+Runtime evidence: one private function plus 3 inline copies, verified by grep.
+Comparison grid:
+
+| Choice              | Current                               | A Apply                                                                           | B Keep                         | C Investigate                                                                    | D Defer                                   |
+| ------------------- | ------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------ | -------------------------------------------------------------------------------- | ----------------------------------------- |
+| R12 helper location | export from `usePestMotion.ts` (plan) | new `src/lib/reducedMotion.ts`, used by both hooks; the 3 inline copies untouched | export from `usePestMotion.ts` | look at the 3 inline copies (≤15 min) and come back with a choice; no change yet | stays pending; implementation waits on it |
+| D43 structure       | approved A                            | A (10 files, 2 new modules)                                                       | A (9 files)                    | A                                                                                | A                                         |
+
+Question D44:
+D44 — "움직임 줄이기" 확인 함수를 어디에 둘까요?
+Project/branch/task: feat/yard-motion, PR ④ 놀이터 움직임(useYardMotion).
+ELI10: 휴대폰의 "동작 줄이기" 설정을 읽는 5줄짜리 함수가 지금 usePestMotion.ts 안에 숨어 있습니다. 마당 hook도 이 함수가 필요합니다. 계획은 그 파일에서 내보내 쓰는 것이고, 외부 검토는 hook이 다른 hook 파일을 불러오는 것보다 src/lib에 따로 두자고 했습니다. 같은 확인이 CoinBurst·StatusViews·StickerAlbum에도 한 줄씩 따로 들어 있습니다.
+Stakes if we pick wrong: lib로 옮기면 파일이 하나 늘고(10개), 그대로 두면 나중에 다른 곳에서 쓰려는 사람이 hook 파일을 불러오게 됩니다. 어느 쪽이든 사용자가 보는 동작은 같습니다.
+Recommendation: B because 동작이 같고 가장 작은 변경이며, 5곳을 한 함수로 모으는 일은 그 3곳까지 같이 고치는 따로 하는 정리가 더 맞습니다.
+Note: options differ in kind, not coverage — no completeness score.
+Pros / cons:
+A) lib로 옮기기
+✅ src/lib/reducedMotion.ts 하나에 두어, 나중에 CoinBurst 등 3곳도 같은 함수로 바꾸기 쉽습니다
+✅ hook 파일이 다른 hook 파일의 도우미를 불러오는 일이 없어집니다
+❌ 파일이 10개, 새 모듈이 2개가 되고, 나머지 3곳은 여전히 따로 남습니다 (human: ~20min / CC: ~3min)
+B) usePestMotion에서 내보내기 (recommended)
+✅ 새 파일 없이 export 한 단어로 끝나서 PR이 가장 작습니다
+✅ 풀이 화면 방해꾼 코드의 동작이 한 글자도 바뀌지 않습니다
+❌ 마당 hook이 방해꾼 hook 파일을 불러오게 되어, 두 hook이 파일로 엮입니다
+C) 먼저 3곳 살펴보기
+✅ 3곳의 확인이 정말 같은지 15분 안에 보고 나서 고를 수 있습니다
+✅ 5곳을 한 번에 모을지 판단할 근거가 생깁니다
+❌ 이 질문이 한 번 더 열리고, 그동안 구현이 이 부분에서 기다립니다
+D) 이 제안만 미루기
+✅ 지금은 정하지 않고 넘어가서 다른 질문을 먼저 끝낼 수 있습니다
+✅ 나중에 정리 작업에서 한 번에 정할 수 있습니다
+❌ 정하지 않은 채로 남아서, 구현할 때 이 함수를 어디서 가져올지 막힙니다
+Net: 가장 작은 PR 대 나중 정리를 쉽게 하는 파일 하나.
+Header: 확인 함수
+Options:
+A) lib로 옮기기
+src/lib/reducedMotion.ts를 새로 두고 두 hook이 씁니다. CoinBurst 등 3곳은 그대로입니다. 파일 10개. (human: ~20min / CC: ~3min)
+B) usePestMotion에서 내보내기 (recommended)
+지금 계획대로 usePestMotion.ts의 함수에 export만 붙이고 마당 hook이 불러옵니다. 파일 9개.
+C) 먼저 3곳 살펴보기
+CoinBurst·StatusViews·StickerAlbum의 확인을 15분 안에 비교하고 다시 묻습니다. 그동안 바꾸지 않습니다.
+D) 이 제안만 미루기
+이 행만 정하지 않은 채로 둡니다. 다른 결정은 그대로입니다.
+
+State: approved
+Actual answer: A) lib로 옮기기 (AskUserQuestion D44, 2026-11-26)
+Accepted scope: new `src/lib/reducedMotion.ts` exporting `prefersReducedMotion()` (the body from `usePestMotion.ts:85-90`, unchanged). `usePestMotion.ts` imports it instead of its private copy; `useYardMotion.ts` imports it. `CoinBurst.tsx:14`, `StatusViews.tsx:53` and `StickerAlbum.tsx:190` stay as they are. Count becomes 7 source + 3 test files = 10, with 2 new modules (`useYardMotion`, `reducedMotion`). This still fits D43 A, because no smaller arrangement exists and the extra file is the user's choice. No new test: `usePestMotion.test.tsx:241-253` (reduced motion stays still) is the regression proof for the move.
+History: Section 2 finding 2 planned the export from `usePestMotion.ts`; replaced by this answer.
+
+### R13: which animal is drawn in front
+
+Finding: Outside Voice O8 (Low), confidence 7/10, `src/components/YardScene.module.css:130-132` (`.animal[data-front='true'] { z-index: 1; }`), reviewer: Claude Plan subagent
+Plan baseline: D18 "the chosen pest is drawn in front". In PR ③ animals never overlap much because they stand in fixed spots.
+Runtime evidence: draw order is fixed. The chosen pest is drawn last (`YardScene.tsx:45-47`); the others follow `PEST_ANIMALS` order.
+Comparison grid:
+
+| Choice                         | Current                       | A Apply                                                                                    | B Keep                                   | C Investigate                                                        | D Defer       |
+| ------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------- | -------------------------------------------------------------------- | ------------- |
+| R13 draw order                 | fixed: chosen pest last (D18) | per frame z-index from feet `y` (lower on the grass = in front); the chosen pest wins ties | fixed order, chosen pest always in front | check overlap in the browser after building (≤15 min); no change yet | stays pending |
+| D18 animals behind cell labels | approved                      | kept (animal z-index stays below `.cells`)                                                 | kept                                     | kept                                                                 | kept          |
+
+Question D45:
+D45 — 돌아다니다 겹치면 어느 동물이 앞에 보이나요?
+Project/branch/task: feat/yard-motion, PR ④ 놀이터 움직임(useYardMotion).
+ELI10: 지금은 고른 방해꾼이 늘 맨 앞이고 나머지는 정해진 순서로 그려집니다. 서 있기만 할 때는 문제가 없었지만, 돌아다니면 풀밭 아래쪽(보는 사람에게 가까운 쪽)에 있는 동물이 위쪽 동물 뒤로 숨는 일이 생깁니다. 발 위치(아래일수록 앞)로 순서를 정할지, 지금처럼 둘지 정합니다.
+Stakes if we pick wrong: 순서를 고정하면 가끔 가까운 동물이 먼 동물 뒤로 들어가 어색하고, 발 위치로 정하면 고른 방해꾼이 다른 동물 뒤로 가려질 때가 생깁니다.
+Recommendation: A because 깊이에 맞게 겹쳐야 마당이 자연스럽고, 프레임마다 숫자 하나를 쓰는 정도라 비용이 거의 없습니다.
+Note: options differ in kind, not coverage — no completeness score.
+Pros / cons:
+A) 발 위치로 앞뒤 정하기 (recommended)
+✅ 풀밭 아래쪽에 있는 동물이 앞에 보여서, 지나가며 겹쳐도 자연스럽습니다
+✅ 같은 높이일 때는 고른 방해꾼이 앞이라 D18의 뜻도 지켜집니다
+❌ 고른 방해꾼이 다른 동물 뒤로 들어가 잠깐 가려질 때가 있습니다 (human: ~30min / CC: ~3min)
+B) 지금처럼 고른 방해꾼 맨 앞
+✅ 고른 방해꾼이 언제나 보여서 D18 문장 그대로입니다
+✅ 코드가 바뀌지 않고 테스트도 그대로입니다
+❌ 가까운 동물이 먼 동물 뒤로 지나가는 어색한 장면이 생깁니다
+C) 만든 뒤 브라우저에서 보고 정하기
+✅ 실제로 얼마나 자주 겹치는지 보고 나서 정할 수 있습니다
+✅ 지금 결정을 미루면서도 확인 방법은 정해 둡니다
+❌ 구현 뒤에 이 질문을 다시 열어야 합니다
+D) 이 제안만 미루기
+✅ 다른 질문을 먼저 끝낼 수 있습니다
+✅ 나중 PR에서 정할 수 있습니다
+❌ 정하지 않은 채로 남아 구현 때 기본값을 따로 골라야 합니다
+Net: 자연스러운 겹침 대 고른 방해꾼이 늘 보이는 것.
+Header: 겹침 순서
+Options:
+A) 발 위치로 앞뒤 정하기 (recommended)
+프레임마다 발 높이로 z-index를 정해 아래쪽 동물이 앞에 보입니다. 같은 높이면 고른 방해꾼이 앞입니다. 칸 글자보다는 늘 뒤입니다. (human: ~30min / CC: ~3min)
+B) 지금처럼 고른 방해꾼 맨 앞
+순서를 바꾸지 않습니다. 고른 방해꾼이 언제나 맨 앞입니다.
+C) 만든 뒤 브라우저에서 보고 정하기
+구현한 뒤 15분 안에 겹침을 보고 다시 묻습니다. 그동안 순서는 지금 그대로입니다.
+D) 이 제안만 미루기
+이 행만 정하지 않은 채로 둡니다. 다른 결정은 그대로입니다.
+
+State: approved
+Actual answer: A) 발 위치로 앞뒤 정하기 (AskUserQuestion D45, 2026-11-26)
+Accepted scope: every frame each animal's outer span gets `z-index` from its feet `y` (rounded px, so lower on the grass is in front). On a tie the chosen pest is in front (a +0.5 rank, or an order tie-break). All animal z-indexes stay inside the `.animals` layer (`z-index: 1`), so cells and their labels stay on top (D18/F9). The `data-front` z-index rule at `YardScene.module.css:130-132` is removed; `data-front` itself stays for size and mood. One hook test: of two animals, the one with the larger `y` gets the higher z-index; on equal `y` the chosen pest is higher.
+History: none
+
+### R14: an explicit `visibilitychange` listener
+
+Finding: Outside Voice O9 (Low), confidence 6/10, D34 "pausing in hidden tabs" (`docs/designs/rewards-playground.md:1275`) and `src/hooks/usePest.ts:371` (the play screen's listener), reviewer: Claude Plan subagent. Medium confidence, so verify this is actually an issue: browsers suspend rAF in hidden tabs, and with O3 (frame-time timers) nothing advances without frames.
+Plan baseline: Section 1 diagram: `visibilitychange hidden ──▶ cancel rAF; visible ──▶ restart`, with a test.
+Runtime evidence: unknown on real in-app browsers (KakaoTalk webview) and TWA; jsdom does not model rAF suspension.
+Comparison grid:
+
+| Choice                   | Current                              | A Apply                                                                                                   | B Keep                                 | C Investigate                                                               | D Defer       |
+| ------------------------ | ------------------------------------ | --------------------------------------------------------------------------------------------------------- | -------------------------------------- | --------------------------------------------------------------------------- | ------------- |
+| R14 hidden-tab pause     | explicit listener cancels rAF (plan) | no listener; rely on browser rAF suspension + `MAX_DT` + O3; test that legs do not advance with no frames | explicit listener, as planned, plus O3 | test in the Android TWA and the KakaoTalk webview (≤20 min) before choosing | stays pending |
+| D34 pause in hidden tabs | approved                             | met implicitly                                                                                            | met explicitly                         | pending check                                                               | pending       |
+
+Question D46:
+D46 — 다른 탭으로 가면 멈추는 일을 직접 챙길까요?
+Project/branch/task: feat/yard-motion, PR ④ 놀이터 움직임(useYardMotion).
+ELI10: D34는 "숨긴 탭에서는 멈춘다"고 정했습니다. 보통 브라우저는 안 보이는 탭에서 애니메이션 프레임을 알아서 멈추고, 이번에 머무는 시간도 프레임 시간으로만 세기로 해서(O3) 저절로 멈춥니다. 외부 검토는 그래서 따로 "탭이 숨겨졌다" 신호를 듣는 코드가 거의 필요 없다고 했습니다. 이 코드를 둘지 뺄지 정합니다.
+Stakes if we pick wrong: 빼면 카카오톡 같은 앱 안 브라우저가 프레임을 안 멈출 때 숨긴 화면에서도 계속 돌아 배터리를 쓰고, 두면 8줄 정도와 테스트 하나가 늘 뿐입니다.
+Recommendation: B because D34가 분명히 정한 동작을 브라우저마다 다른 기본 동작에 맡기지 않고, 풀이 화면(usePest.ts:371)과 같은 방식이라 설명이 쉽습니다.
+Note: options differ in kind, not coverage — no completeness score.
+Pros / cons:
+A) 신호 코드 빼기
+✅ 코드 8줄 정도와 테스트 하나가 줄어 hook이 조금 작아집니다
+✅ 머무는 시간이 프레임 시간이라, 프레임이 멈추면 저절로 함께 멈춥니다
+❌ 앱 안 브라우저가 숨긴 화면에서 프레임을 계속 돌리면 그대로 돌아서 배터리를 씁니다
+B) 신호 코드 두기 (recommended)
+✅ 숨기면 루프를 직접 끄므로 어느 브라우저에서도 D34대로 멈춥니다
+✅ 풀이 화면 방해꾼(usePest.ts:371)과 같은 방식이라 두 화면이 똑같이 행동합니다
+❌ 대부분의 브라우저에서는 이미 일어나는 일을 한 번 더 하는 코드입니다
+C) 앱 안 브라우저에서 먼저 확인
+✅ 안드로이드 앱(TWA)과 카카오톡 브라우저에서 실제로 멈추는지 20분 안에 보고 고릅니다
+✅ 근거를 갖고 코드를 넣거나 뺄 수 있습니다
+❌ 기기 확인이 필요하고, 그동안 이 질문이 열려 있습니다
+D) 이 제안만 미루기
+✅ 다른 질문을 먼저 끝낼 수 있습니다
+✅ 계획(신호 코드 두기)은 바뀌지 않은 채로 남습니다
+❌ 외부 검토의 지적에 답하지 않은 채로 남습니다
+Net: 모든 브라우저에서 확실히 멈추기 대 8줄 줄이기.
+Header: 숨긴 탭
+Options:
+A) 신호 코드 빼기
+visibilitychange를 듣지 않고, 브라우저의 프레임 멈춤과 프레임 시간 타이머(O3)에 맡깁니다. 프레임이 없으면 일정이 안 넘어가는지 테스트합니다.
+B) 신호 코드 두기 (recommended)
+계획대로 탭이 숨겨지면 루프를 끄고, 보이면 다시 켭니다(점프 없음). O3도 함께 적용합니다.
+C) 앱 안 브라우저에서 먼저 확인
+TWA와 카카오톡 브라우저에서 20분 안에 확인하고 다시 묻습니다. 그동안 바꾸지 않습니다.
+D) 이 제안만 미루기
+이 행만 정하지 않은 채로 둡니다. 다른 결정은 그대로입니다.
+
+State: approved
+Actual answer: B) 신호 코드 두기 (AskUserQuestion D46, 2026-11-26)
+Accepted scope: as planned in Section 1. `useYardMotion` listens to `visibilitychange`: when hidden it cancels the rAF, and when visible it restarts with `last` reset (`dt` ≤ 0.05 s, no jump). It starts paused if `document.hidden` at mount, like `usePest.ts:279`. O3 also applies. Test: hide → no frames and no leg progress; show → frames resume with no jump.
+History: none
+
+### R15: reduced-motion standing positions
+
+Finding: Outside Voice O10 (Low), confidence 8/10, `src/components/YardScene.module.css:116-128` (`top: calc(var(--row) * 50% + 2%)`, `left: calc((var(--col) + 0.55) / 3 * 100%)`, bottom row `left: calc(4% + var(--col) * 23%)`, `bottom: 0`), reviewer: Claude Plan subagent
+Plan baseline: D34 "PR ③ shows every animal standing still, using D18's reduced-motion layout"; D41 A moves placement into the hook. Nothing says whether the hook keeps PR ③'s exact spots.
+Runtime evidence: PR ③ spots as quoted above, measured against the `.animals` layer (same inset as `.cells`).
+Comparison grid:
+
+| Choice                  | Current        | A Apply                                                                                                                                                                                                                                                                | B Keep                                                                         | C Investigate                                      | D Defer       |
+| ----------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------- | ------------- |
+| R15 standing spots      | PR ③ CSS spots | `standingPoint` reproduces PR ③'s spots in px from the measured cell rects (box left at cell left + 0.55 × cell width; box top at row top + 2% of layer height; bottom row at 4% + slot × 23% of layer width, feet at the layer bottom), and one test pins the numbers | new spots "beside the art" (Section 2 plan), and the visual change is recorded | compare both in the browser (≤15 min), then choose | stays pending |
+| D41 hook places animals | approved A     | A                                                                                                                                                                                                                                                                      | A                                                                              | A                                                  | A             |
+
+Question D47:
+D47 — 움직임 줄이기일 때 동물이 서는 자리를 PR ③과 똑같이 둘까요?
+Project/branch/task: feat/yard-motion, PR ④ 놀이터 움직임(useYardMotion).
+ELI10: D41에서 동물 자리를 hook이 정하기로 했습니다. 그런데 계획의 새 "물건 옆" 자리는 PR ③의 CSS 자리와 몇 px씩 다릅니다. 그래서 움직임 줄이기를 켠 사람에게는 이번 배포로 동물 자리가 조금 옮겨져 보입니다. PR ③ 숫자를 그대로 hook으로 옮길지, 새 자리로 바꾸고 그 변화를 기록할지 정합니다.
+Stakes if we pick wrong: 새 자리로 가면 D34의 "PR ③처럼 서 있다"는 약속과 달라지고, PR ③ 숫자로 가면 계획한 "물건 오른쪽 옆"보다 동물이 칸 가운데 쪽에 조금 더 붙습니다.
+Recommendation: A because D34가 약속한 모습이 그대로 남고, CSS는 지워지므로 숫자는 여전히 hook 한 곳에만 있습니다.
+Note: options differ in kind, not coverage — no completeness score.
+Pros / cons:
+A) PR ③ 자리 그대로 (recommended)
+✅ 움직임 줄이기 화면이 PR ③과 똑같아서, 이미 디자인 리뷰를 통과한 모습이 그대로 남습니다
+✅ 숫자는 잰 칸 크기에 곱해 쓰고 CSS 쪽은 지우므로 여전히 한 곳에만 있습니다
+❌ 칸 안 비율(0.55, 2%, 23%)이 JS 상수로 옮겨 오고, 그 값을 지키는 테스트가 하나 늡니다 (human: ~30min / CC: ~3min)
+B) 새 자리로 바꾸기
+✅ 물건 그림 크기(O7)를 기준으로 "물건 바로 오른쪽"에 서서, 무엇을 좋아하는지 더 잘 보입니다
+✅ 움직일 때 쉬는 자리와 계산 방식이 같아 코드가 조금 단순합니다
+❌ 움직임 줄이기 화면이 PR ③과 달라져서, D34 약속을 고쳐 적고 화면을 다시 봐야 합니다
+C) 브라우저에서 둘 다 보고 정하기
+✅ 두 자리를 실제 화면에서 15분 안에 비교하고 고를 수 있습니다
+✅ 디자인 판단을 눈으로 확인한 뒤에 합니다
+❌ 구현 중에 이 질문을 다시 열어야 합니다
+D) 이 제안만 미루기
+✅ 다른 질문을 먼저 끝낼 수 있습니다
+✅ 구현 뒤 /design-review에서 정할 수 있습니다
+❌ 구현할 때 어느 자리로 만들지 정해지지 않은 채로 남습니다
+Net: PR ③ 모습 그대로 대 좋아하는 물건 바로 옆에 서기.
+Header: 서는 자리
+Options:
+A) PR ③ 자리 그대로 (recommended)
+PR ③의 CSS 비율(칸 너비의 0.55, 줄 높이 2%, 아래 줄 4%+23%)을 잰 칸 크기로 hook이 계산합니다. CSS 배치는 지웁니다. 숫자를 지키는 테스트 하나. (human: ~30min / CC: ~3min)
+B) 새 자리로 바꾸기
+물건 그림 오른쪽 옆에 서게 하고, 움직임 줄이기 화면이 PR ③과 달라진 것을 기록합니다.
+C) 브라우저에서 둘 다 보고 정하기
+구현 중 15분 안에 두 자리를 비교하고 다시 묻습니다. 그동안 정하지 않습니다.
+D) 이 제안만 미루기
+이 행만 정하지 않은 채로 둡니다. 다른 결정은 그대로입니다.
+
+State: approved
+Actual answer: A) PR ③ 자리 그대로 (AskUserQuestion D47, 2026-11-26)
+Accepted scope: `standingPoint` reproduces PR ③'s spots in px from the measured cell rects and the measured animals layer (same box as `.cells`). Liked cell: the box's left edge is at cell left + 0.55 × cell width, and its top is at (row × 50% + 2%) of layer height. PR ③ uses a flat 50% here, not the measured row top, and that is kept so the spot does not move. In feet coordinates that is x = box left + size / 2 and y = box top + size. No liked item: bottom-row slot `slot` (chosen-pest order as in `YardScene.tsx:45-47`) with box left at 4% + slot × 23% of layer width, and feet at the layer bottom. The ratios live as named constants next to `standingPoint`, and the CSS placement is removed (D41). One table test pins the numbers for a 356 × 220 layer. With motion on these are also the start points. O7 (art size) is no longer needed for standing points; roam rest points remain random grass points.
+History: Section 2's "beside the art" spot replaced by this answer.
+
+### Outside Voice dispositions (PR ④)
+
+- O1, O2, O3, O4, O6: accepted as corrections.
+- O7: accepted, then made moot by D47 A (standing points do not use art size).
+- O5: accepted. The count was corrected to 9, then 10 after D44. Structure was confirmed by D43 A, and the helper moves to `src/lib` per D44 A.
+- O8: D45 A (depth order).
+- O9: D46 B (keep the listener). The reviewer's suggestion to drop it was declined.
+- O10: D47 A (PR ③ spots).
+- Remaining disagreements: none.
+
+### R16: TODO — move the 3 inline reduced-motion checks onto the shared helper
+
+Finding: Final planning decisions (TODO), confidence 9/10, `src/components/CoinBurst.tsx:14`, `src/components/StatusViews.tsx:53`, `src/components/StickerAlbum.tsx:190` (`globalThis.matchMedia?.(`), reviewer: plan-eng-review (Claude)
+Plan baseline: D44 A creates `src/lib/reducedMotion.ts` for the two hooks and leaves these 3 as they are.
+Runtime evidence: 3 inline copies, verified by grep.
+TODO card: **What**: make CoinBurst, StatusViews and StickerAlbum call `prefersReducedMotion()` from `src/lib/reducedMotion.ts`. **Why**: one place reads the OS setting, so a later app-level "움직임 줄이기" toggle has one switch. **Pros**: 5 callers, one helper. **Cons**: touches 3 shipped components for no visible change. **Context**: D44 (2026-11-26) moved the helper; these 3 were left out to keep PR ④ small. Start at the grep above. **Depends on**: PR ④ (the helper exists).
+Comparison grid:
+
+| Choice                  | Current            | A                    | B        | C                               |
+| ----------------------- | ------------------ | -------------------- | -------- | ------------------------------- |
+| R16 the 3 inline checks | left as is (D44 A) | add a TODOS.md entry | no entry | migrate them in PR ④ (13 files) |
+| D44 helper location     | approved A         | A                    | A        | A                               |
+
+Question D48:
+D48 — 남은 "움직임 줄이기" 확인 3곳을 TODO로 남길까요?
+Project/branch/task: feat/yard-motion, PR ④ 놀이터 움직임(useYardMotion).
+ELI10: D44에서 확인 함수를 src/lib/reducedMotion.ts로 옮기기로 했고, CoinBurst·StatusViews·StickerAlbum 3곳은 그대로 두었습니다. 이 3곳도 나중에 같은 함수를 쓰도록 TODOS.md에 적어 둘지, 적지 않을지, 이번 PR에서 바로 할지 정합니다.
+Stakes if we pick wrong: 적지 않으면 나중에 앱 안 "움직임 줄이기" 스위치를 만들 때 3곳을 놓치기 쉽고, 지금 하면 이 PR이 출시된 화면 3개를 더 건드립니다.
+Recommendation: A because 화면에 보이는 변화가 없는 정리라 이 PR을 키울 이유가 없고, 적어 두면 잊지 않습니다.
+Note: options differ in kind, not coverage — no completeness score.
+Pros / cons:
+A) TODOS.md에 적기 (recommended)
+✅ 3곳과 이유가 기록되어, 나중에 앱 안 스위치를 만들 때 한 번에 찾을 수 있습니다
+✅ 이 PR은 계획한 10개 파일 그대로 남습니다
+❌ 같은 확인이 당분간 4곳(함수 1 + 인라인 3)에 남습니다
+B) 적지 않기
+✅ TODO 목록이 길어지지 않습니다
+✅ 지금 세 줄 그대로도 동작은 정확합니다
+❌ 나중에 이 3곳이 따로 있다는 걸 다시 찾아내야 합니다
+C) 이번 PR에서 바로 하기
+✅ 5곳이 바로 한 함수를 써서 정리가 끝납니다
+✅ 따로 PR을 낼 필요가 없습니다
+❌ 파일이 13개가 되고 출시된 화면 3개를 다시 확인해야 합니다 (human: ~30min / CC: ~5min)
+Net: 작은 PR과 기록 대 지금 한 번에 정리.
+Header: TODO
+Options:
+A) TODOS.md에 적기 (recommended)
+3곳을 공유 함수로 바꾸는 일을 TODOS.md에 적고, 이 PR에서는 하지 않습니다.
+B) 적지 않기
+TODO로 남기지 않습니다. 3곳은 그대로입니다.
+C) 이번 PR에서 바로 하기
+CoinBurst·StatusViews·StickerAlbum도 이 PR에서 공유 함수를 쓰게 바꿉니다. 파일 13개. (human: ~30min / CC: ~5min)
+
+State: approved
+Actual answer: A) TODOS.md에 적기 (AskUserQuestion D48, 2026-11-26)
+Accepted scope: one TODOS.md entry "Shared reduced-motion check" with the card above. No code change in PR ④ for these 3 files.
+History: none
+
+Approval readiness: PASS. Checked R9 (D40 A), R10 (D41 A), R11 (D42 A), D43 A (structure), R12 (D44 A), R13 (D45 A), R14 (D46 B), R15 (D47 A) and R16 (D48 A), all AskUserQuestion answers from 2026-11-26. Corrections O1–O4, O6 and O7 and Scope findings 1–2 are necessary implementation of these approved contracts.
+
+### NOT in scope (PR ④)
+
+- Moving CoinBurst, StatusViews and StickerAlbum onto `prefersReducedMotion` (D48, TODO).
+- An app-level "움직임 줄이기" toggle (today it is only the OS setting).
+- Depth scaling of yard animals (they keep fixed 50/60 px sizes, `YardScene.tsx:87`).
+- Animals reacting to taps in the yard (D18: animals never take taps).
+- Any new drawings, sounds or speech bubbles in the yard.
+
+### What already exists (PR ④)
+
+- Reused as is: `stepToward`, `travelSpeed`, `pickRoamTarget`, `isInside` (`pestMotion.ts`), `gaitLift` and per-animal `speed` (`pestAnimals.ts`), `randomIntBetween` (`random.ts`), and `likedBy` / `standingCell` (D39).
+- Patterns reused without sharing code: rAF + `MAX_DT`, `subscribe` frames, and `ResizeObserver` measuring (`usePestMotion.ts`); `visibilitychange` (`usePest.ts:371`).
+- Shared by extraction: `figurePose` (D42), from `PestLayer.tsx:150-159`. `prefersReducedMotion` moves to `src/lib/reducedMotion.ts` (D44), from `usePestMotion.ts:85`.
+- New: `yardBounds`, `standingPoint`, `nextYardLeg` and `YARD_TIMING` (`pestMotion.ts`), plus `useYardMotion`.
+
+### Failure modes (PR ④)
+
+| Path                     | Realistic failure                      | Test                | Handling                                                 | User sees                        |
+| ------------------------ | -------------------------------------- | ------------------- | -------------------------------------------------------- | -------------------------------- |
+| liked map changes        | item placed, moved or removed mid-walk | hook test           | ref read per frame; reduced motion re-emits (O2)         | animal turns toward the new spot |
+| resize                   | rotation, URL bar, 42dvh change        | hook test           | re-measure, clamp point and target                       | animals stay inside              |
+| hidden tab               | minutes in background                  | hook test           | listener cancels rAF (D46); frame-time legs (O3); dt cap | no jump on return                |
+| first paint              | rects not measured yet                 | page test           | animals `visibility: hidden` until first frame (D41)     | no flash at 0,0                  |
+| tiny yard                | 220 px minimum height                  | pure test           | `yardBounds` centre fallback                             | animals bunched, still inside    |
+| jsdom without matchMedia | page tests run with motion on          | page test stub (O4) | explicit stub                                            | n/a (tests only)                 |
+
+Critical gaps: 0. Every path has a test and handling, and none fails silently.
+
+### Worktree parallelization (PR ④)
+
+| Step                          | Modules touched            | Depends on |
+| ----------------------------- | -------------------------- | ---------- |
+| 1 pure fns + `reducedMotion`  | src/lib                    | —          |
+| 2 `figurePose` into PestLayer | src/components (PestLayer) | 1          |
+| 3 `useYardMotion`             | src/hooks                  | 1          |
+| 4 YardScene drawing + CSS     | src/components (YardScene) | 3          |
+| 5 page tests                  | src/pages                  | 4          |
+
+Lane A: 1 → 3 → 4 → 5. Lane B: 2, after 1 (independent of 3–5). This is small enough to run sequentially in one worktree: 2 lanes, 1 parallel step, otherwise sequential.
+
+### Implementation Tasks (PR ④)
+
+- [x] **P4-1 (P1, human: ~3h / CC: ~15min)** — lib — yard pure functions and the shared helpers
+  - Surfaced by: Scope finding 1 and O1 (`yardBounds` with measured `grassTop`), D47 A (`standingPoint` with PR ③ ratios), D40 A and O3 (`nextYardLeg`, `YARD_TIMING`), D42 A (`figurePose`), D44 A (`src/lib/reducedMotion.ts`)
+  - Files: src/lib/pestMotion.ts, src/lib/pestMotion.test.ts, src/lib/reducedMotion.ts, src/hooks/usePestMotion.ts
+  - Verify: `npm test -- pestMotion usePestMotion`
+- [x] **P4-2 (P1, human: ~1h / CC: ~5min)** — PestLayer — use `figurePose`
+  - Surfaced by: D42 A
+  - Files: src/components/PestLayer.tsx
+  - Verify: `PestLayer.test.tsx:87-91` unchanged and green
+- [x] **P4-3 (P1, human: ~1d / CC: ~45min)** — hook — `useYardMotion`
+  - Surfaced by: D34, D40 A, D41 A, D45 A, D46 B, O2, O3, Section 1 production failures
+  - Files: src/hooks/useYardMotion.ts, src/hooks/useYardMotion.test.tsx
+  - Verify: hook tests (reduced motion + place, start points, stay/leave/return, move/remove, hidden/visible, resize, depth order, unmount)
+- [x] **P4-4 (P1, human: ~3h / CC: ~20min)** — YardScene — draw from frames
+  - Surfaced by: D41 A (remove `--col`/`--row`, hide until first frame), O6 (inner figure wrapper, `transform-origin: 50% 95%`, 90 ms), D45 A (z-index per frame, drop the `data-front` z rule)
+  - Files: src/components/YardScene.tsx, src/components/YardScene.module.css
+  - Verify: 360px look in the browser (/design-review), with motion on and with reduced motion
+- [x] **P4-5 (P1, human: ~1h / CC: ~10min)** — page tests
+  - Surfaced by: O4 (matchMedia stub for `YardPage.test.tsx:150-163`, rAF availability), Section 3 (transform after measure)
+  - Files: src/pages/YardPage.test.tsx
+  - Verify: `npm test -- YardPage`
+- [x] **P4-6 (P3, human: ~30min / CC: ~5min)** — TODO — shared reduced-motion check for the 3 inline copies (D48 A, TODOS.md)
+
+### Unresolved decisions (PR ④)
+
+None.
+
+### Completion summary (PR ④)
+
+- Step 0: Scope Challenge — scope accepted as-is; gate re-run after O5, structure D43 A
+- Reality rows: 7/7 tier-1 rows emitted, 0 unverified premises
+- Architecture Review: 2 issues found (D40, D41)
+- Code Quality Review: 3 issues found (D42 plus 2 corrections; the helper location was revised by D44)
+- Test Review: diagram produced, 15 gaps identified (all required proof), plus O2 and O4 additions
+- Performance Review: 0 issues found
+- NOT in scope: written
+- What already exists: written
+- TODOS.md updates: 1 item proposed to user (D48 A, added)
+- Failure modes: 0 critical gaps flagged
+- Unresolved decisions: 0 in this review
+- Outside voice: codex not installed; native Claude Plan subagent completed with 10 findings (6 corrections, 4 decisions D44–D47, plus the D43 gate re-run). This does not count as outside coverage.
+- Parallelization: 2 lanes, 1 parallel / 4 sequential
+- Lake Score: 3/3 (D40, D41 and D42 all picked the 9/10 option)
+
 ## GSTACK REVIEW REPORT
 
 | Review         | Trigger                                           | Why                             | Runs                               | Status                                  | Findings                                                                |
 | -------------- | ------------------------------------------------- | ------------------------------- | ---------------------------------- | --------------------------------------- | ----------------------------------------------------------------------- |
 | CEO Review     | `/plan-ceo-review`                                | Scope & strategy                | 0                                  | —                                       | —                                                                       |
-| Outside Review | native Claude Plan subagent (Codex not installed) | Independent 2nd opinion         | 1 (this branch)                    | unavailable (native fallback completed) | 12 findings, 2 decisions, 10 corrections                                |
-| Eng Review     | `/plan-eng-review`                                | Architecture & tests (required) | 1 (this branch)                    | issues_open (ISSUES OPEN)               | 8 issues, 0 critical gaps                                               |
+| Outside Review | native Claude Plan subagent (Codex not installed) | Independent 2nd opinion         | 1 (feat/yard-motion)               | unavailable (native fallback completed) | 10 findings: 6 corrections, 4 decisions (D44–D47), gate re-run (D43)    |
+| Eng Review     | `/plan-eng-review`                                | Architecture & tests (required) | 1 (feat/yard-motion)               | issues_open (ISSUES OPEN)               | 20 issues, 0 critical gaps                                              |
 | Design Review  | `/plan-design-review`                             | UI/UX gaps                      | 1 (feat/sticker-album, 2026-11-20) | clean (CLEAR)                           | score: 2/10 → 8/10, 22 decisions; yard mockup approved 2026-11-24 (D33) |
 | DX Review      | `/plan-devex-review`                              | Developer experience gaps       | 0                                  | —                                       | —                                                                       |
 
-- **OUTSIDE COVERAGE:** codex unavailable (not installed) for the PR ③ eng plan review. An in-host Claude Plan subagent completed instead, which does not count as outside coverage.
-- **VERDICT:** DESIGN CLEARED (earlier branch, plus the D33 yard mockup). Eng review for PR ③ is ISSUES OPEN: all issues are mapped to tasks P3-1 to P3-6, with 0 unresolved and 0 critical gaps. eng review required
+- **OUTSIDE COVERAGE:** codex unavailable (not installed) for the PR ④ eng plan review. An in-host Claude Plan subagent completed within the 5-minute limit; it does not count as outside coverage.
+- **VERDICT:** DESIGN CLEARED (earlier branch; PR ④ changes yard motion only, no new layout). Eng review for PR ④ is ISSUES OPEN: all 20 issues are mapped to tasks P4-1 to P4-6, with 0 unresolved decisions and 0 critical gaps. eng review required
 
 NO UNRESOLVED DECISIONS

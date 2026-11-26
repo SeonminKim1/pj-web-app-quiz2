@@ -35,7 +35,10 @@ beforeEach(() => {
     }),
   );
 });
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 function renderAt(
   path: string | { pathname: string; state: unknown },
@@ -146,8 +149,10 @@ it('찬 칸에 놓으면 바꾸고, 원래 물건은 다시 놓을 수 있다', 
   ).toBeInTheDocument();
 });
 
-// Value: protects=좋아하는 물건이 놓이면 그 동물이 그 옆에 선다(D39, 움직임은 PR ④); fails_when=likedBy를 마당에서 안 쓰면; why_new=새 규칙; seam=none; no_claim=움직임
-it('고양이는 놓인 털실 공 옆에 선다', () => {
+// Value: protects=움직임 줄이기면 좋아하는 물건이 놓인 동물이 그 옆에 선다(D39, D18); fails_when=likedBy를 마당에서 안 쓰면; why_new=새 규칙; seam=none; no_claim=jsdom에는 배치가 없어 px 자리는 hook 테스트가 본다
+it('움직임 줄이기면 고양이는 놓인 털실 공 옆에 선다', () => {
+  // jsdom에는 matchMedia가 없어 직접 넣는다(없으면 움직이는 쪽으로 돈다, O4).
+  vi.stubGlobal('matchMedia', () => ({ matches: true }) as MediaQueryList);
   renderAt('/playground', {
     earnedRewards: ['item-yarn-mint'],
     seenRewards: ['item-yarn-mint'],
@@ -161,6 +166,16 @@ it('고양이는 놓인 털실 공 옆에 선다', () => {
     .querySelector('[data-animal="dog"]')!
     .closest('[data-by-item]')!;
   expect(dog.getAttribute('data-by-item')).toBe('false');
+});
+
+// Value: protects=마당이 hook 프레임으로 동물을 그린다(D41: 처음 잴 때까지 숨기고, 재면 보이며 자리가 생긴다); fails_when=subscribe를 안 이으면 동물이 계속 숨어 있다; why_new=페이지 테스트는 속성만 봤다; seam=none; no_claim=jsdom에는 배치가 없어 자리 값은 보지 않는다
+it('마당을 재면 동물이 보이고 자리(transform)가 생긴다', () => {
+  renderAt('/playground');
+  const cat = yard()
+    .querySelector('[data-animal="cat"]')!
+    .closest<HTMLElement>('[data-by-item]')!;
+  expect(cat.style.visibility).toBe('visible');
+  expect(cat.style.transform).toMatch(/^translate\(/);
 });
 
 // Value: protects=놓을 물건이 없을 때 빈 칸을 누르면 스테이지로 안내한다(D14); fails_when=아무 반응이 없으면; why_new=새 빈 상태; seam=none; no_claim=none beyond protects

@@ -1,7 +1,7 @@
 // 방해꾼 움직임 계산(spec "행동 상태", "탭과 끌기 구분"). 좌표는 놀이 영역 왼쪽 위 기준 px이고,
 // 점은 토끼 발밑(바닥)의 위치다. 입력만으로 결과가 정해지는 순수 함수만 둔다.
 import { MAX_GAIT_LIFT } from './pestAnimals.ts';
-import type { RandomFn } from './random.ts';
+import { randomIntBetween, type RandomFn } from './random.ts';
 
 /** 놀이 영역 안의 한 점. */
 export type Point = { x: number; y: number };
@@ -257,4 +257,161 @@ export function nudge({
 export function depthScale({ y, area }: { y: number; area: Area }): number {
   const ratio = area.height > 0 ? clamp(y / area.height, 0, 1) : 1;
   return PEST_SIZE.far + (PEST_SIZE.near - PEST_SIZE.far) * ratio;
+}
+
+/**
+ * 뛰는 높이·가는 방향에 따른 몸 모양(풀이 화면 방해꾼과 놀이터 동물이 같이 쓴다, 설계 D42).
+ * 옆으로 충분히 움직일 때만 방향을 바꿔(|sin| > 0.35) 떨리지 않게 하고, 뜨면 길쭉, 땅에 닿으면 원래대로.
+ * flip은 직전 방향(1 = 오른쪽, -1 = 왼쪽)이고 새 방향을 돌려준다.
+ */
+export function figurePose({
+  hop,
+  facing,
+  flip,
+}: {
+  hop: number;
+  facing: number;
+  flip: number;
+}): { flip: number; sx: number; sy: number } {
+  const side = Math.sin(facing);
+  const next = side > 0.35 ? 1 : side < -0.35 ? -1 : flip;
+  if (hop <= 0.5) return { flip: next, sx: 1, sy: 1 };
+  const stretch = Math.min(hop, 12) / 12;
+  return { flip: next, sx: 1 - 0.05 * stretch, sy: 1 + 0.08 * stretch };
+}
+
+/** 놀이터(마당) 안의 상자(마당 왼쪽 위 기준 px). */
+export type Box = { left: number; top: number; width: number; height: number };
+
+/** 마당 동물 그림 크기(px): 고른 방해꾼은 조금 크게(설계 D18). */
+export const YARD_PET_SIZE = { front: 60, other: 50 } as const;
+
+/** 마당 동물의 머무는 시간(ms)과 산책 횟수(설계 D40). */
+export const YARD_TIMING = {
+  /** 좋아하는 물건 옆에 머무는 시간. */
+  stayMin: 8_000,
+  stayMax: 12_000,
+  /** 돌아다니다 한 곳에서 쉬는 시간. */
+  restMin: 1_500,
+  restMax: 4_000,
+  /** 물건 옆을 떠나 들르는 곳 수. */
+  roamStopsMin: 1,
+  roamStopsMax: 2,
+} as const;
+
+/** 발밑이 풀밭 윗변보다 이만큼은 아래(px). */
+const YARD_GRASS_GAP = 8;
+/** 발밑 아래로 남길 여백(px, 그림자). */
+const YARD_BOTTOM_GAP = 4;
+
+/**
+ * 마당에서 크기 size인 동물의 발밑이 있을 수 있는 범위. grassTop은 잰 칸 목록 윗변(하늘 아래, 설계 O1).
+ * 몸(크기 + 가장 높은 걸음)은 마당 안에, 발밑은 풀밭 위에. 마당이 너무 작으면 가운데 한 점.
+ */
+export function yardBounds({
+  area,
+  size,
+  grassTop,
+}: {
+  area: Area;
+  size: number;
+  grassTop: number;
+}): Bounds {
+  const half = size / 2;
+  const [left, right] =
+    area.width >= size
+      ? [half, area.width - half]
+      : [area.width / 2, area.width / 2];
+  const top = Math.max(grassTop + YARD_GRASS_GAP, size + MAX_GAIT_LIFT);
+  const bottom = area.height - YARD_BOTTOM_GAP;
+  const [minY, maxY] =
+    top <= bottom ? [top, bottom] : [area.height / 2, area.height / 2];
+  return { left, right, top: minY, bottom: maxY };
+}
+
+/** PR ③ 배치 비율(칸 목록 기준, 설계 D47). 칸은 3열, 그림 상자 왼쪽·위 비율. */
+const STAND = {
+  /** 칸 안 가로 위치(칸 너비 대비). */
+  inCell: 0.55,
+  /** 줄 높이(목록 높이 대비)와 줄 안 위쪽 여백. */
+  row: 0.5,
+  rowGap: 0.02,
+  /** 아래 줄에 설 때 첫 자리와 자리 간격(목록 너비 대비). */
+  slotStart: 0.04,
+  slotStep: 0.23,
+} as const;
+
+/**
+ * 서 있는 자리(발밑, 마당 기준 px). cell이 있으면 그 칸 옆, 없으면 아래쪽 slot번째 자리.
+ * layer는 잰 칸 목록 상자(설계 D41, D47: PR ③과 같은 자리).
+ */
+export function standingPoint({
+  layer,
+  cell,
+  slot,
+  size,
+}: {
+  layer: Box;
+  cell: number | undefined;
+  slot: number;
+  size: number;
+}): Point {
+  if (cell === undefined) {
+    const left =
+      layer.left + (STAND.slotStart + slot * STAND.slotStep) * layer.width;
+    return { x: left + size / 2, y: layer.top + layer.height };
+  }
+  const col = cell % 3;
+  const row = Math.floor(cell / 3);
+  const left = layer.left + ((col + STAND.inCell) / 3) * layer.width;
+  const top = layer.top + (row * STAND.row + STAND.rowGap) * layer.height;
+  return { x: left + size / 2, y: top + size };
+}
+
+/** 마당 동물의 지금 일정: 좋아하는 물건 옆(home) 또는 돌아다니기(roam, left = 남은 들를 곳 수). */
+export type YardLeg = { kind: 'home' } | { kind: 'roam'; left: number };
+
+/**
+ * 다음 일정(설계 D40): 물건 옆 → 1~2곳 돌아다니기 → 다시 물건 옆. 좋아하는 물건이 없으면 계속 돌아다닌다.
+ */
+export function nextYardLeg({
+  leg,
+  hasHome,
+  random,
+}: {
+  leg: YardLeg;
+  hasHome: boolean;
+  random: RandomFn;
+}): YardLeg {
+  if (!hasHome) return { kind: 'roam', left: 0 };
+  if (leg.kind === 'home') {
+    const stops = randomIntBetween({
+      min: YARD_TIMING.roamStopsMin,
+      max: YARD_TIMING.roamStopsMax,
+      random,
+    });
+    return { kind: 'roam', left: stops - 1 };
+  }
+  return leg.left > 0 ? { kind: 'roam', left: leg.left - 1 } : { kind: 'home' };
+}
+
+/** 그 일정의 도착 뒤 머무는 시간(ms): 물건 옆 8~12초, 돌아다니다 쉬기 1.5~4초. */
+export function yardRestMs({
+  leg,
+  random,
+}: {
+  leg: YardLeg;
+  random: RandomFn;
+}): number {
+  return leg.kind === 'home'
+    ? randomIntBetween({
+        min: YARD_TIMING.stayMin,
+        max: YARD_TIMING.stayMax,
+        random,
+      })
+    : randomIntBetween({
+        min: YARD_TIMING.restMin,
+        max: YARD_TIMING.restMax,
+        random,
+      });
 }

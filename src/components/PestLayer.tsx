@@ -8,6 +8,7 @@ import {
   type RefObject,
 } from 'react';
 import type { PestMotion } from '../hooks/usePestMotion.ts';
+import { figurePose } from '../lib/pestMotion.ts';
 import type { PestBehavior, PestMood } from '../lib/pest.ts';
 import styles from './PestLayer.module.css';
 import { DragCue } from './DragCue.tsx';
@@ -148,15 +149,10 @@ export function PestLayer({
       }
       const figure = figureRef.current;
       if (figure) {
-        // 가는 쪽을 본다(옆으로 움직일 때만 바꿔서 떨리지 않게).
-        const side = Math.sin(facing);
-        if (side > 0.35) flip = 1;
-        else if (side < -0.35) flip = -1;
-        // 뜨면 길쭉, 땅에 닿을 때 살짝 납작(transform-origin은 발밑).
-        const stretch = Math.min(hop, 12) / 12;
-        const sy = hop > 0.5 ? 1 + 0.08 * stretch : 1;
-        const sx = hop > 0.5 ? 1 - 0.05 * stretch : 1;
-        figure.style.transform = `scale(${sx * flip}, ${sy})`;
+        // 가는 쪽을 보고, 뜨면 길쭉(transform-origin은 발밑). 마당 동물과 같은 계산(figurePose).
+        const pose = figurePose({ hop, facing, flip });
+        flip = pose.flip;
+        figure.style.transform = `scale(${pose.sx * flip}, ${pose.sy})`;
       }
     });
   }, [motion]);

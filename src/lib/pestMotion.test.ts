@@ -16,6 +16,12 @@ import {
   pickRoamTarget,
   stepToward,
   travelSpeed,
+  YARD_TIMING,
+  figurePose,
+  nextYardLeg,
+  standingPoint,
+  yardBounds,
+  yardRestMs,
 } from './pestMotion.ts';
 
 const AREA = { width: 360, height: 600 };
@@ -226,5 +232,133 @@ describe('spaceBelow', () => {
     expect(
       spaceBelow({ area: { width: 360, height: 0 }, floor: 0 }),
     ).toBeUndefined();
+  });
+});
+
+// Value: protects=뛰기·방향 모양이 풀이 화면과 마당에서 같다(D42); fails_when=떨림 방지(0.35)나 늘어남 비율이 바뀌면; why_new=PestLayer에서 꺼낸 공유 함수; seam=none; no_claim=그림 모양
+describe('figurePose', () => {
+  it.each([
+    // [hop, facing, 이전 flip] → [flip, sx, sy]
+    [0, Math.PI / 2, -1, 1, 1, 1], // 오른쪽으로 가면 오른쪽을 본다, 땅에서는 원래 모양
+    [0, -Math.PI / 2, 1, -1, 1, 1], // 왼쪽
+    [0, 0.2, -1, -1, 1, 1], // 거의 앞뒤로만 가면 방향을 바꾸지 않는다(떨림 방지)
+    [0.5, Math.PI / 2, 1, 1, 1, 1], // 0.5px 이하는 땅에 닿은 것으로
+    [6, Math.PI / 2, 1, 1, 0.975, 1.04], // 반쯤 뜨면 반만 늘어난다
+    [20, Math.PI / 2, 1, 1, 0.95, 1.08], // 12px 넘게 떠도 최대치
+  ])(
+    'hop %s, facing %s, flip %s → %s, %s, %s',
+    (hop, facing, flip, f, sx, sy) => {
+      const pose = figurePose({ hop, facing, flip });
+      expect(pose.flip).toBe(f);
+      expect(pose.sx).toBeCloseTo(sx);
+      expect(pose.sy).toBeCloseTo(sy);
+    },
+  );
+});
+
+// Value: protects=마당 동물의 발밑이 풀밭 위, 몸은 마당 안(50/60px 동물, O1); fails_when=PEST_SIZE(96px)를 쓰거나 하늘 띠를 무시하면; why_new=마당 범위가 새로 생김; seam=none; no_claim=실제 CSS 배치
+describe('yardBounds', () => {
+  it('발밑은 풀밭 윗변 아래, 몸 전체와 가장 높은 걸음이 마당 안', () => {
+    const b = yardBounds({
+      area: { width: 360, height: 300 },
+      size: 50,
+      grassTop: 66,
+    });
+    expect(b).toEqual({ left: 25, right: 335, top: 74, bottom: 296 });
+    // 몸 꼭대기(발밑 − 크기 − 걸음)가 마당 위로 나가지 않는다.
+    expect(b.top - 50 - MAX_GAIT_LIFT).toBeGreaterThanOrEqual(0);
+  });
+
+  it('풀밭이 아주 높으면 몸 높이로 아래를 정한다', () => {
+    const b = yardBounds({
+      area: { width: 360, height: 300 },
+      size: 60,
+      grassTop: 0,
+    });
+    expect(b.top).toBe(60 + MAX_GAIT_LIFT);
+  });
+
+  it('마당이 동물보다 작으면 가운데 한 점', () => {
+    expect(
+      yardBounds({ area: { width: 40, height: 50 }, size: 60, grassTop: 10 }),
+    ).toEqual({ left: 20, right: 20, top: 25, bottom: 25 });
+  });
+});
+
+// Value: protects=움직임 줄이기 자리가 PR ③ CSS 자리와 같다(D47); fails_when=비율(0.55, 50%+2%, 4%+23%)이 바뀌면; why_new=CSS 배치를 hook으로 옮김(D41); seam=none; no_claim=그림이 칸과 겹쳐 보이는 모양
+describe('standingPoint', () => {
+  const layer = { left: 7, top: 66, width: 346, height: 225 };
+  it.each([
+    // [칸, 자리, 크기] → 발밑 [x, y]
+    [0, 0, 50, 7 + (0.55 / 3) * 346 + 25, 66 + 0.02 * 225 + 50],
+    [4, 1, 50, 7 + (1.55 / 3) * 346 + 25, 66 + 0.52 * 225 + 50],
+    [5, 3, 60, 7 + (2.55 / 3) * 346 + 30, 66 + 0.52 * 225 + 60],
+    [undefined, 0, 50, 7 + 0.04 * 346 + 25, 66 + 225],
+    [undefined, 3, 60, 7 + 0.73 * 346 + 30, 66 + 225],
+  ])('칸 %s, 자리 %s, 크기 %s → (%s, %s)', (cell, slot, size, x, y) => {
+    const p = standingPoint({ layer, cell, slot, size });
+    expect(p.x).toBeCloseTo(x);
+    expect(p.y).toBeCloseTo(y);
+  });
+});
+
+// Value: protects=물건 옆 8~12초 → 1~2곳 → 다시 물건 옆(D40), 물건이 없으면 계속 돌아다니기; fails_when=떠나지 않거나 돌아오지 않으면; why_new=새 일정; seam=none; no_claim=기기에서 느끼는 속도
+describe('nextYardLeg / yardRestMs', () => {
+  it('물건 옆을 떠나 1~2곳 들른 뒤 돌아온다', () => {
+    // random 0 → 1곳, random 0.99 → 2곳.
+    const one = nextYardLeg({
+      leg: { kind: 'home' },
+      hasHome: true,
+      random: () => 0,
+    });
+    expect(one).toEqual({ kind: 'roam', left: 0 });
+    expect(nextYardLeg({ leg: one, hasHome: true, random: () => 0 })).toEqual({
+      kind: 'home',
+    });
+
+    const two = nextYardLeg({
+      leg: { kind: 'home' },
+      hasHome: true,
+      random: () => 0.99,
+    });
+    expect(two).toEqual({ kind: 'roam', left: 1 });
+    const next = nextYardLeg({ leg: two, hasHome: true, random: () => 0 });
+    expect(next).toEqual({ kind: 'roam', left: 0 });
+    expect(nextYardLeg({ leg: next, hasHome: true, random: () => 0 })).toEqual({
+      kind: 'home',
+    });
+  });
+
+  it('좋아하는 물건이 없으면 계속 돌아다닌다(물건 옆 일정이어도)', () => {
+    expect(
+      nextYardLeg({ leg: { kind: 'home' }, hasHome: false, random: () => 0 }),
+    ).toEqual({
+      kind: 'roam',
+      left: 0,
+    });
+    expect(
+      nextYardLeg({
+        leg: { kind: 'roam', left: 0 },
+        hasHome: false,
+        random: () => 0,
+      }),
+    ).toEqual({ kind: 'roam', left: 0 });
+  });
+
+  it('물건 옆은 8~12초, 돌아다니다 쉬기는 1.5~4초', () => {
+    const home = { kind: 'home' } as const;
+    const roam = { kind: 'roam', left: 0 } as const;
+    expect(yardRestMs({ leg: home, random: () => 0 })).toBe(
+      YARD_TIMING.stayMin,
+    );
+    expect(yardRestMs({ leg: home, random: () => 0.9999 })).toBe(
+      YARD_TIMING.stayMax,
+    );
+    expect(yardRestMs({ leg: roam, random: () => 0 })).toBe(
+      YARD_TIMING.restMin,
+    );
+    expect(yardRestMs({ leg: roam, random: () => 0.9999 })).toBe(
+      YARD_TIMING.restMax,
+    );
   });
 });

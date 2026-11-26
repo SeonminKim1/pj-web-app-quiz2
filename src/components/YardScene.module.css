@@ -105,30 +105,28 @@
   font-weight: 700;
 }
 
-/* 서 있는 동물: 칸 격자와 같은 좌표로 놓는다. 누를 수 없다. */
+/* 동물: 자리는 useYardMotion이 프레임마다 transform으로 정한다(마당 기준 px). 누를 수 없다.
+   처음 잴 때까지 숨긴다(0,0에서 번쩍이지 않게). 겹침 순서는 프레임마다 z-index(이 층 안에서만). */
 .animals {
   position: absolute;
   z-index: 1;
-  inset: 22% 2% 3%;
+  inset: 0;
   pointer-events: none;
 }
 
 .animal {
   position: absolute;
-  top: calc(var(--row) * 50% + 2%);
-  left: calc((var(--col) + 0.55) / 3 * 100%);
+  top: 0;
+  left: 0;
   line-height: 0;
+  visibility: hidden;
 }
 
-/* 좋아하는 물건이 없으면 아래쪽 가장자리에 한 줄로 선다. */
-.animal[data-by-item='false'] {
-  top: auto;
-  bottom: 0;
-  left: calc(4% + var(--col) * 23%);
-}
-
-.animal[data-front='true'] {
-  z-index: 1;
+/* 몸 모양(뛰면 길쭉, 방향)은 발밑 기준으로(풀이 화면 방해꾼과 같음). */
+.figure {
+  display: block;
+  transform-origin: 50% 95%;
+  transition: transform 90ms ease-out;
 }
 
 .banner {
@@ -162,5 +160,6 @@
 @media (prefers-reduced-motion: reduce) {
   .yard * {
     animation: none;
+    transition: none;
   }
 }
