@@ -10,6 +10,7 @@ import {
   type RefObject,
 } from 'react';
 import type { RandomFn } from '../lib/random.ts';
+import { prefersReducedMotion } from '../lib/reducedMotion.ts';
 import {
   PEST_TIMING,
   STROLL_CHANCE,
@@ -80,14 +81,6 @@ export type PestMotion = {
 
 // 최대 한 프레임 시간(초). 탭이 잠깐 멈췄다 돌아와도 순간이동하지 않게.
 const MAX_DT = 0.05;
-
-function prefersReducedMotion(): boolean {
-  return (
-    typeof window !== 'undefined' &&
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
-}
 
 /** 움직임 줄이기에서 머무는 자리: 놀이터 왼쪽 아래(놀이터가 없으면 영역 왼쪽 아래). */
 function restPoint(m: { roam: Bounds | undefined; area: Area }): Point {

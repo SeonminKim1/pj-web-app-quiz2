@@ -1,0 +1,284 @@
+import { act, renderHook } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { getPestAnimal } from '../lib/pestAnimals.ts';
+import {
+  isInside,
+  standingPoint,
+  yardBounds,
+  type Point,
+} from '../lib/pestMotion.ts';
+import type { PetId } from '../types/settings.ts';
+import {
+  useYardMotion,
+  type YardAnimalInput,
+  type YardFrame,
+} from './useYardMotion.ts';
+
+type Rect = { left: number; top: number; width: number; height: number };
+
+const YARD: Rect = { left: 10, top: 40, width: 360, height: 300 };
+// 칸 목록: 마당 안 (7, 66) 크기 346 × 225.
+const LAYER: Rect = { left: 17, top: 106, width: 346, height: 225 };
+const LAYER_IN_YARD = { left: 7, top: 66, width: 346, height: 225 };
+
+function element(rect: { current: Rect }) {
+  const el = document.createElement('div');
+  el.getBoundingClientRect = () => {
+    const r = rect.current;
+    return {
+      ...r,
+      x: r.left,
+      y: r.top,
+      right: r.left + r.width,
+      bottom: r.top + r.height,
+      toJSON: () => ({}),
+    } as DOMRect;
+  };
+  return el;
+}
+
+function animals(
+  homes: Partial<Record<PetId, number>> = {},
+): YardAnimalInput[] {
+  const ids: PetId[] = ['dog', 'cat', 'squirrel', 'rabbit'];
+  return ids.map((id, slot) => ({
+    id,
+    slot,
+    size: id === 'rabbit' ? 60 : 50,
+    home: homes[id],
+    front: id === 'rabbit',
+  }));
+}
+
+function setup({
+  homes = {},
+  random = () => 0,
+}: { homes?: Partial<Record<PetId, number>>; random?: () => number } = {}) {
+  const yardRect = { current: YARD };
+  const layerRect = { current: LAYER };
+  const yardRef = { current: element(yardRect) };
+  const layerRef = { current: element(layerRect) };
+  const view = renderHook(
+    ({ list }: { list: YardAnimalInput[] }) =>
+      useYardMotion({ yardRef, layerRef, animals: list, random }),
+    { initialProps: { list: animals(homes) } },
+  );
+  const frames = new Map<PetId, YardFrame[]>();
+  for (const id of ['dog', 'cat', 'squirrel', 'rabbit'] as PetId[]) {
+    frames.set(id, []);
+    act(() => {
+      view.result.current.subscribe(id, (f) => frames.get(id)!.push({ ...f }));
+    });
+  }
+  const last = (id: PetId) => frames.get(id)!.at(-1)!;
+  const count = () => [...frames.values()].reduce((n, f) => n + f.length, 0);
+  return { ...view, frames, last, count, yardRect, layerRect };
+}
+
+const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
+
+const reduceMotion = () =>
+  vi.stubGlobal('matchMedia', () => ({ matches: true }) as MediaQueryList);
+
+beforeEach(() => {
+  vi.useFakeTimers({
+    toFake: [
+      'setTimeout',
+      'clearTimeout',
+      'requestAnimationFrame',
+      'cancelAnimationFrame',
+      'performance',
+    ],
+  });
+});
+afterEach(() => {
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
+  Object.defineProperty(document, 'hidden', {
+    configurable: true,
+    get: () => false,
+  });
+});
+
+describe('useYardMotion', () => {
+  // Value: protects=움직임 줄이기면 PR ③ 자리에 서 있고 루프가 없다(D18, D41, D47); fails_when=rAF가 돌거나 자리가 바뀌면; why_new=자리를 hook이 정함; seam=none; no_claim=실제 OS 설정
+  it('움직임 줄이기면 서 있는 자리에 가만히 있고, 물건을 놓으면 그 옆으로 옮긴다(O2)', () => {
+    reduceMotion();
+    const { last, count, rerender } = setup();
+    const dogSpot = standingPoint({
+      layer: LAYER_IN_YARD,
+      cell: undefined,
+      slot: 0,
+      size: 50,
+    });
+    expect(last('dog')).toMatchObject({ x: dogSpot.x, y: dogSpot.y, hop: 0 });
+    const before = count();
+    act(() => vi.advanceTimersByTime(5000));
+    expect(count()).toBe(before);
+
+    rerender({ list: animals({ cat: 4 }) });
+    const catSpot = standingPoint({
+      layer: LAYER_IN_YARD,
+      cell: 4,
+      slot: 1,
+      size: 50,
+    });
+    expect(last('cat')).toMatchObject({ x: catSpot.x, y: catSpot.y });
+  });
+
+  // Value: protects=네 마리가 서 있는 자리에서 시작해 풀밭 안에서만 다닌다; fails_when=범위가 하늘·마당 밖을 포함하면; why_new=새 루프; seam=none; no_claim=그림이 보이는 모양
+  it('서 있는 자리에서 시작해, 돌아다니는 동안 마당 범위 밖으로 나가지 않는다', () => {
+    const random = vi
+      .fn<() => number>()
+      .mockImplementation(() => Math.random());
+    const { frames, last } = setup({ random });
+    const start = standingPoint({
+      layer: LAYER_IN_YARD,
+      cell: undefined,
+      slot: 1,
+      size: 50,
+    });
+    const b = yardBounds({
+      area: { width: 360, height: 300 },
+      size: 50,
+      grassTop: 66,
+    });
+    expect(last('cat').x).toBeCloseTo(start.x);
+    expect(last('cat').y).toBeCloseTo(Math.min(b.bottom, start.y));
+    act(() => vi.advanceTimersByTime(30_000));
+    for (const f of frames.get('cat')!) {
+      expect(isInside({ point: f, bounds: b })).toBe(true);
+    }
+    // 정말 움직였다.
+    expect(distance(last('cat'), start)).toBeGreaterThan(1);
+  });
+
+  // Value: protects=좋아하는 물건 옆 8~12초 → 산책 → 돌아오기(D40); fails_when=떠나지 않거나 안 돌아오면; why_new=새 일정; seam=none; no_claim=느낌(속도)
+  it('좋아하는 물건 옆에 머물다 떠나고, 들른 뒤 다시 돌아온다', () => {
+    const { frames, last } = setup({ homes: { cat: 4 } });
+    const home = last('cat');
+    // random 0: 머무는 시간 8초.
+    act(() => vi.advanceTimersByTime(7_800));
+    expect(distance(last('cat'), home)).toBeLessThan(0.5);
+    act(() => vi.advanceTimersByTime(1_000));
+    expect(distance(last('cat'), home)).toBeGreaterThan(1);
+    const leftAt = frames.get('cat')!.length;
+    act(() => vi.advanceTimersByTime(20_000));
+    const back = frames
+      .get('cat')!
+      .slice(leftAt)
+      .some((f) => distance(f, home) < 0.5);
+    expect(back).toBe(true);
+  });
+
+  // Value: protects=물건을 옮기면 바로 새 칸으로, 빼면 다시 돌아다니기(Section 1 실패 1); fails_when=좋아하는 칸을 프레임마다 안 읽으면; why_new=새 hook; seam=none; no_claim=none beyond protects
+  it('머무는 중에 물건을 옮기면 바로 새 칸 쪽으로 간다', () => {
+    const { last, rerender } = setup({ homes: { cat: 4 } });
+    const oldHome = last('cat');
+    const newHome = standingPoint({
+      layer: LAYER_IN_YARD,
+      cell: 0,
+      slot: 1,
+      size: 50,
+    });
+    rerender({ list: animals({ cat: 0 }) });
+    act(() => vi.advanceTimersByTime(500));
+    expect(distance(last('cat'), newHome)).toBeLessThan(
+      distance(oldHome, newHome),
+    );
+    // 약 160px을 초속 65px로 가서(약 2.5초) 8초 머문다.
+    act(() => vi.advanceTimersByTime(5_000));
+    expect(distance(last('cat'), newHome)).toBeLessThan(0.5);
+  });
+
+  it('물건을 빼면 그 자리를 떠나 돌아다닌다', () => {
+    const { last, rerender } = setup({ homes: { cat: 4 } });
+    const home = last('cat');
+    rerender({ list: animals() });
+    act(() => vi.advanceTimersByTime(1_000));
+    expect(distance(last('cat'), home)).toBeGreaterThan(1);
+  });
+
+  // Value: protects=숨긴 탭에서 멈추고 돌아와도 순간이동하지 않는다(D34, D46); fails_when=visibilitychange를 안 듣거나 dt를 안 자르면; why_new=마당에는 방해꾼 reducer가 없음; seam=none; no_claim=실제 브라우저 백그라운드 제한
+  it('탭을 숨기면 멈추고, 다시 보이면 순간이동 없이 이어 간다', () => {
+    const { count, last, frames } = setup({ random: () => 0.5 });
+    act(() => vi.advanceTimersByTime(3_000));
+    act(() => {
+      Object.defineProperty(document, 'hidden', {
+        configurable: true,
+        get: () => true,
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    const stopped = count();
+    const where = last('squirrel');
+    act(() => vi.advanceTimersByTime(60_000));
+    expect(count()).toBe(stopped);
+    act(() => {
+      Object.defineProperty(document, 'hidden', {
+        configurable: true,
+        get: () => false,
+      });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    const resumedAt = frames.get('squirrel')!.length;
+    act(() => vi.advanceTimersByTime(1_000));
+    expect(count()).toBeGreaterThan(stopped);
+    // 다시 보인 뒤 첫 프레임도 한 프레임 최대 거리(속도 × 0.05초) 안.
+    const first = frames.get('squirrel')![resumedAt]!;
+    const fastest = getPestAnimal('squirrel').speed * 0.05;
+    expect(distance(first, where)).toBeLessThanOrEqual(fastest + 0.01);
+  });
+
+  // Value: protects=마당 크기가 바뀌면(회전, 주소창) 동물을 새 범위 안으로; fails_when=옛 범위를 계속 쓰면; why_new=새 재기 경로; seam=none; no_claim=모든 기기 크기
+  it('마당이 작아지면 위치를 새 범위 안으로 당긴다', () => {
+    let resize: () => void = () => {};
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          resize = callback;
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    const { last, yardRect, layerRect } = setup();
+    yardRect.current = { ...YARD, width: 200, height: 220 };
+    layerRect.current = { left: 14, top: 88, width: 192, height: 165 };
+    act(() => resize());
+    const b = yardBounds({
+      area: { width: 200, height: 220 },
+      size: 50,
+      grassTop: 48,
+    });
+    expect(isInside({ point: last('squirrel'), bounds: b })).toBe(true);
+    act(() => vi.advanceTimersByTime(5_000));
+    expect(isInside({ point: last('squirrel'), bounds: b })).toBe(true);
+  });
+
+  // Value: protects=풀밭 아래쪽 동물이 앞, 같은 높이면 고른 방해꾼이 앞(D45); fails_when=고정 순서로 돌아가면; why_new=겹침 순서가 새로 생김; seam=none; no_claim=그림 겹침 모양
+  it('아래쪽에 있을수록 앞에 그리고, 같은 높이면 고른 방해꾼이 앞', () => {
+    reduceMotion();
+    const { last } = setup({ homes: { cat: 0 } });
+    // 강아지(아래 줄)와 토끼(아래 줄, 고른 방해꾼)는 발밑 높이가 같다.
+    expect(last('rabbit').y).toBe(last('dog').y);
+    expect(last('rabbit').z).toBeGreaterThan(last('dog').z);
+    // 위쪽 칸 옆 고양이는 뒤.
+    expect(last('cat').z).toBeLessThan(last('dog').z);
+  });
+
+  it('언마운트하면 프레임을 멈추고 듣기를 정리한다', () => {
+    const remove = vi.spyOn(document, 'removeEventListener');
+    const { count, unmount } = setup();
+    act(() => vi.advanceTimersByTime(100));
+    unmount();
+    const after = count();
+    act(() => vi.advanceTimersByTime(2_000));
+    expect(count()).toBe(after);
+    expect(remove).toHaveBeenCalledWith(
+      'visibilitychange',
+      expect.any(Function),
+    );
+  });
+});
