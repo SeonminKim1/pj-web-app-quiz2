@@ -420,6 +420,50 @@ describe('usePestMotion', () => {
       return { frames, last: () => frames.at(-1)! };
     }
 
+    // Value: protects=가리러 가는 도중 동작 줄이기를 켜도 입력칸·문제 위를 머무는 자리로 삼지 않는다(놀이터 왼쪽 아래로); fails_when=켤 때의 자리를 그대로 머무는 자리로 삼으면; why_new=다른 켜기 테스트는 놀이터 안에서만 켬; seam=none; no_claim=도망·산책 중 켜기(같은 분기)
+    it('가리러 가는 도중 움직임 줄이기를 켜면 다 가린 뒤 놀이터로 돌아와 머문다', () => {
+      const media = stubReducedMotion(false);
+      const areaRef = { current: element(AREA) };
+      const coverRef = {
+        current: element({
+          left: AREA.left + 40,
+          top: AREA.top + 100,
+          width: 280,
+          height: 40,
+        }),
+      };
+      const playgroundRef = {
+        current: element({
+          left: AREA.left,
+          top: AREA.top + PG_TOP,
+          width: AREA.width,
+          height: PG_HEIGHT,
+        }),
+      };
+      const view = renderHook(
+        ({ pest }: { pest: PestView }) =>
+          usePestMotion({ pest, areaRef, coverRef, playgroundRef }),
+        { initialProps: { pest: fakePest({ behavior: 'covering' }) } },
+      );
+      const frames: PestFrame[] = [];
+      act(() => {
+        view.result.current.subscribe((f) => frames.push({ ...f }));
+      });
+      // 놀이터 밖(문제 쪽)으로 나갈 때까지 간다.
+      for (
+        let i = 0;
+        i < 40 && isInside({ point: frames.at(-1)!, bounds: PG });
+        i++
+      )
+        act(() => vi.advanceTimersByTime(50));
+      expect(isInside({ point: frames.at(-1)!, bounds: PG })).toBe(false);
+      act(() => media.set(true));
+      view.rerender({ pest: fakePest() });
+      act(() => vi.advanceTimersByTime(2000));
+      expect(frames.at(-1)).toMatchObject({ x: PG.left, y: PG.bottom });
+      vi.unstubAllGlobals();
+    });
+
     it('평소에는 놀이터 안에서만 다니고, 두리번거리는 동안 resting', () => {
       const random = vi.fn().mockReturnValue(0.5);
       const { frames } = setupWith({ pest: fakePest(), random });

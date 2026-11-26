@@ -282,10 +282,15 @@ export function usePestMotion({
     const m = motion.current;
     if (m.reducedMotion === reducedMotion) return;
     m.reducedMotion = reducedMotion;
-    // 켜면 가던 곳으로 순간이동하지 않고 지금 자리에 머문다(그 자리가 머무는 자리). 끄면 목표를 새로 정한다.
+    // 켜면 가던 곳으로 순간이동하지 않고 지금 자리에 머문다(그 자리가 머무는 자리). 다만 놀이터 밖
+    // (산책·가리기·도망 도중, 입력칸·문제 쪽)이면 머무는 자리는 놀이터 왼쪽 아래다. 끄면 목표를 새로 정한다.
     if (reducedMotion && m.point) {
-      m.home = m.point;
-      m.target = m.point;
+      const inPlayground = isInside({
+        point: m.point,
+        bounds: m.roam ?? areaBounds(m.area),
+      });
+      m.home = inPlayground ? m.point : restPoint(m);
+      m.target = m.home;
       m.hop = 0;
       m.visiting = false;
       m.pending = undefined;
