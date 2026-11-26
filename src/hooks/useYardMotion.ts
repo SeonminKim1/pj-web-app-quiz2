@@ -18,7 +18,7 @@ import {
 } from '../lib/pestMotion.ts';
 import { gaitLift, getPestAnimal } from '../lib/pestAnimals.ts';
 import type { RandomFn } from '../lib/random.ts';
-import { prefersReducedMotion } from '../lib/reducedMotion.ts';
+import { useReducedMotion } from './useReducedMotion.ts';
 import type { PetId } from '../types/settings.ts';
 
 /** 마당에 서는 동물 하나. */
@@ -109,6 +109,8 @@ export function useYardMotion({
   const geometry = useRef<{ area: Area; layer: Box } | undefined>(undefined);
   const states = useRef(new Map<PetId, AnimalState>());
   const listeners = useRef(new Map<PetId, Set<(frame: YardFrame) => void>>());
+  const reducedMotion = useReducedMotion();
+  // 프레임·재기 함수가 읽는 값. 아래 전환 effect가 reducedMotion을 따라 바꾼다.
   const reduced = useRef(false);
   const [hidden, setHidden] = useState(
     () => typeof document !== 'undefined' && document.hidden,
@@ -226,11 +228,31 @@ export function useYardMotion({
     }
   }, [stateOf, standing, targetFor]);
 
+  // 동작 줄이기 설정이 바뀌면(화면을 보는 도중에도) 바로 전환한다. 켜면 서 있는 자리에 멈추고,
+  // 끄면 그 자리에서 처음처럼 다시 다닌다. 재기 effect보다 먼저 선언해 처음 값도 여기서 넣는다.
+  useEffect(() => {
+    if (reduced.current === reducedMotion) return;
+    reduced.current = reducedMotion;
+    for (const animal of animalsRef.current) {
+      const s = states.current.get(animal.id);
+      if (!s?.point) continue;
+      s.point = standing(animal, s.home) ?? s.point;
+      s.target = undefined;
+      s.hop = 0;
+      s.facing = 0;
+      if (!reducedMotion) {
+        s.leg =
+          s.home === undefined ? { kind: 'roam', left: 0 } : { kind: 'home' };
+        s.restLeft = yardRestMs({ leg: s.leg, random: randomRef.current });
+      }
+    }
+    emit();
+  }, [reducedMotion, standing, emit]);
+
   // 마당과 칸 목록을 재고(크기 변경도), 위치·목표를 새 범위 안으로 당긴다.
   useEffect(() => {
     const yard = yardRef.current;
     if (!yard) return;
-    reduced.current = prefersReducedMotion();
     const measure = (): void => {
       const rect = yard.getBoundingClientRect();
       const layerRect = layerRef.current?.getBoundingClientRect() ?? rect;
@@ -330,7 +352,7 @@ export function useYardMotion({
 
   // 프레임 루프. 숨긴 탭·움직임 줄이기에서는 돌리지 않는다.
   useEffect(() => {
-    if (hidden || prefersReducedMotion()) return;
+    if (hidden || reducedMotion) return;
     let handle = 0;
     let last = performance.now();
     const loop = (now: number): void => {
@@ -342,7 +364,7 @@ export function useYardMotion({
     };
     handle = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(handle);
-  }, [hidden, step, emit]);
+  }, [hidden, reducedMotion, step, emit]);
 
   const subscribe = useCallback(
     (id: PetId, listener: (frame: YardFrame) => void) => {

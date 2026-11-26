@@ -7,6 +7,7 @@ import {
   yardBounds,
   type Point,
 } from '../lib/pestMotion.ts';
+import { stubReducedMotion } from '../test/reducedMotion.ts';
 import type { PetId } from '../types/settings.ts';
 import {
   useYardMotion,
@@ -101,6 +102,29 @@ afterEach(() => {
 });
 
 describe('useYardMotion', () => {
+  // Value: protects=보는 도중 동작 줄이기를 켜면 바로 서 있는 자리에 멈추고, 끄면 다시 다닌다; fails_when=설정을 처음 한 번만 읽으면; why_new=예전 테스트는 처음부터 켜 둔 경우만 봄; seam=none; no_claim=실제 OS 설정 화면
+  it('보는 도중 움직임 줄이기를 켜면 서 있는 자리에 멈추고, 끄면 다시 다닌다', () => {
+    const media = stubReducedMotion(false);
+    const { last, count } = setup();
+    act(() => vi.advanceTimersByTime(3_000));
+    act(() => media.set(true));
+    const dogSpot = standingPoint({
+      layer: LAYER_IN_YARD,
+      cell: undefined,
+      slot: 0,
+      size: 50,
+    });
+    expect(last('dog')).toMatchObject({ x: dogSpot.x, y: dogSpot.y, hop: 0 });
+    const still = count();
+    act(() => vi.advanceTimersByTime(5_000));
+    expect(count()).toBe(still);
+
+    act(() => media.set(false));
+    act(() => vi.advanceTimersByTime(5_000));
+    expect(count()).toBeGreaterThan(still);
+    expect(distance(last('dog'), dogSpot)).toBeGreaterThan(1);
+  });
+
   // Value: protects=움직임 줄이기면 PR ③ 자리에 서 있고 루프가 없다(D18, D41, D47); fails_when=rAF가 돌거나 자리가 바뀌면; why_new=자리를 hook이 정함; seam=none; no_claim=실제 OS 설정
   it('움직임 줄이기면 서 있는 자리에 가만히 있고, 물건을 놓으면 그 옆으로 옮긴다(O2)', () => {
     reduceMotion();

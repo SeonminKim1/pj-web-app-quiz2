@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import styles from './StatusViews.module.css';
+import { prefersReducedMotion } from '../lib/reducedMotion.ts';
 
 /** 로딩 표시. */
 export function LoadingView(): ReactElement {
@@ -50,9 +51,7 @@ function useCountUp(value: number): number {
   const shownRef = useRef(value);
   useEffect(() => {
     const from = shownRef.current;
-    const reduce = globalThis.matchMedia?.(
-      '(prefers-reduced-motion: reduce)',
-    ).matches;
+    const reduce = prefersReducedMotion();
     if (value <= from || reduce) {
       shownRef.current = value;
       setShown(value);

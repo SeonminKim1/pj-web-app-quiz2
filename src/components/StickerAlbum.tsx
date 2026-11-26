@@ -13,6 +13,7 @@ import type { Album, AlbumCell } from '../lib/album.ts';
 import { clearAlbumFlash, peekAlbumFlash } from '../lib/rewardFlash.ts';
 import { RewardArt } from './RewardArt.tsx';
 import styles from './StickerAlbum.module.css';
+import { prefersReducedMotion } from '../lib/reducedMotion.ts';
 
 type StickerAlbumProps = {
   album: Album;
@@ -187,9 +188,7 @@ function useScrollToCurrent(ref: RefObject<HTMLButtonElement | null>): void {
     if (!cell || typeof cell.scrollIntoView !== 'function') return;
     const rect = cell.getBoundingClientRect();
     if (rect.top >= 0 && rect.bottom <= globalThis.innerHeight) return;
-    const reduce = globalThis.matchMedia?.(
-      '(prefers-reduced-motion: reduce)',
-    ).matches;
+    const reduce = prefersReducedMotion();
     cell.scrollIntoView({
       block: 'center',
       behavior: reduce ? 'auto' : 'smooth',

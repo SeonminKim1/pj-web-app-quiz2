@@ -9,6 +9,7 @@ import {
   isInside,
   playgroundBounds,
 } from '../lib/pestMotion.ts';
+import { stubReducedMotion } from '../test/reducedMotion.ts';
 import type { PestView } from './usePest.ts';
 import { usePestMotion, type PestFrame } from './usePestMotion.ts';
 
@@ -249,6 +250,28 @@ describe('usePestMotion', () => {
       hop: 0,
     });
     expect(frames.every((f) => f.hop === 0)).toBe(true);
+    vi.unstubAllGlobals();
+  });
+
+  // Value: protects=보는 도중 동작 줄이기를 켜면 방해꾼이 깡충 뛰지 않고 그 자리에 멈춘다; fails_when=설정을 처음 한 번만 읽으면; why_new=예전 테스트는 처음부터 켜 둔 경우만 봄; seam=none; no_claim=실제 OS 설정 화면
+  it('보는 도중 움직임 줄이기를 켜면 바로 그 자리에 멈추고 깡충 뛰지 않는다', () => {
+    const media = stubReducedMotion(false);
+    // 목표가 매번 달라지게(늘 0이면 같은 자리로만 간다).
+    const values = [0.2, 0.8, 0.5, 0.9, 0.1];
+    let i = 0;
+    const { last, frames } = setup(
+      fakePest(),
+      () => values[i++ % values.length]!,
+    );
+    act(() => vi.advanceTimersByTime(2000));
+    act(() => media.set(true));
+    const from = frames.length;
+    const at = { x: last().x, y: last().y };
+    // 쉬었다 다시 다닐 시간까지 지켜본다.
+    act(() => vi.advanceTimersByTime(15_000));
+    const after = frames.slice(from);
+    expect(after.every((f) => f.hop === 0)).toBe(true);
+    expect(after.every((f) => f.x === at.x && f.y === at.y)).toBe(true);
     vi.unstubAllGlobals();
   });
 

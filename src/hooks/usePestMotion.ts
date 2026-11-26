@@ -10,7 +10,6 @@ import {
   type RefObject,
 } from 'react';
 import type { RandomFn } from '../lib/random.ts';
-import { prefersReducedMotion } from '../lib/reducedMotion.ts';
 import {
   PEST_TIMING,
   STROLL_CHANCE,
@@ -41,6 +40,7 @@ import {
   type Point,
 } from '../lib/pestMotion.ts';
 import type { PestView } from './usePest.ts';
+import { useReducedMotion } from './useReducedMotion.ts';
 
 /** 한 프레임의 토끼 위치(놀이 영역 px, 발밑)와 그리기에 필요한 값. */
 export type PestFrame = {
@@ -276,12 +276,21 @@ export function usePestMotion({
     [areaRef, below],
   );
 
+  // 동작 줄이기 설정을 따라간다(화면을 보는 도중 바꿔도). 프레임 계산이 매번 이 값을 읽는다.
+  const reducedMotion = useReducedMotion();
+  useEffect(() => {
+    const m = motion.current;
+    if (m.reducedMotion === reducedMotion) return;
+    m.reducedMotion = reducedMotion;
+    if (reducedMotion) m.hop = 0;
+    emit();
+  }, [reducedMotion, emit]);
+
   // 놀이 영역 크기를 재고(크기 변경도), 위치를 영역 안으로 당긴다.
   useEffect(() => {
     const element = areaRef.current;
     if (!element || !active) return;
     const m = motion.current;
-    m.reducedMotion = prefersReducedMotion();
     const measure = (): void => {
       const rect = element.getBoundingClientRect();
       m.area = { width: rect.width, height: rect.height };
