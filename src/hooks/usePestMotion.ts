@@ -10,7 +10,6 @@ import {
   type RefObject,
 } from 'react';
 import type { RandomFn } from '../lib/random.ts';
-import { prefersReducedMotion } from '../lib/reducedMotion.ts';
 import {
   PEST_TIMING,
   STROLL_CHANCE,
@@ -41,6 +40,7 @@ import {
   type Point,
 } from '../lib/pestMotion.ts';
 import type { PestView } from './usePest.ts';
+import { useReducedMotion } from './useReducedMotion.ts';
 
 /** 한 프레임의 토끼 위치(놀이 영역 px, 발밑)와 그리기에 필요한 값. */
 export type PestFrame = {
@@ -276,12 +276,37 @@ export function usePestMotion({
     [areaRef, below],
   );
 
+  // 동작 줄이기 설정을 따라간다(화면을 보는 도중 바꿔도). 프레임 계산이 매번 이 값을 읽는다.
+  const reducedMotion = useReducedMotion();
+  useEffect(() => {
+    const m = motion.current;
+    if (m.reducedMotion === reducedMotion) return;
+    m.reducedMotion = reducedMotion;
+    // 켜면 가던 곳으로 순간이동하지 않고 지금 자리에 머문다(그 자리가 머무는 자리). 다만 놀이터 밖
+    // (산책·가리기·도망 도중, 입력칸·문제 쪽)이면 머무는 자리는 놀이터 왼쪽 아래다. 끄면 목표를 새로 정한다.
+    if (reducedMotion && m.point) {
+      const inPlayground = isInside({
+        point: m.point,
+        bounds: m.roam ?? areaBounds(m.area),
+      });
+      m.home = inPlayground ? m.point : restPoint(m);
+      m.target = m.home;
+      m.hop = 0;
+      m.visiting = false;
+      m.pending = undefined;
+    } else {
+      m.target = undefined;
+    }
+    m.restUntil = 0;
+    m.plannedFor = '';
+    emit();
+  }, [reducedMotion, emit]);
+
   // 놀이 영역 크기를 재고(크기 변경도), 위치를 영역 안으로 당긴다.
   useEffect(() => {
     const element = areaRef.current;
     if (!element || !active) return;
     const m = motion.current;
-    m.reducedMotion = prefersReducedMotion();
     const measure = (): void => {
       const rect = element.getBoundingClientRect();
       m.area = { width: rect.width, height: rect.height };

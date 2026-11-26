@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ReactElement } from 'react';
 import { playCue } from '../lib/sound.ts';
 import styles from './CoinBurst.module.css';
+import { prefersReducedMotion } from '../lib/reducedMotion.ts';
 
 const COINS = 5;
 
@@ -11,9 +12,7 @@ export function CoinBurst(): ReactElement {
   useEffect(() => {
     const anchor = anchorRef.current;
     const target = document.querySelector('[data-gold-badge]');
-    const reduce = globalThis.matchMedia?.(
-      '(prefers-reduced-motion: reduce)',
-    ).matches;
+    const reduce = prefersReducedMotion();
     if (!anchor || !target || reduce || typeof anchor.animate !== 'function')
       return;
     const from = anchor.getBoundingClientRect();
