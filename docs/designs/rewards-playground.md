@@ -2040,27 +2040,27 @@ Lane A: 1 → 3 → 4 → 5. Lane B: 2, after 1 (independent of 3–5). This is 
 
 ### Implementation Tasks (PR ④)
 
-- [ ] **P4-1 (P1, human: ~3h / CC: ~15min)** — lib — yard pure functions and the shared helpers
+- [x] **P4-1 (P1, human: ~3h / CC: ~15min)** — lib — yard pure functions and the shared helpers
   - Surfaced by: Scope finding 1 and O1 (`yardBounds` with measured `grassTop`), D47 A (`standingPoint` with PR ③ ratios), D40 A and O3 (`nextYardLeg`, `YARD_TIMING`), D42 A (`figurePose`), D44 A (`src/lib/reducedMotion.ts`)
   - Files: src/lib/pestMotion.ts, src/lib/pestMotion.test.ts, src/lib/reducedMotion.ts, src/hooks/usePestMotion.ts
   - Verify: `npm test -- pestMotion usePestMotion`
-- [ ] **P4-2 (P1, human: ~1h / CC: ~5min)** — PestLayer — use `figurePose`
+- [x] **P4-2 (P1, human: ~1h / CC: ~5min)** — PestLayer — use `figurePose`
   - Surfaced by: D42 A
   - Files: src/components/PestLayer.tsx
   - Verify: `PestLayer.test.tsx:87-91` unchanged and green
-- [ ] **P4-3 (P1, human: ~1d / CC: ~45min)** — hook — `useYardMotion`
+- [x] **P4-3 (P1, human: ~1d / CC: ~45min)** — hook — `useYardMotion`
   - Surfaced by: D34, D40 A, D41 A, D45 A, D46 B, O2, O3, Section 1 production failures
   - Files: src/hooks/useYardMotion.ts, src/hooks/useYardMotion.test.tsx
   - Verify: hook tests (reduced motion + place, start points, stay/leave/return, move/remove, hidden/visible, resize, depth order, unmount)
-- [ ] **P4-4 (P1, human: ~3h / CC: ~20min)** — YardScene — draw from frames
+- [x] **P4-4 (P1, human: ~3h / CC: ~20min)** — YardScene — draw from frames
   - Surfaced by: D41 A (remove `--col`/`--row`, hide until first frame), O6 (inner figure wrapper, `transform-origin: 50% 95%`, 90 ms), D45 A (z-index per frame, drop the `data-front` z rule)
   - Files: src/components/YardScene.tsx, src/components/YardScene.module.css
   - Verify: 360px look in the browser (/design-review), with motion on and with reduced motion
-- [ ] **P4-5 (P1, human: ~1h / CC: ~10min)** — page tests
+- [x] **P4-5 (P1, human: ~1h / CC: ~10min)** — page tests
   - Surfaced by: O4 (matchMedia stub for `YardPage.test.tsx:150-163`, rAF availability), Section 3 (transform after measure)
   - Files: src/pages/YardPage.test.tsx
   - Verify: `npm test -- YardPage`
-- [ ] **P4-6 (P3, human: ~30min / CC: ~5min)** — TODO — shared reduced-motion check for the 3 inline copies (D48 A, TODOS.md)
+- [x] **P4-6 (P3, human: ~30min / CC: ~5min)** — TODO — shared reduced-motion check for the 3 inline copies (D48 A, TODOS.md)
 
 ### Unresolved decisions (PR ④)
 
