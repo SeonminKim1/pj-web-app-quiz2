@@ -257,6 +257,36 @@ describe('useYardMotion', () => {
     expect(isInside({ point: last('squirrel'), bounds: b })).toBe(true);
   });
 
+  // Value: protects=움직임 줄이기에서 마당 크기가 바뀌면 새 칸 목록 기준 서 있는 자리로(D47); fails_when=measure의 움직임 줄이기 분기를 빼 범위 당기기만 하면; why_new=크기 변경 테스트는 움직이는 쪽만 봄; seam=none; no_claim=실제 회전 이벤트
+  it('움직임 줄이기에서 마당 크기가 바뀌면 새 서 있는 자리로 옮긴다', () => {
+    reduceMotion();
+    let resize: () => void = () => {};
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          resize = callback;
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    const { last, yardRect, layerRect } = setup({ homes: { cat: 4 } });
+    yardRect.current = { ...YARD, width: 200, height: 220 };
+    layerRect.current = { left: 14, top: 88, width: 192, height: 165 };
+    act(() => resize());
+    const layer = { left: 4, top: 48, width: 192, height: 165 };
+    const catSpot = standingPoint({ layer, cell: 4, slot: 1, size: 50 });
+    const dogSpot = standingPoint({
+      layer,
+      cell: undefined,
+      slot: 0,
+      size: 50,
+    });
+    expect(last('cat')).toMatchObject({ x: catSpot.x, y: catSpot.y });
+    expect(last('dog')).toMatchObject({ x: dogSpot.x, y: dogSpot.y });
+  });
+
   // Value: protects=풀밭 아래쪽 동물이 앞, 같은 높이면 고른 방해꾼이 앞(D45); fails_when=고정 순서로 돌아가면; why_new=겹침 순서가 새로 생김; seam=none; no_claim=그림 겹침 모양
   it('아래쪽에 있을수록 앞에 그리고, 같은 높이면 고른 방해꾼이 앞', () => {
     reduceMotion();
