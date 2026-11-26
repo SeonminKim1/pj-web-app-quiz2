@@ -258,6 +258,12 @@ export function useYardMotion({
         });
         s.point = into(s.point);
         if (s.target) s.target = into(s.target);
+        // 좋아하는 물건 쪽이면 그 칸의 새 자리로(가는 중이면 목표를, 머무는 중이면 자리를).
+        if (s.leg.kind === 'home' && s.home !== undefined) {
+          const spot = standing(animal, s.home);
+          if (spot && s.target) s.target = spot;
+          else if (spot) s.point = spot;
+        }
       }
       syncHomes();
       emit();

@@ -257,6 +257,34 @@ describe('useYardMotion', () => {
     expect(isInside({ point: last('squirrel'), bounds: b })).toBe(true);
   });
 
+  // Value: protects=움직일 때 마당 크기가 바뀌면 좋아하는 물건 옆에 머무는 동물도 새 칸 옆으로; fails_when=measure가 옛 좌표를 범위 안으로 당기기만 하면; why_new=크기 변경 테스트는 돌아다니는 동물만 봄; seam=none; no_claim=실제 회전 이벤트
+  it('마당 크기가 바뀌면 물건 옆에 머무는 동물도 새 자리로 옮긴다', () => {
+    let resize: () => void = () => {};
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          resize = callback;
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    const { last, yardRect, layerRect } = setup({ homes: { cat: 4 } });
+    yardRect.current = { ...YARD, width: 200, height: 220 };
+    layerRect.current = { left: 14, top: 88, width: 192, height: 165 };
+    act(() => resize());
+    const spot = standingPoint({
+      layer: { left: 4, top: 48, width: 192, height: 165 },
+      cell: 4,
+      slot: 1,
+      size: 50,
+    });
+    // 머무는 시간(8초) 안.
+    act(() => vi.advanceTimersByTime(3_000));
+    expect(distance(last('cat'), spot)).toBeLessThan(0.5);
+  });
+
   // Value: protects=움직임 줄이기에서 마당 크기가 바뀌면 새 칸 목록 기준 서 있는 자리로(D47); fails_when=measure의 움직임 줄이기 분기를 빼 범위 당기기만 하면; why_new=크기 변경 테스트는 움직이는 쪽만 봄; seam=none; no_claim=실제 회전 이벤트
   it('움직임 줄이기에서 마당 크기가 바뀌면 새 서 있는 자리로 옮긴다', () => {
     reduceMotion();
