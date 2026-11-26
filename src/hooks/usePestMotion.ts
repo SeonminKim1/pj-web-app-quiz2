@@ -282,7 +282,18 @@ export function usePestMotion({
     const m = motion.current;
     if (m.reducedMotion === reducedMotion) return;
     m.reducedMotion = reducedMotion;
-    if (reducedMotion) m.hop = 0;
+    // 켜면 가던 곳으로 순간이동하지 않고 지금 자리에 머문다(그 자리가 머무는 자리). 끄면 목표를 새로 정한다.
+    if (reducedMotion && m.point) {
+      m.home = m.point;
+      m.target = m.point;
+      m.hop = 0;
+      m.visiting = false;
+      m.pending = undefined;
+    } else {
+      m.target = undefined;
+    }
+    m.restUntil = 0;
+    m.plannedFor = '';
     emit();
   }, [reducedMotion, emit]);
 
