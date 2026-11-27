@@ -13,6 +13,8 @@
   --color-gold: #ffd66b;
   /* 큰 물건 스티커 칸(5스테이지마다) 바탕. */
   --color-gold-soft: #fff1c9;
+  /* 다 푼 큰 보상 칸의 고리(민트 바탕에서 3.45:1). */
+  --color-gold-strong: #a87a00;
   /* 보상 색 변형의 네 번째 색(분홍·민트·노랑·하늘). 그림은 RewardArt.tsx가 같은 값을 쓴다. */
   --color-sky: #a9d8ff;
   /* 놀이터 풀밭(설계 D22). */
