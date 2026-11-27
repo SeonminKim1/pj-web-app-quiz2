@@ -1,5 +1,6 @@
-// 스티커첩(설계 G 시안, D4·D5·D7·D12·D23·D24): 칭호 카드 + 판마다 스티커 칸. 넌센스(3열)와 MBTI(2열 큰 칸)가 같이 쓴다.
-// 모든 칸은 언제든 누를 수 있다(잠금 없음). 받은 칸은 스티커가 선명하고, 아직이면 받을 보상이 흐리게 보인다.
+// 판 목록(설계 docs/designs/stage-cells.md, 앞선 D4·D7·D12·D23·D24): 칭호 카드 + 판마다 칸. 넌센스(3열)와 MBTI(2열 큰 칸)가 같이 쓴다.
+// 칸의 주인공은 스테이지 번호(MBTI는 카테고리 이름)와 상태(다 풀면 ✓, 푸는 중이면 막대)이고, 스티커는 오른쪽 아래 구석의 보조 그림이다.
+// 모든 칸은 언제든 누를 수 있다(잠금 없음). 받은 스티커는 선명하고, 아직이면 받을 보상이 흐리게 보인다.
 import {
   useEffect,
   useRef,
@@ -17,6 +18,8 @@ import { prefersReducedMotion } from '../lib/reducedMotion.ts';
 
 type StickerAlbumProps = {
   album: Album;
+  /** 목록 제목("스테이지", "카테고리"). 화면이 정한다(R1). */
+  heading: string;
   /** small = 넌센스 3열, large = MBTI 2열 큰 칸(이름이 칸 이름). */
   size: 'small' | 'large';
   /** 진행 문구의 동사("풂", "맞힘"). */
@@ -26,6 +29,7 @@ type StickerAlbumProps = {
 
 export function StickerAlbum({
   album,
+  heading,
   size,
   verb,
   onSelect,
@@ -58,7 +62,7 @@ export function StickerAlbum({
       )}
       <section className={styles.album} aria-labelledby="album-title">
         <header className={styles.albumHeader}>
-          <h2 id="album-title">스티커 수집첩</h2>
+          <h2 id="album-title">{heading}</h2>
           {album.rewardCount > 0 && (
             <span className={styles.count}>
               스티커 {album.earnedCount} / {album.rewardCount}장
@@ -121,14 +125,16 @@ function StickerCell({
   ]
     .filter(Boolean)
     .join(', ');
-  const artSize =
-    (size === 'large' ? 60 : 48) * (reward?.kind === 'big' ? 1.2 : 1);
+  // 구석 스티커(S1): 넌센스 24px(큰 보상 28px), MBTI 32px.
+  const artSize = size === 'large' ? 32 : reward?.kind === 'big' ? 28 : 24;
   return (
     <button
       ref={buttonRef}
       type="button"
       className={styles.cell}
       data-earned={earned}
+      data-done={completed}
+      data-started={started}
       data-big={reward?.kind === 'big'}
       data-current={current}
       data-flash={flash}
@@ -138,40 +144,54 @@ function StickerCell({
     >
       {current && (
         <span className={styles.here} aria-hidden="true">
-          여기부터
+          {/* 그 칸을 아직 시작 전이면 "여기부터", 하다 만 칸이면 "다음!"(R4). */}
+          {started ? '다음!' : '여기부터'}
+        </span>
+      )}
+      {completed && (
+        <span className={styles.done} aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="12" height="12">
+            <path
+              d="M3 8.5 6.5 12 13 4.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </span>
       )}
       <span className={styles.no} aria-hidden="true">
         {cell.label}
       </span>
-      {reward && (
-        <span className={styles.art} data-faded={!earned} aria-hidden="true">
-          <RewardArt reward={reward} size={Math.round(artSize)} />
-        </span>
-      )}
       {added > 0 ? (
-        <span className={styles.added} aria-hidden="true">
-          새 문제 {added}개
+        <span className={styles.status} aria-hidden="true">
+          <span className={styles.added}>새 문제 {added}개</span>
         </span>
       ) : (
-        !earned &&
-        (started || !reward) && (
-          <span className={styles.progress} aria-hidden="true">
+        // 시작 전이면 번호만(R5), 다 풀면 ✓만. 푸는 중에만 막대와 "n/T".
+        started &&
+        !completed && (
+          <span className={styles.status} aria-hidden="true">
             <span className={styles.progressText}>
-              {completed ? '완료' : `${solvedCount}/${total}`}
+              {solvedCount}/{total}
             </span>
-            {!completed && (
-              <span
-                className={styles.bar}
-                style={
-                  {
-                    '--progress': `${(solvedCount / Math.max(1, total)) * 100}%`,
-                  } as CSSProperties
-                }
-              />
-            )}
+            <span
+              className={styles.bar}
+              style={
+                {
+                  '--progress': `${(solvedCount / Math.max(1, total)) * 100}%`,
+                } as CSSProperties
+              }
+            />
           </span>
         )
+      )}
+      {reward && (
+        <span className={styles.art} data-faded={!earned} aria-hidden="true">
+          <RewardArt reward={reward} size={artSize} />
+        </span>
       )}
     </button>
   );
