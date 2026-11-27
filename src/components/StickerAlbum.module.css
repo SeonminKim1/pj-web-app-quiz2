@@ -215,15 +215,20 @@
   filter: var(--reward-faded);
 }
 
-/* 상태 줄: 번호 아래 왼쪽 60%(R3), 구석 스티커와 겹치지 않게. */
+/* 상태 줄: 번호 아래 왼쪽(R3). 오른쪽은 구석 스티커 자리(6px + 최대 28px + 틈)를 비워 겹치지 않게. */
 .status {
   position: absolute;
+  right: 40px;
   bottom: 8px;
   left: 8px;
   display: grid;
-  width: 60%;
   justify-items: start;
   gap: 2px;
+}
+
+/* MBTI 칸은 스티커가 32px. */
+.grid[data-size='large'] .status {
+  right: 44px;
 }
 
 /* 흐린 그림 위의 글자도 진한 잉크로(대비 4.5:1 이상). */
