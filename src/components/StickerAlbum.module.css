@@ -128,7 +128,8 @@
     var(--shadow-pop);
 }
 
-.cell[data-current='true']:active {
+/* .pressable:active:not(...)(0,3,0)가 빌드 CSS에서 뒤에 오므로 :not(:disabled)로 한 단계 높인다. */
+.cell[data-current='true']:active:not(:disabled) {
   box-shadow:
     0 0 0 3px var(--color-pink-strong),
     var(--shadow-pressed);
