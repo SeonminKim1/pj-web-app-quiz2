@@ -30,6 +30,7 @@ export function StageListPage(): ReactElement {
       {state.status === 'ready' && (
         <StickerAlbum
           album={state.data}
+          heading="스테이지"
           size="small"
           verb="풂"
           onSelect={openStage}

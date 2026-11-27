@@ -45,6 +45,7 @@ export function CategoryListPage(): ReactElement {
       {state.status === 'ready' && (
         <StickerAlbum
           album={state.data}
+          heading="카테고리"
           size="large"
           verb="맞힘"
           onSelect={openCategory}

@@ -31,27 +31,27 @@ Branch: `feat/stage-cells` (from main 299fb5d). 2026-11-27.
 - S3 지금 차례 탭: 그 주제에서 한 문제도 풀지 않았으면 "여기부터", 하나라도 풀었으면 "다음!". 분홍 테두리는 그대로. 스크린리더 라벨은 둘 다 "지금 차례"(D23 유지).
 - 상태 표(나머지는 D4 그대로 옮김):
 
-  | 상태 | 바탕 | 번호 | 상태 줄 | 스티커(구석) | 배지 |
-  |---|---|---|---|---|---|
-  | 다 푼 칸(`completed`) | 민트 | 잉크 | 없음 | 컬러 | ✓ 오른쪽 위(SVG) |
-  | 푸는 중 | 흰색 | 잉크 | 막대 + "n/10" | 흐림 | 없음 |
-  | 지금 차례 | `--color-pink-soft`, 분홍 고리(지금 그대로) | 잉크 | 시작했으면 막대 | 흐림 | 위 탭: 그 칸이 시작 전이면 "여기부터", 시작했으면 "다음!"(R4) |
-  | 아직 | 흰색 | `--color-ink-soft` | 없음 | 흐림 | 없음 |
-  | 5번마다(큰 보상) | 안 깼으면 연한 금색, 깼으면 민트 + 안쪽 2px 금색 고리(R6) | 위와 같음 | 위와 같음 | 28px | 위와 같음 |
-  | 표 밖(56번~) | 흰색 | 시작 전 `--color-ink-soft` | 시작하면 막대(R5) | 없음 | 다 풀면 ✓ |
-  | 로딩·오류 | 지금 목록의 `LoadingView`/`ErrorView` 그대로 | | | | |
+  | 상태                  | 바탕                                                      | 번호                       | 상태 줄           | 스티커(구석) | 배지                                                          |
+  | --------------------- | --------------------------------------------------------- | -------------------------- | ----------------- | ------------ | ------------------------------------------------------------- |
+  | 다 푼 칸(`completed`) | 민트                                                      | 잉크                       | 없음              | 컬러         | ✓ 오른쪽 위(SVG)                                              |
+  | 푸는 중               | 흰색                                                      | 잉크                       | 막대 + "n/10"     | 흐림         | 없음                                                          |
+  | 지금 차례             | `--color-pink-soft`, 분홍 고리(지금 그대로)               | 잉크                       | 시작했으면 막대   | 흐림         | 위 탭: 그 칸이 시작 전이면 "여기부터", 시작했으면 "다음!"(R4) |
+  | 아직                  | 흰색                                                      | `--color-ink-soft`         | 없음              | 흐림         | 없음                                                          |
+  | 5번마다(큰 보상)      | 안 깼으면 연한 금색, 깼으면 민트 + 안쪽 2px 금색 고리(R6) | 위와 같음                  | 위와 같음         | 28px         | 위와 같음                                                     |
+  | 표 밖(56번~)          | 흰색(다 풀면 민트, 다른 다 푼 칸과 같게)                  | 시작 전 `--color-ink-soft` | 시작하면 막대(R5) | 없음         | 다 풀면 ✓                                                     |
+  | 로딩·오류             | 지금 목록의 `LoadingView`/`ErrorView` 그대로              |                            |                   |              |                                                               |
 
 - S4 MBTI 카테고리 목록(2열 큰 칸): 주인공은 카테고리 이름(Jua 20px, 가운데). ✓·민트·지금 차례 탭·진행 막대 "n/16"·구석 스티커(32px)는 넌센스와 같다. 머리 제목은 "카테고리", 보조 줄 "스티커 n / 7장".
 - 반응형·접근성: 360px 넌센스 3열(칸 약 100px), MBTI 2열. 데스크톱은 지금처럼 최대 폭 안에서 같은 격자. 터치 영역은 칸 전체(44px 이상). `--color-ink-soft` 번호는 흰 바탕에서 약 5.9:1(AA). 스크린리더 라벨·`aria-current="step"`·포커스 링·자동 스크롤(D23, D24)은 그대로. 상태는 색과 함께 ✓·막대·탭 글자로도 보인다.
 - 여정(5초·5분·오래):
 
-  | 단계 | 사용자가 하는 일 | 느낌 | 받쳐 주는 것 |
-  |---|---|---|---|
-  | 1 | 처음 넌센스 목록을 연다 | "1번부터 깨면 되는구나" | 큰 번호, 1번 칸 "여기부터" |
-  | 2 | 1번을 깨고 돌아온다 | "하나 깼다!" | 1번 민트+✓, 2번 "여기부터"(R4, 2번은 아직 시작 전), 결과 카드의 새 보상(D6) |
-  | 3 | 며칠 뒤 다시 연다 | "어디까지 했지" → 바로 앎 | 자동 스크롤(D24)로 지금 차례 칸이 가운데(하다 만 칸이면 "다음!") |
-  | 4 | 중간 스테이지를 골라 들어간다 | 잠김 없음, 자유 | 어느 칸이든 누르면 들어감 |
-  | 5 | 스티커를 모은다 | 보조 재미 | 머리 줄 "스티커 n / 55장", 구석 컬러 스티커, 놀이터 |
+  | 단계 | 사용자가 하는 일              | 느낌                      | 받쳐 주는 것                                                                |
+  | ---- | ----------------------------- | ------------------------- | --------------------------------------------------------------------------- |
+  | 1    | 처음 넌센스 목록을 연다       | "1번부터 깨면 되는구나"   | 큰 번호, 1번 칸 "여기부터"                                                  |
+  | 2    | 1번을 깨고 돌아온다           | "하나 깼다!"              | 1번 민트+✓, 2번 "여기부터"(R4, 2번은 아직 시작 전), 결과 카드의 새 보상(D6) |
+  | 3    | 며칠 뒤 다시 연다             | "어디까지 했지" → 바로 앎 | 자동 스크롤(D24)로 지금 차례 칸이 가운데(하다 만 칸이면 "다음!")            |
+  | 4    | 중간 스테이지를 골라 들어간다 | 잠김 없음, 자유           | 어느 칸이든 누르면 들어감                                                   |
+  | 5    | 스티커를 모은다               | 보조 재미                 | 머리 줄 "스티커 n / 55장", 구석 컬러 스티커, 놀이터                         |
 
 ## 바뀌는 것 / 안 바뀌는 것
 
@@ -123,6 +123,7 @@ Unresolved Decisions: none.
 Target: `docs/designs/stage-cells.md` (this file). Scope Challenge: 3~4 files, no new class → complexity gate skipped; scope accepted as-is.
 
 Scope Challenge findings:
+
 1. [INFORMATIONAL] (9/10) T2 assumed a test asserts "스티커 수집첩"; none does (`src/pages/pages.test.tsx:752` asserts only "스티커 1 / 2장", which stays). Factual correction, no question.
 2. [INFORMATIONAL] (8/10) `src/components/StickerAlbum.tsx:61` hard-codes `<h2 id="album-title">스티커 수집첩</h2>`; callers `src/pages/StageListPage.tsx:31` and `src/pages/CategoryListPage.tsx:46` need "스테이지"/"카테고리". → R1.
 3. [INFORMATIONAL] (8/10) S3 "아무것도 안 풀었음" = `album.cells.every((c) => c.solvedCount === 0)` (`StickerAlbum.tsx:34` already derives `current` from `album.cells`). Spec clarification, no question.
@@ -130,15 +131,16 @@ Scope Challenge findings:
 ## Decision ledger
 
 ### R1: how the album gets its heading word
+
 Finding: 2, INFORMATIONAL, 8/10, src/components/StickerAlbum.tsx:61, Claude (plan-eng-review)
 Plan baseline: S4 (approved in /plan-design-review): heading "스테이지" for nonsense, "카테고리" for MBTI; mechanism unspecified.
 Runtime evidence: heading is a literal in StickerAlbum; the two callers are separate pages.
 Comparison grid:
 
-| Choice | Current | A | B |
-|---|---|---|---|
+| Choice            | Current                 | A                                  | B                                                            |
+| ----------------- | ----------------------- | ---------------------------------- | ------------------------------------------------------------ |
 | R1 heading source | literal "스티커 수집첩" | `heading` prop passed by each page | derived from `size` ('small' → 스테이지, 'large' → 카테고리) |
-| S4 wording | approved | unchanged | unchanged |
+| S4 wording        | approved                | unchanged                          | unchanged                                                    |
 
 Question D1:
 D1 — 목록 머리 제목(스테이지/카테고리)을 어디서 정할까요?
@@ -162,15 +164,16 @@ History: none
 Factual corrections (no question): current cell background is `--color-pink-soft` today (`StickerAlbum.module.css:105`), and S3 keeps it, so the state table's "흰색, 분홍 테두리" row means pink-soft + pink-strong ring. An earned big-reward cell keeps the gold background (`.cell[data-big]` follows `[data-earned]`) and still shows ✓.
 
 ### R2: regression contract for the cell rewrite
+
 Finding: Section 3, CRITICAL (regression risk), 8/10, src/components/StickerAlbum.tsx:111-125 (aria-label) and :127-137 (data-*, aria-current), Claude (plan-eng-review)
 Plan baseline: plan says labels stay ("안 바뀜"); no test pins them. Existing coverage: pages.test.tsx flash (:798) and count (:752) only.
 Runtime evidence: label pattern "스테이지 N, T문제 중 S문제 풂, (보상 받음|받을 보상 X|완료), 새 문제 n개, 지금 차례"; attributes data-earned/data-big/data-current/data-flash, aria-current="step".
 Comparison grid:
 
-| Choice | Current | A | B |
-|---|---|---|---|
-| R2 regression contract | none | unit tests pin: label text, aria-current on current cell only, data-earned/data-big, onSelect(no) on click, plus new S2/S3/S4/R1 behavior | only new behavior tests (S2/S3/S4/R1); labels unpinned |
-| R1 heading | approved prop | unchanged | unchanged |
+| Choice                 | Current       | A                                                                                                                                         | B                                                      |
+| ---------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| R2 regression contract | none          | unit tests pin: label text, aria-current on current cell only, data-earned/data-big, onSelect(no) on click, plus new S2/S3/S4/R1 behavior | only new behavior tests (S2/S3/S4/R1); labels unpinned |
+| R1 heading             | approved prop | unchanged                                                                                                                                 | unchanged                                              |
 
 Question D2:
 D2 — 칸을 다시 짤 때 지금 동작(스크린리더 라벨 등)을 테스트로 고정할까요?
@@ -192,6 +195,7 @@ Accepted scope: new `src/components/StickerAlbum.test.tsx` pinning current behav
 History: none
 
 Outside voice (native Plan subagent, Codex not installed) corrections, verified in code, no question:
+
 - ✓ shows iff `cell.completed` (`src/lib/album.ts:53-54`: `earned` is false for off-table cells, so keying ✓ on `earned` would miss 56+). Earned-but-not-completed is exactly the "새 문제 n개" case.
 - R2 premise correction: labels are partly pinned already (`src/pages/MbtiPlay.test.tsx:120` full label; prefixes in `pages.test.tsx`). R2 stands; the new unit test must not duplicate MbtiPlay's exact label.
 - New unit test needs `MemoryRouter` (StickerAlbum uses `useLocation`/`useNavigationType`) and `clearAlbumFlash()` between tests (`src/lib/rewardFlash.ts` module state).
@@ -199,13 +203,14 @@ Outside voice (native Plan subagent, Codex not installed) corrections, verified 
 - T1 and T2 merge (same file); verify with full `npm test` (there is no TopicPage test file; album page tests live in pages.test.tsx and MbtiPlay.test.tsx).
 
 ### R3: how the corner sticker and the status line share a cell
+
 Finding: outside voice #2, High, 8/10, src/components/StickerAlbum.module.css:181-186 (`.progress` width 80%, centered); cell content ≈85px wide at 360px (328 − 2×12 album − 2×12 gaps ≈ 280 / 3 ≈ 93px − 8px padding), Plan subagent
 Plan baseline: S1 (approved): number 32px center, status line under it, sticker 24/28px bottom-right corner. Overlap not addressed.
 Runtime evidence: a 24px absolute sticker in the bottom-right overlaps the right end of an 80%-wide bar and "n/10" in ≈85px.
 Comparison grid:
 
-| Choice | Current | A | B | C | D |
-|---|---|---|---|---|---|
+| Choice    | Current     | A                                                                                                                                                     | B                                   | C                                                         | D                                   |
+| --------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | --------------------------------------------------------- | ----------------------------------- |
 | R3 layout | unspecified | status line narrowed to the left ≈60% (bar + "n/10" left-aligned under the number), sticker keeps the bottom-right corner; cell min-height 108px kept | keep S1 as written (accept overlap) | investigate: build both in the browser at 360px, then ask | defer this row only (stays pending) |
 
 Question D3:
@@ -232,13 +237,14 @@ Accepted scope: status line (bar + "n/T", or "새 문제 n개") sits left-aligne
 History: none
 
 ### R4: which wording the current-cell tab uses
+
 Finding: outside voice #6, Medium, 8/10, plan S3 (album-wide `every(c => c.solvedCount === 0)`), Plan subagent
 Plan baseline: S3 (approved): "여기부터" when nothing in the topic is solved, "다음!" after.
 Runtime evidence: no locks, so a user who solved only stage 7 gets "다음!" on stage 1, which they never touched.
 Comparison grid:
 
-| Choice | Current | A | B | C | D |
-|---|---|---|---|---|---|
+| Choice              | Current       | A                                                                                              | B                  | C           | D                   |
+| ------------------- | ------------- | ---------------------------------------------------------------------------------------------- | ------------------ | ----------- | ------------------- |
 | R4 tab wording rule | S3 album-wide | per cell: "여기부터" when the current cell has `solvedCount === 0`, "다음!" when it is started | keep S3 album-wide | investigate | defer this row only |
 
 Question D4:
@@ -265,13 +271,14 @@ Accepted scope: the current-cell tab reads "여기부터" when that cell has `so
 History: S3 (design review) used the album-wide rule; reopened by outside-voice finding #6.
 
 ### R5: what an unstarted off-table cell (56+) shows
+
 Finding: outside voice #7, Low, 8/10, src/components/StickerAlbum.tsx:158 (`(started || !reward)` shows "0/T" on unstarted cells without a reward), Plan subagent
 Plan baseline: state table: off-table cells "진행만"; ordinary unstarted cells "번호만".
 Runtime evidence: today an unstarted 56+ cell shows "0/10" plus bar.
 Comparison grid:
 
-| Choice | Current | A | B | C | D |
-|---|---|---|---|---|---|
+| Choice                | Current            | A                                                              | B                       | C           | D                   |
+| --------------------- | ------------------ | -------------------------------------------------------------- | ----------------------- | ----------- | ------------------- |
 | R5 unstarted 56+ cell | "0/10" + empty bar | number only, like other unstarted cells (bar from first solve) | keep "0/10" + empty bar | investigate | defer this row only |
 
 Question D5:
@@ -298,13 +305,14 @@ Accepted scope: an unstarted cell shows number only whether or not it has a rewa
 History: none
 
 ### R6: how an earned big-reward cell (every 5th) looks done
+
 Finding: outside voice #8, Low, 7/10, src/components/StickerAlbum.module.css:100 (`.cell[data-big]` gold follows `[data-earned]` mint), Plan subagent
 Plan baseline: factual correction above: earned big cell keeps gold + ✓.
 Runtime evidence: with the sticker shrunk to a 28px corner, 11 of 55 cells show "done" only by the ✓ badge, while other done cells also turn mint.
 Comparison grid:
 
-| Choice | Current | A | B | C | D |
-|---|---|---|---|---|---|
+| Choice             | Current  | A                                                                                  | B             | C                                   | D                   |
+| ------------------ | -------- | ---------------------------------------------------------------------------------- | ------------- | ----------------------------------- | ------------------- |
 | R6 earned big cell | gold + ✓ | mint (like other done cells) + ✓ + a 2px gold inner ring keeps the big-reward hint | keep gold + ✓ | investigate in the browser at 360px | defer this row only |
 
 Question D6:
@@ -346,13 +354,13 @@ Approval readiness: PASS — R1 (D1 A), R2 (D2 A), R3 (D3 A), R4 (D4 A), R5 (D5 
 
 ## GSTACK REVIEW REPORT
 
-| Review | Trigger | Why | Runs | Status | Findings |
-|--------|---------|-----|------|--------|----------|
-| CEO Review | `/plan-ceo-review` | Scope & strategy | 0 | — | — |
-| Outside Review | native Plan subagent (Codex not installed) | Independent 2nd opinion | 1 | issues_found (in-host; outside unavailable) | 11 findings, all resolved |
-| Eng Review | `/plan-eng-review` | Architecture & tests (required) | 1 | clean | 9 issues, 0 critical gaps |
-| Design Review | `/plan-design-review` | UI/UX gaps | 1 | clean | score: 6/10 → 8/10, 4 decisions |
-| DX Review | `/plan-devex-review` | Developer experience gaps | 0 | — | — |
+| Review         | Trigger                                    | Why                             | Runs | Status                                      | Findings                        |
+| -------------- | ------------------------------------------ | ------------------------------- | ---- | ------------------------------------------- | ------------------------------- |
+| CEO Review     | `/plan-ceo-review`                         | Scope & strategy                | 0    | —                                           | —                               |
+| Outside Review | native Plan subagent (Codex not installed) | Independent 2nd opinion         | 1    | issues_found (in-host; outside unavailable) | 11 findings, all resolved       |
+| Eng Review     | `/plan-eng-review`                         | Architecture & tests (required) | 1    | clean                                       | 9 issues, 0 critical gaps       |
+| Design Review  | `/plan-design-review`                      | UI/UX gaps                      | 1    | clean                                       | score: 6/10 → 8/10, 4 decisions |
+| DX Review      | `/plan-devex-review`                       | Developer experience gaps       | 0    | —                                           | —                               |
 
 - **OUTSIDE COVERAGE:** Codex plan-review unavailable (CLI not installed); native Plan subagent completed with 11 findings; design outside voices skipped by the owner.
 - **VERDICT:** DESIGN + ENG CLEARED — ready to implement
