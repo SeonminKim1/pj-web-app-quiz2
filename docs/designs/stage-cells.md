@@ -81,11 +81,11 @@ Branch: `feat/stage-cells` (from main 299fb5d). 2026-11-27.
 
 Synthesized from the design review (S1–S4) and the eng review (R1–R6). Run with Claude Code; checkbox as you ship.
 
-- [ ] **T1 (P1, human: ~3h / CC: ~25min)** — StickerAlbum + list pages — 칸 안 위계와 머리 제목
+- [x] **T1 (P1, human: ~3h / CC: ~25min)** — StickerAlbum + list pages — 칸 안 위계와 머리 제목
   - Surfaced by: S1–S4, R1 heading prop, R3 status line left 60%, R4 per-cell tab rule, R5 unstarted = number only, R6 done big cell mint + gold ring, ✓ = `completed` (SVG)
   - Files: src/components/StickerAlbum.tsx, src/components/StickerAlbum.module.css, src/pages/StageListPage.tsx, src/pages/CategoryListPage.tsx
   - Verify: `npm test` (pages.test.tsx, MbtiPlay.test.tsx 라벨 그대로), 360px /design-review
-- [ ] **T2 (P1, human: ~1h / CC: ~10min)** — tests — 새 `src/components/StickerAlbum.test.tsx`(R2)
+- [x] **T2 (P1, human: ~1h / CC: ~10min)** — tests — 새 `src/components/StickerAlbum.test.tsx`(R2)
   - Surfaced by: R2 regression contract
   - Files: src/components/StickerAlbum.test.tsx (MemoryRouter, `clearAlbumFlash()` between tests; do not duplicate MbtiPlay.test.tsx:120 exact label)
   - Verify: `npm test`
