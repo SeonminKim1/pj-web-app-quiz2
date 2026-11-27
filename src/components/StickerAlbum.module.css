@@ -191,6 +191,11 @@
   color: var(--color-ink-soft);
 }
 
+/* 지금 차례 칸은 시작 전이어도 진한 번호(상태 표). */
+.cell[data-current='true'] .no {
+  color: var(--color-ink);
+}
+
 /* MBTI: 카테고리 이름이 주인공(S4). */
 .grid[data-size='large'] .no {
   font-size: 1.25rem;
