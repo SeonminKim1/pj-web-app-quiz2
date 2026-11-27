@@ -37,7 +37,7 @@ Branch: `feat/stage-cells` (from main 299fb5d). 2026-11-27.
   | 푸는 중               | 흰색                                                      | 잉크                       | 막대 + "n/10"     | 흐림         | 없음                                                          |
   | 지금 차례             | `--color-pink-soft`, 분홍 고리(지금 그대로)               | 잉크                       | 시작했으면 막대   | 흐림         | 위 탭: 그 칸이 시작 전이면 "여기부터", 시작했으면 "다음!"(R4) |
   | 아직                  | 흰색                                                      | `--color-ink-soft`         | 없음              | 흐림         | 없음                                                          |
-  | 5번마다(큰 보상)      | 안 깼으면 연한 금색, 깼으면 민트 + 안쪽 2px 금색 고리(R6) | 위와 같음                  | 위와 같음         | 28px         | 위와 같음                                                     |
+  | 5번마다(큰 보상)      | 안 깼으면 연한 금색, 깼으면 민트 + 안쪽 3px 금색 고리(R6) | 위와 같음                  | 위와 같음         | 28px         | 위와 같음                                                     |
   | 표 밖(56번~)          | 흰색(다 풀면 민트, 다른 다 푼 칸과 같게)                  | 시작 전 `--color-ink-soft` | 시작하면 막대(R5) | 없음         | 다 풀면 ✓                                                     |
   | 로딩·오류             | 지금 목록의 `LoadingView`/`ErrorView` 그대로              |                            |                   |              |                                                               |
 
@@ -235,6 +235,7 @@ State: approved
 Actual answer: A) Apply: 진행 줄 왼쪽으로 (D3, owner answer 2026-11-27)
 Accepted scope: status line (bar + "n/T", or "새 문제 n개") sits left-aligned in the left ≈60% of the cell under the number; the sticker keeps the bottom-right corner (24px, big 28px; MBTI 32px); cell min-height stays 108px (MBTI 132px).
 History: none
+Implementation note (fix/stage-cells-polish, 2026-11-27): the cell is a two-row grid (number on top, status line in the bottom row) instead of an absolutely placed status line, so larger text grows the cell rather than overlapping the number. The status line still leaves the sticker corner free (`width: calc(100% - 32px)`, MBTI `- 36px`).
 
 ### R4: which wording the current-cell tab uses
 
@@ -337,6 +338,7 @@ State: approved
 Actual answer: A) Apply: 민트 + 금색 테두리 (D6, owner answer 2026-11-27)
 Accepted scope: a completed big-reward cell gets the mint background like other done cells, the ✓ badge, and a 2px `--color-gold` inner ring; an unfinished big cell keeps `--color-gold-soft`. Supersedes the earlier factual correction that kept gold.
 History: earlier factual correction (gold wins over mint) replaced by this decision.
+Implementation note (fix/stage-cells-polish, 2026-11-27): the shipped ring is 3px `--color-gold-strong` (`#a87a00`, about 3.45:1 on mint) instead of 2px `--color-gold`, which was too faint on the mint background; the ring also stays while the cell is pressed (`:active`). The decision itself (mint + ✓ + inner gold ring) is unchanged.
 
 Approval readiness: PASS — R1 (D1 A), R2 (D2 A), R3 (D3 A), R4 (D4 A), R5 (D5 A), R6 (D6 A); factual corrections carry no new behavior.
 
