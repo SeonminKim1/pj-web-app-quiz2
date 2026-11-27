@@ -1,0 +1,173 @@
+// 판 목록 칸(설계 docs/designs/stage-cells.md R2): 지금 동작(라벨, 지금 차례, 상태 속성, 누르기)과
+// 새 동작(✓, "여기부터"/"다음!", 시작 전 번호만, 제목)을 고정한다.
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { Album, AlbumCell } from '../lib/album.ts';
+import { clearAlbumFlash } from '../lib/rewardFlash.ts';
+import { getReward } from '../lib/rewards.ts';
+import { StickerAlbum } from './StickerAlbum.tsx';
+
+const bow = getReward('hat-ribbon-pink');
+const yarn = getReward('item-yarn-pink');
+const slide = getReward('big-slide');
+
+function cell(no: number, over: Partial<AlbumCell> = {}): AlbumCell {
+  return {
+    no,
+    label: String(no),
+    solvedCount: 0,
+    total: 10,
+    completed: false,
+    reward: undefined,
+    earned: false,
+    ...over,
+  };
+}
+
+function album(cells: AlbumCell[]): Album {
+  return {
+    cells,
+    earnedCount: cells.filter((c) => c.earned).length,
+    rewardCount: cells.filter((c) => c.reward).length,
+    title: undefined,
+  };
+}
+
+function renderAlbum(
+  a: Album,
+  {
+    heading = '스테이지',
+    size = 'small',
+  }: { heading?: string; size?: 'small' | 'large' } = {},
+) {
+  const onSelect = vi.fn();
+  render(
+    <MemoryRouter>
+      <StickerAlbum
+        album={a}
+        heading={heading}
+        size={size}
+        verb="풂"
+        onSelect={onSelect}
+      />
+    </MemoryRouter>,
+  );
+  return { onSelect, user: userEvent.setup() };
+}
+
+const cellButton = (name: RegExp) => screen.getByRole('button', { name });
+const done = (button: HTMLElement) =>
+  button.querySelector('[class*="done"]') !== null;
+const tab = (button: HTMLElement) =>
+  button.querySelector('[class*="here"]')?.textContent ?? null;
+
+afterEach(() => clearAlbumFlash());
+
+describe('StickerAlbum', () => {
+  // Value: protects=칸 라벨 문장(D23)과 aria-current가 지금 차례 칸에만; fails_when=칸 배치를 바꾸며 라벨 조립이나 aria-current가 달라지면; why_new=넌센스 칸 라벨 전체를 고정한 테스트 없음(MbtiPlay.test는 MBTI 첫 칸만); seam=none; no_claim=실제 화면 읽기 프로그램 출력
+  it('칸 라벨과 지금 차례 표시를 그대로 둔다', () => {
+    renderAlbum(
+      album([
+        cell(1, {
+          solvedCount: 10,
+          completed: true,
+          reward: bow,
+          earned: true,
+        }),
+        cell(2, { solvedCount: 3, reward: yarn }),
+        cell(3),
+      ]),
+    );
+    expect(cellButton(/^스테이지 1,/).getAttribute('aria-label')).toBe(
+      '스테이지 1, 10문제 중 10문제 풂, 분홍 리본 받음',
+    );
+    const second = cellButton(/^스테이지 2,/);
+    expect(second.getAttribute('aria-label')).toBe(
+      '스테이지 2, 10문제 중 3문제 풂, 받을 보상 분홍 털실 공, 지금 차례',
+    );
+    expect(second).toHaveAttribute('aria-current', 'step');
+    expect(cellButton(/^스테이지 1,/)).not.toHaveAttribute('aria-current');
+    expect(cellButton(/^스테이지 3,/)).not.toHaveAttribute('aria-current');
+  });
+
+  // Value: protects=누르면 그 칸 번호로 onSelect(잠김 없음); fails_when=클릭 처리가 빠지거나 번호가 틀리면; why_new=칸 단위 클릭 테스트 없음; seam=none; no_claim=실제 화면 이동(페이지 테스트 몫)
+  it('어느 칸이든 누르면 그 번호로 고른다', async () => {
+    const { onSelect, user } = renderAlbum(album([cell(1), cell(2), cell(3)]));
+    await user.click(cellButton(/^스테이지 3,/));
+    expect(onSelect).toHaveBeenCalledWith(3);
+  });
+
+  // Value: protects=✓는 다 푼 칸(completed)에만, 받았지만 문제가 늘어 덜 푼 칸은 "새 문제 n개"(S2, D4); fails_when=✓를 earned 기준으로 붙이면 표 밖 칸에 ✓가 없고 새 문제 칸에 ✓가 붙음; why_new=✓는 새 동작; seam=none; no_claim=✓ 그림 모양
+  it('다 푼 칸에만 ✓, 문제가 늘어 덜 푼 칸은 새 문제 수', () => {
+    renderAlbum(
+      album([
+        cell(1, {
+          solvedCount: 10,
+          completed: true,
+          reward: bow,
+          earned: true,
+        }),
+        cell(2, { solvedCount: 10, total: 12, reward: yarn, earned: true }),
+        cell(56, { solvedCount: 10, completed: true }),
+        cell(57, { solvedCount: 4 }),
+      ]),
+    );
+    const first = cellButton(/^스테이지 1,/);
+    expect(done(first)).toBe(true);
+    expect(first).toHaveAttribute('data-earned', 'true');
+    const added = cellButton(/^스테이지 2,/);
+    expect(done(added)).toBe(false);
+    expect(within(added).getByText('새 문제 2개')).toBeInTheDocument();
+    expect(done(cellButton(/^스테이지 56,/))).toBe(true);
+    expect(done(cellButton(/^스테이지 57,/))).toBe(false);
+  });
+
+  // Value: protects=지금 차례 탭은 그 칸이 시작 전이면 "여기부터", 시작했으면 "다음!"(R4); fails_when=주제 전체 기준이나 반대로 고르면; why_new=탭 문구 전환은 새 동작; seam=none; no_claim=탭 위치·모양
+  it.each([
+    ['시작 전', '여기부터', 0],
+    ['하다 만 칸', '다음!', 4],
+  ])('지금 차례 칸이 %s이면 탭은 %s', (_, text, solvedCount) => {
+    renderAlbum(
+      album([
+        cell(1, { solvedCount: 10, completed: true }),
+        cell(2, { solvedCount }),
+        cell(3),
+      ]),
+    );
+    expect(tab(cellButton(/^스테이지 2,/))).toBe(text);
+    expect(tab(cellButton(/^스테이지 3,/))).toBeNull();
+  });
+
+  // Value: protects=시작 전 칸은 번호만(보상 없는 칸도, R5), 푸는 중에만 "n/T"; fails_when=보상 없는 시작 전 칸에 "0/10"이 다시 나오면; why_new=예전엔 보상 없는 칸에 0/10을 보였음; seam=none; no_claim=막대 길이
+  it('시작 전 칸은 번호만, 푸는 중에만 진행 숫자', () => {
+    renderAlbum(
+      album([
+        cell(1, { solvedCount: 4 }),
+        cell(56),
+        cell(5, { reward: slide }),
+      ]),
+    );
+    expect(
+      within(cellButton(/^스테이지 1,/)).getByText('4/10'),
+    ).toBeInTheDocument();
+    expect(within(cellButton(/^스테이지 56,/)).queryByText(/\/10/)).toBeNull();
+    const big = cellButton(/^스테이지 5,/);
+    expect(big).toHaveAttribute('data-big', 'true');
+    expect(within(big).queryByText(/\/10/)).toBeNull();
+  });
+
+  // Value: protects=목록 제목은 화면이 넘긴 heading(R1)과 스티커 수 보조 줄; fails_when=제목이 하드코딩되거나 칸 크기로 짐작되면; why_new=제목 prop은 새 동작; seam=none; no_claim=제목 글꼴
+  it('제목은 넘긴 heading, 옆에 스티커 수', () => {
+    renderAlbum(album([cell(1, { label: '일상', reward: bow })]), {
+      heading: '카테고리',
+      size: 'large',
+    });
+    expect(
+      screen.getByRole('heading', { name: '카테고리' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('스티커 0 / 1장')).toBeInTheDocument();
+    expect(within(cellButton(/^일상,/)).getByText('일상')).toBeInTheDocument();
+  });
+});
